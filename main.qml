@@ -15,7 +15,9 @@ Window {
     title: qsTr("DispOCR")
 
     Material.theme: Material.Light
-    Material.accent: Material.Pink
+    Material.primary: Material.BlueGrey
+    Material.accent: Material.Indigo
+
 
     Rectangle {
         id: main
@@ -74,19 +76,21 @@ Window {
                                     Button {
                                         id: configRoi
                                         width: configContainer.width
+                                        height: operationStop.height
                                         text: qsTr("Set ROI")
-                                        highlighted: false
-                                        flat: false
                                         font.bold: true
                                         font.pointSize: 9
+                                        Material.elevation: 1
                                     }
 
                                     Button {
                                         id: configDir
                                         width: configContainer.width
+                                        height: operationStop.height
                                         text: qsTr("Set Dir")
                                         font.bold: true
                                         font.pointSize: 9
+                                        Material.elevation: 1
                                     }
                                 }
                             }
@@ -128,9 +132,18 @@ Window {
                     id: predictTextScrollView
                     width: menuContainer.width
                     height: menuContainer.height * (2 / 5) - menuContainer.spacing
-                    background: none.none
 
-                    ScrollBar.horizontal.width: menuContainer.width - (ScrollBar.vertical.width + 4)
+                    ScrollBar.horizontal.height: 10
+                    ScrollBar.horizontal.width: predictTextScrollView.width - (2 * ScrollBar.vertical.width + 4)
+                    ScrollBar.horizontal.anchors.horizontalCenter: predictTextScrollView.horizontalCenter
+                    ScrollBar.horizontal.bottomInset: 5
+                    ScrollBar.horizontal.bottomPadding: 5
+
+                    ScrollBar.vertical.height: 0.85 * predictTextScrollView.height
+                    ScrollBar.vertical.width: 10
+                    ScrollBar.vertical.anchors.verticalCenter: predictTextScrollView.verticalCenter
+                    ScrollBar.vertical.rightInset: 5
+                    ScrollBar.vertical.rightPadding: 5
 
                     TextArea {
                         id: predictTextArea
@@ -139,10 +152,10 @@ Window {
                         anchors.fill: parent
                         activeFocusOnTab: false
                         focus: false
-                        bottomPadding: 20
+                        bottomPadding: 15
                         clip: false
                         topInset: 4
-                        rightPadding: 20
+                        rightPadding: 15
                         leftPadding: 12
                         font.pointSize: 9
                         topPadding: 19
@@ -282,23 +295,23 @@ Window {
                         height: operationContainer.height
                         text: qsTr("Start")
                         font.bold: true
-                        highlighted: true
-                        flat: false
+                        font.pointSize: 9
                         rightPadding: 14
                         leftPadding: 14
-                        font.pointSize: 9
+                        highlighted: true
+                        Material.elevation: 1
                     }
 
                     Button {
                         id: operationStop
                         height: operationContainer.height
                         text: qsTr("Stop + Save")
-                        highlighted: false
-                        flat: false
                         font.bold: true
                         font.pointSize: 9
                         leftPadding: 21
                         rightPadding: 21
+                        highlighted: false
+                        Material.elevation: 1
                     }
                 }
             }
@@ -306,19 +319,19 @@ Window {
 
         Rectangle {
             id: settingsContainerLabelBackground
-            x: viewfinderContainer.width + 10
+            x: viewfinderContainer.width + 19
             y: predictTextScrollView.height + 8
-            width: 49
+            width: 45
             height: 12
             color: main.color
 
             Text {
                 id: settingsContainerLabelText
                 x: 4
-                y: 0
+                y: 2
                 color: "#959595"
                 text: qsTr("Settings")
-                font.pixelSize: 12
+                font.pixelSize: 10
             }
         }
 
