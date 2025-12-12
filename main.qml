@@ -6,8 +6,11 @@ import QtQuick.Controls.Material
 Window {
     width: 640
     height: 480
-    minimumWidth: 480
-    minimumHeight: 360
+    minimumWidth: 640
+    minimumHeight: 480
+    maximumWidth: 640
+    maximumHeight: 480
+
     visible: true
     title: qsTr("DispOCR")
 
@@ -17,6 +20,9 @@ Window {
     Rectangle {
         id: main
         anchors.fill: parent
+
+        property real heightRatio: main.height/480
+        property real widthRatio: main.width/640
 
         Row {
             id: mainContainer
@@ -161,12 +167,13 @@ Window {
                             id: toggleCorrection
                             x: -9
                             y: -4
-                            height: 35
                             text: qsTr("Use text correction")
                             display: AbstractButton.TextBesideIcon
                             leftPadding: 8
-                            padding: 8
                             rightPadding: 8
+                            padding: 8
+
+                            height: 35
                             font.pointSize: 9
                         }
 
@@ -174,8 +181,8 @@ Window {
                             id: toggleAutosave
                             x: -9
                             y: 28
-                            height: 35
                             text: qsTr("Enable auto-save")
+                            height: 35
                             font.pointSize: 9
                         }
 
@@ -183,10 +190,8 @@ Window {
                             id: toggleSsd
                             x: -9
                             y: 60
-                            height: 35
                             text: qsTr("Optimize for 7-segment font")
-                            autoExclusive: false
-                            focusPolicy: Qt.StrongFocus
+                            height: 35
                             font.pointSize: 9
                         }
 
@@ -196,19 +201,18 @@ Window {
                             y: 101
                             width: 68
                             height: 28
-                            focusPolicy: Qt.StrongFocus
                             font.pointSize: 8
-                            to: 30
                             from: 1
+                            to: 30
                         }
 
                         Text {
                             id: inputLogFrequencyLabel1
                             x: 0
                             y: 99
+                            text: qsTr("Logging frequency")
                             width: 119
                             height: 16
-                            text: qsTr("Logging frequency")
                             font.pixelSize: 12
                         }
 
@@ -216,30 +220,19 @@ Window {
                             id: inputLogFrequencyLabel2
                             x: 0
                             y: 113
+                            text: qsTr("per sec. (max 30)")
                             width: 119
                             height: 16
-                            text: qsTr("per sec. (max 30)")
                             font.pixelSize: 12
-                        }
-
-                        CheckBox {
-                            id: toggleDateMerge
-                            x: -9
-                            y: 174
-                            height: 35
-                            text: qsTr("Merge date and time")
-                            font.pointSize: 9
-                            focusPolicy: Qt.StrongFocus
-                            autoExclusive: false
                         }
 
                         ComboBox {
                             id: inputDateFmt
                             x: 84
                             y: 141
+                            editable: false
                             width: 120
                             height: 28
-                            editable: false
                             font.pointSize: 8
                         }
 
@@ -247,9 +240,9 @@ Window {
                             id: inputDateFmtLabel1
                             x: 0
                             y: 139
+                            text: qsTr("Date")
                             width: 119
                             height: 16
-                            text: qsTr("Date")
                             font.pixelSize: 12
                         }
 
@@ -257,10 +250,19 @@ Window {
                             id: inputDateFmtLabel2
                             x: 0
                             y: 153
+                            text: qsTr("format")
                             width: 119
                             height: 16
-                            text: qsTr("format")
                             font.pixelSize: 12
+                        }
+
+                        CheckBox {
+                            id: toggleDateMerge
+                            x: -9
+                            y: 174
+                            text: qsTr("Merge date and time")
+                            height: 35
+                            font.pointSize: 9
                         }
                     }
                 }
