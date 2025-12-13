@@ -2,4 +2,4 @@
 name = "DispOCR"
 
 [tool.pyside6-project]
-files = ["dir.qml", "main.py", "main.qml", "roi.qml"]
+files = ["main.py", "main.qml", "roi.qml", "tester.qml"]

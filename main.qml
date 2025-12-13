@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
+import QtQuick.Dialogs
 import QtQuick.Controls.Material
 
 Window {
@@ -91,6 +92,7 @@ Window {
                                         font.bold: true
                                         font.pointSize: 9
                                         Material.elevation: 1
+                                        onClicked: folderDialog.open()
                                     }
                                 }
                             }
@@ -332,6 +334,17 @@ Window {
                 color: "#959595"
                 text: qsTr("Settings")
                 font.pixelSize: 10
+            }
+        }
+
+        FolderDialog {
+            id: folderDialog
+            title: "Select a Folder"
+            onAccepted: {
+                console.log("Selected folder:", folderDialog.selectedFolder)
+            }
+            onRejected: {
+                console.log("Folder selection canceled")
             }
         }
 
