@@ -2,8 +2,21 @@
 import sys
 from pathlib import Path
 
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlApplicationEngine
+# import PySide6.QtMultimedia
+from PySide6.QtGui import QGuiApplication, QImage
+from PySide6.QtQml import QQmlApplicationEngine, QmlElement
+from PySide6.QtCore import QObject, Slot
+
+## TODO: FOR QML-PY INTEG
+# QML_IMPORT_NAME = "io.qt.textproperties"
+# QML_IMPORT_MAJOR_VERSION = 1
+
+# @QmlElement
+# class Bridge(QObject):
+#     @Slot(QImage)
+#     def capture(self, preview):
+#         # process placeholder
+#         print(type(preview))
 
 
 if __name__ == "__main__":

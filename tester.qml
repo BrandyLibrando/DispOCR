@@ -6,11 +6,4 @@ ApplicationWindow {
     width: 400
     height: 300
     title: "Folder Selector Example"
-
-
-
-    FolderSelectButton {
-        id:  folderSelect
-        text: "hi there"
-    }
 }

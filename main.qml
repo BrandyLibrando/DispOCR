@@ -2,7 +2,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
 import QtQuick.Dialogs
+import QtMultimedia
 import QtQuick.Controls.Material
+
+// import io.qt.textproperties 1.0
 
 Window {
     width: 640
@@ -19,6 +22,10 @@ Window {
     Material.primary: Material.BlueGrey
     Material.accent: Material.Indigo
 
+
+    // Bridge {
+    //     id: bridge
+    // }
 
     Rectangle {
         id: main
@@ -82,6 +89,11 @@ Window {
                                         font.bold: true
                                         font.pointSize: 9
                                         Material.elevation: 1
+
+                                        onClicked: {
+                                            main.state = "editroidir"
+                                            console.log("pressed")
+                                        }
                                     }
 
                                     Button {
@@ -92,7 +104,11 @@ Window {
                                         font.bold: true
                                         font.pointSize: 9
                                         Material.elevation: 1
-                                        onClicked: folderDialog.open()
+
+                                        onClicked: {
+                                            main.state = "editroidir"
+                                            folderDialog.open()
+                                        }
                                     }
                                 }
                             }
@@ -302,6 +318,11 @@ Window {
                         leftPadding: 14
                         highlighted: true
                         Material.elevation: 1
+
+                        onClicked: {
+                            // processes for start operation
+                            main.state = "inop"
+                        }
                     }
 
                     Button {
@@ -314,6 +335,13 @@ Window {
                         rightPadding: 21
                         highlighted: false
                         Material.elevation: 1
+
+                        enabled: false
+                        onClicked: {
+                            // finalize write CSV file
+                            // processes
+                            main.state = ""
+                        }
                     }
                 }
             }
@@ -337,33 +365,36 @@ Window {
             }
         }
 
+
         FolderDialog {
             id: folderDialog
             title: "Select a Folder"
             onAccepted: {
+                main.state = ""
                 console.log("Selected folder:", folderDialog.selectedFolder)
             }
             onRejected: {
+                main.state = ""
                 console.log("Folder selection canceled")
             }
         }
 
         states: [
             State {
-                id: stateNoOp
-                name: "No Operation"
-            },
-            State {
                 id: stateInOp
-                name: "In Operation"
+                name: "inop"
+                PropertyChanges { target: configRoi; enabled: false }
+                PropertyChanges { target: configDir; enabled: false }
+                PropertyChanges { target: operationStart; enabled: false }
+                PropertyChanges { target: operationStop; enabled: true }
             },
             State {
-                id: statePopRoi
-                name: "Edit ROI"
-            },
-            State {
-                id: statePopDir
-                name: "Edit Directory"
+                id: statePopRoiDir
+                name: "editroidir"
+                PropertyChanges { target: configRoi; enabled: false }
+                PropertyChanges { target: configDir; enabled: false }
+                PropertyChanges { target: operationStart; enabled: false }
+                PropertyChanges { target: operationStop; enabled: false }
             }
         ]
     }
