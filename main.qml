@@ -20,7 +20,7 @@ Window {
 
     Material.theme: Material.Light
     Material.primary: Material.BlueGrey
-    Material.accent: Material.Indigo
+    Material.accent: Material.Pink
 
 
     // Bridge {
@@ -88,6 +88,8 @@ Window {
                                         text: qsTr("Set ROI")
                                         font.bold: true
                                         font.pointSize: 9
+                                        Material.foreground: Material.accent
+                                        Material.background: "#eeeeee"
                                         Material.elevation: 1
 
                                         onClicked: {
@@ -103,6 +105,8 @@ Window {
                                         text: qsTr("Set Dir")
                                         font.bold: true
                                         font.pointSize: 9
+                                        Material.foreground: Material.accent
+                                        Material.background: "#eeeeee"
                                         Material.elevation: 1
 
                                         onClicked: {
@@ -151,21 +155,53 @@ Window {
                     width: menuContainer.width
                     height: menuContainer.height * (2 / 5) - menuContainer.spacing
 
-                    ScrollBar.horizontal.height: 10
-                    ScrollBar.horizontal.width: predictTextScrollView.width - (2 * ScrollBar.vertical.width + 4)
-                    ScrollBar.horizontal.anchors.horizontalCenter: predictTextScrollView.horizontalCenter
-                    ScrollBar.horizontal.bottomInset: 5
-                    ScrollBar.horizontal.bottomPadding: 5
+                    ScrollBar.horizontal: ScrollBar {
+                        background: Rectangle {
+                            implicitHeight: 5
+                            implicitWidth: predictTextScrollView.width - 20
+                            radius: 5
+                            color: "#eeeeee"
+                        }
 
-                    ScrollBar.vertical.height: 0.85 * predictTextScrollView.height
-                    ScrollBar.vertical.width: 10
-                    ScrollBar.vertical.anchors.verticalCenter: predictTextScrollView.verticalCenter
-                    ScrollBar.vertical.rightInset: 5
-                    ScrollBar.vertical.rightPadding: 5
+                        contentItem: Rectangle {
+                            implicitWidth: 5
+                            radius: 5
+                            color: Material.accent
+                        }
+
+                        Component.onCompleted: {
+                            bottomInset = 5
+                            bottomPadding = 5
+                            anchors.bottom = predictTextScrollView.bottom
+                            anchors.horizontalCenter = predictTextScrollView.horizontalCenter
+                        }
+                    }
+
+                    ScrollBar.vertical: ScrollBar {
+                        background: Rectangle {
+                            implicitHeight: 0.85 * predictTextScrollView.height
+                            implicitWidth: 4
+                            radius: 5
+                            color: "#eeeeee"
+                        }
+
+                        contentItem: Rectangle {
+                            implicitWidth: 4
+                            radius: 5
+                            color: Material.accent
+                        }
+
+                        Component.onCompleted: {
+                            rightInset = 5
+                            rightPadding = 5
+                            anchors.right = predictTextScrollView.right
+                            anchors.verticalCenter = predictTextScrollView.verticalCenter
+                        }
+                    }
+
 
                     TextArea {
                         id: predictTextArea
-                        color: "#000000"
                         text: "PredictedPredictedPredictedPredictedPredicted\n\nHi there\n\nHi there\n\nHi there\n\nHi there\n\nHi there"
                         anchors.fill: parent
                         activeFocusOnTab: false
@@ -334,6 +370,8 @@ Window {
                         leftPadding: 21
                         rightPadding: 21
                         highlighted: false
+                        Material.foreground: Material.accent
+                        Material.background: "#eeeeee"
                         Material.elevation: 1
 
                         enabled: false
@@ -383,18 +421,32 @@ Window {
             State {
                 id: stateInOp
                 name: "inop"
-                PropertyChanges { target: configRoi; enabled: false }
-                PropertyChanges { target: configDir; enabled: false }
-                PropertyChanges { target: operationStart; enabled: false }
-                PropertyChanges { target: operationStop; enabled: true }
+                PropertyChanges {
+                    configRoi { enabled: false }
+                    configDir { enabled: false }
+                    operationStart { enabled: false }
+                    operationStop { enabled: true }
+                    settingsFrame { enabled: false }
+                    inputLogFrequencyLabel1 { color: "#9f9f9f" }
+                    inputLogFrequencyLabel2 { color: "#9f9f9f" }
+                    inputDateFmtLabel1 { color: "#9f9f9f" }
+                    inputDateFmtLabel2 { color: "#9f9f9f" }
+                }
             },
             State {
                 id: statePopRoiDir
                 name: "editroidir"
-                PropertyChanges { target: configRoi; enabled: false }
-                PropertyChanges { target: configDir; enabled: false }
-                PropertyChanges { target: operationStart; enabled: false }
-                PropertyChanges { target: operationStop; enabled: false }
+                PropertyChanges {
+                    configRoi { enabled: false }
+                    configDir { enabled: false }
+                    operationStart { enabled: false }
+                    operationStop { enabled: false }
+                    settingsFrame { enabled: false }
+                    inputLogFrequencyLabel1 { color: "#9f9f9f" }
+                    inputLogFrequencyLabel2 { color: "#9f9f9f" }
+                    inputDateFmtLabel1 { color: "#9f9f9f" }
+                    inputDateFmtLabel2 { color: "#9f9f9f" }
+                }
             }
         ]
     }
