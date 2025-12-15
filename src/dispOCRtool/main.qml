@@ -8,6 +8,7 @@ import QtQuick.Controls.Material
 // import io.qt.textproperties 1.0
 
 Window {
+    id: root
     width: 640
     height: 480
     minimumWidth: 640
@@ -19,8 +20,8 @@ Window {
     title: qsTr("DispOCR")
 
     Material.theme: Material.Light
-    Material.primary: Material.BlueGrey
-    Material.accent: Material.Pink
+    Material.accent: Material.Cyan
+    property string disabledColor: "#9f9f9f"
 
 
     // Bridge {
@@ -365,6 +366,7 @@ Window {
                         id: operationStop
                         height: operationContainer.height
                         text: qsTr("Stop + Save")
+                        // text: folderDialog.selectedFolder.toString()
                         font.bold: true
                         font.pointSize: 9
                         leftPadding: 21
@@ -403,10 +405,11 @@ Window {
             }
         }
 
-
+        // SAVE DIRECTORY HANDLER
         FolderDialog {
             id: folderDialog
             title: "Select a Folder"
+            // property QUrl prevFolder: none
             onAccepted: {
                 main.state = ""
                 console.log("Selected folder:", folderDialog.selectedFolder)
@@ -417,6 +420,21 @@ Window {
             }
         }
 
+
+        // CAMERA DEVICE HANDLERS
+        MediaDevices {
+            id: devices
+        }
+
+        CaptureSession {
+            camera: Camera {
+                cameraDevice: mediaDevices.defaultVideoInput
+            }
+        }
+
+
+
+        // WINDOW STATE MANAGEMENT
         states: [
             State {
                 id: stateInOp
@@ -427,10 +445,10 @@ Window {
                     operationStart { enabled: false }
                     operationStop { enabled: true }
                     settingsFrame { enabled: false }
-                    inputLogFrequencyLabel1 { color: "#9f9f9f" }
-                    inputLogFrequencyLabel2 { color: "#9f9f9f" }
-                    inputDateFmtLabel1 { color: "#9f9f9f" }
-                    inputDateFmtLabel2 { color: "#9f9f9f" }
+                    inputLogFrequencyLabel1 { color: root.disabledColor }
+                    inputLogFrequencyLabel2 { color: root.disabledColor }
+                    inputDateFmtLabel1 { color: root.disabledColor }
+                    inputDateFmtLabel2 { color: root.disabledColor }
                 }
             },
             State {
@@ -442,10 +460,10 @@ Window {
                     operationStart { enabled: false }
                     operationStop { enabled: false }
                     settingsFrame { enabled: false }
-                    inputLogFrequencyLabel1 { color: "#9f9f9f" }
-                    inputLogFrequencyLabel2 { color: "#9f9f9f" }
-                    inputDateFmtLabel1 { color: "#9f9f9f" }
-                    inputDateFmtLabel2 { color: "#9f9f9f" }
+                    inputLogFrequencyLabel1 { color: root.disabledColor }
+                    inputLogFrequencyLabel2 { color: root.disabledColor }
+                    inputDateFmtLabel1 { color: root.disabledColor }
+                    inputDateFmtLabel2 { color: root.disabledColor }
                 }
             }
         ]

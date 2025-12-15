@@ -83,3 +83,8 @@ CMakeLists.txt.user*
 
 ###
 .qtcreator/
+.briefcase/
+logs/
+build/
+dist/
+tests/
