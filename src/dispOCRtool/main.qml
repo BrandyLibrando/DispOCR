@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
 import QtQuick.Dialogs
+import QtQuick.Layouts
 import QtMultimedia
 import QtQuick.Controls.Material
 
@@ -232,7 +233,7 @@ Window {
                         topInset: 4
                         rightPadding: 15
                         leftPadding: 12
-                        font.pointSize: 9
+                        font.pointSize: 10
                         topPadding: 19
                         cursorVisible: false
                         readOnly: true
@@ -240,10 +241,44 @@ Window {
                     }
                 }
 
-                ScrollView {
+                TabBar {
+                    id: settingsBar
+
+                    x: 10; y: 4
+                    width: implicitWidth
+                    height: 12
+                    spacing: 8
+
+                    Repeater {
+                        model: [qsTr("General Settings"), qsTr("Control System Settings")]
+
+                        TabButton {
+                            id: settingsBarButton
+                            width: implicitWidth
+                            leftPadding: 5; rightPadding: 5
+                            topPadding: 0; bottomPadding: 5
+
+                            background: Rectangle {
+                                height: 12
+                                opacity: 1
+                            }
+                            contentItem: Text {
+                                text: modelData
+
+                                font.pointSize: 7
+                                opacity: enabled ? 1.0 : 0.3
+                                color: checked ? Material.accent : "#959595"
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                    }
+                }
+
+                StackLayout {
                     id: settingsContainer
                     width: menuContainer.width
-                    height: menuContainer.height * (1 / 2) - menuContainer.spacing
+                    height: menuContainer.height * (1 / 2) - menuContainer.spacing - settingsBar.height
 
                     Frame {
                         id: settingsFrame
@@ -448,23 +483,23 @@ Window {
             }
         }
 
-        Rectangle {
-            id: settingsContainerLabelBackground
-            x: viewfinderContainer.width + 19
-            y: predictTextScrollView.height + 8
-            width: 45
-            height: 12
-            color: main.color
+        // Rectangle {
+        //     id: settingsContainerLabelBackground
+        //     x: viewfinderContainer.width + 19
+        //     y: predictTextScrollView.height + 8
+        //     width: 45
+        //     height: 12
+        //     color: main.color
 
-            Text {
-                id: settingsContainerLabelText
-                x: 4
-                y: 2
-                color: "#959595"
-                text: qsTr("Settings")
-                font.pixelSize: 10
-            }
-        }
+        //     Text {
+        //         id: settingsContainerLabelText
+        //         x: 4
+        //         y: 2
+        //         color: "#959595"
+        //         text: qsTr("Settings")
+        //         font.pixelSize: 10
+        //     }
+        // }
 
 
         //////////////////
