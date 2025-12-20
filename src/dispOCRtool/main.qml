@@ -9,12 +9,9 @@ import QtQuick.Controls.Material
 
 Window {
     id: root
-    width: 640
-    height: 480
-    minimumWidth: 640
-    minimumHeight: 480
-    maximumWidth: 640
-    maximumHeight: 480
+    width: 640; height: 480
+    minimumWidth: 640; minimumHeight: 480
+    maximumWidth: 640; maximumHeight: 480
 
     visible: true
     title: qsTr("DispOCR")
@@ -37,8 +34,7 @@ Window {
 
         Row {
             id: mainContainer
-            x: 8
-            y: 8
+            x: 8; y: 8
             width: main.width - (mainContainer.x * 2)
             height: main.height - (mainContainer.y * 2)
 
@@ -63,57 +59,79 @@ Window {
                         Frame {
                             id: subCameraBorder
                             anchors.fill: parent
-                            rightInset: 8
+                            topInset: 5; rightInset: 8
 
                             Pane {
                                 id: subCameraField
                                 x: 2
                                 width: subCameraBorder.width * 5 / 8
                                 height: subCameraField.width / 16 * 9
+                                background: Rectangle {
+                                    color: "#000000"
+                                }
+
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.verticalCenterOffset: -1
 
-                                Column {
-                                    id: configContainer
-                                    x: subCameraField.width + 2
-                                    width: subCameraBorder.width * 1/4
-                                    height: subCameraField.height
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    topPadding: (configContainer.height - (configRoi.height + configDir.height)) / 2
-                                    spacing: 0
+                                Image {
+                                    id: name
 
-                                    Button {
-                                        id: configRoi
-                                        width: configContainer.width
-                                        height: operationStop.height
-                                        text: qsTr("Set ROI")
-                                        font.bold: true
-                                        font.pointSize: 9
-                                        Material.foreground: Material.accent
-                                        Material.background: "#eeeeee"
-                                        Material.elevation: 1
+                                    anchors.fill: parent
+                                    fillMode: Image.PreserveAspectFit
 
-                                        onClicked: {
-                                            main.state = "editroidir"
-                                            console.log("pressed")
-                                        }
+                                    source: "image://live/image"
+                                    asynchronous: true
+                                    cache: false
+
+                                    function reload()
+                                    {
+                                        counter = !counter
+                                        source = "image://live/image?id=" + counter
                                     }
+                                }
+                            }
 
-                                    Button {
-                                        id: configDir
-                                        width: configContainer.width
-                                        height: operationStop.height
-                                        text: qsTr("Set Dir")
-                                        font.bold: true
-                                        font.pointSize: 9
-                                        Material.foreground: Material.accent
-                                        Material.background: "#eeeeee"
-                                        Material.elevation: 1
+                            Column {
+                                id: configContainer
+                                x: subCameraField.width + (subCameraBorder.width * 1/32)
+                                width: subCameraBorder.width * 1/4
+                                height: subCameraField.height
+                                anchors.verticalCenter: parent.verticalCenter
+                                topPadding: (configContainer.height - (configRoi.height + configDir.height)) / 2
+                                spacing: 0
 
-                                        onClicked: {
-                                            main.state = "editroidir"
-                                            folderDialog.open()
-                                        }
+                                Button {
+                                    id: configRoi
+                                    width: configContainer.width
+                                    height: operationStop.height
+                                    text: qsTr("Set ROI")
+                                    font.bold: true
+                                    font.pointSize: 9
+                                    Material.foreground: Material.accent
+                                    Material.background: "#eeeeee"
+                                    Material.elevation: 1
+
+                                    onClicked: {
+                                        main.state = "editroidir"
+                                        roiwindow.show()
+                                        console.log("pressed")
+                                    }
+                                }
+
+                                Button {
+                                    id: configDir
+                                    width: configContainer.width
+                                    height: operationStop.height
+                                    text: qsTr("Set Dir")
+                                    font.bold: true
+                                    font.pointSize: 9
+                                    Material.foreground: Material.accent
+                                    Material.background: "#eeeeee"
+                                    Material.elevation: 1
+
+                                    onClicked: {
+                                        main.state = "editroidir"
+                                        folderDialog.open()
                                     }
                                 }
                             }
@@ -157,6 +175,7 @@ Window {
                     height: menuContainer.height * (2 / 5) - menuContainer.spacing
 
                     ScrollBar.horizontal: ScrollBar {
+                        policy: ScrollBar.AsNeeded
                         background: Rectangle {
                             implicitHeight: 5
                             implicitWidth: predictTextScrollView.width - 20
@@ -179,6 +198,7 @@ Window {
                     }
 
                     ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
                         background: Rectangle {
                             implicitHeight: 0.85 * predictTextScrollView.height
                             implicitWidth: 4
@@ -203,7 +223,7 @@ Window {
 
                     TextArea {
                         id: predictTextArea
-                        text: "PredictedPredictedPredictedPredictedPredicted\n\nHi there\n\nHi there\n\nHi there\n\nHi there\n\nHi there"
+                        text: main.state
                         anchors.fill: parent
                         activeFocusOnTab: false
                         focus: false
@@ -235,7 +255,7 @@ Window {
                             id: toggleCorrection
                             x: -9
                             y: -4
-                            text: qsTr("Use text correction")
+                            text: qsTr("Apply text correction upon saving")
                             display: AbstractButton.TextBesideIcon
                             leftPadding: 8
                             rightPadding: 8
@@ -387,6 +407,47 @@ Window {
             }
         }
 
+
+        ///////////////////////
+        /// MISCELLANEOUS
+        ///////////////////////
+
+        Rectangle {
+            id: subCameraContainerLabelBackground
+            x: subCameraContainer.x + 19
+            y: subCameraContainer.y + 4
+            width: 93
+            height: 12
+            color: main.color
+
+            Text {
+                id: subCameraContainerLabelText
+                x: 4
+                y: 2
+                color: "#959595"
+                text: qsTr("Camera Viewfinder")
+                font.pixelSize: 10
+            }
+        }
+
+        Rectangle {
+            id: cameraContainerLabelBackground
+            x: cameraContainer.x + 19
+            y: cameraContainer.y
+            width: 137
+            height: 12
+            color: main.color
+
+            Text {
+                id: cameraContainerLabelText
+                x: 4
+                y: 2
+                color: "#959595"
+                text: qsTr("Region of Interest Viewfinder")
+                font.pixelSize: 10
+            }
+        }
+
         Rectangle {
             id: settingsContainerLabelBackground
             x: viewfinderContainer.width + 19
@@ -405,6 +466,11 @@ Window {
             }
         }
 
+
+        //////////////////
+        /// HANDLERS
+        //////////////////
+
         // SAVE DIRECTORY HANDLER
         FolderDialog {
             id: folderDialog
@@ -421,17 +487,23 @@ Window {
         }
 
 
+        // ROI SELECTION HANDLER
+        RoiDialog {
+            id: roiwindow
+            onHidden: main.state = ""
+        }
+
         // CAMERA DEVICE HANDLERS
         MediaDevices {
-            id: devices
+            id: mediaDevices
         }
 
         CaptureSession {
+            videoOutput: subCameraView
             camera: Camera {
                 cameraDevice: mediaDevices.defaultVideoInput
             }
         }
-
 
 
         // WINDOW STATE MANAGEMENT
