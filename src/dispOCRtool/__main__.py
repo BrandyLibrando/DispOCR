@@ -3,8 +3,10 @@ import sys
 from pathlib import Path
 
 # import PySide6.QtMultimedia
-from PySide6.QtGui import QGuiApplication, QImage
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
+
+from PySide6.QtGui import QImage
 from PySide6.QtCore import QObject, Slot, Signal, QTimer, QUrl, QThread, QPermission, QCameraPermission
 from PySide6.QtQuick import QQuickImageProvider, QQuickView
 

@@ -31,7 +31,7 @@ requires = [
     "shiboken6",
 ]
 test_requires = [
-    "pytest",
+    # "pytest",
 ]
 
 [tool.briefcase.app.dispOCRtool.macOS]

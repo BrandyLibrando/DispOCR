@@ -1,9 +1,10 @@
+import QtMultimedia
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
 import QtQuick.Dialogs
 import QtQuick.Layouts
-import QtMultimedia
+// import QtQuick.VirtualKeyboard
 import QtQuick.Controls.Material
 
 // import io.qt.textproperties 1.0
@@ -158,6 +159,9 @@ Window {
                                 anchors.centerIn: parent
                                 anchors.horizontalCenterOffset: -4
                                 rightInset: 0
+                                background: Rectangle {
+                                    color: "#000000"
+                                }
                             }
                         }
                     }
@@ -245,9 +249,9 @@ Window {
                     id: settingsBar
 
                     x: 10; y: 4
-                    width: implicitWidth
-                    height: 12
+                    width: implicitWidth; height: 12
                     spacing: 8
+                    currentIndex: settingsContainer.currentIndex
 
                     Repeater {
                         model: [qsTr("General Settings"), qsTr("Control System Settings")]
@@ -257,6 +261,7 @@ Window {
                             width: implicitWidth
                             leftPadding: 5; rightPadding: 5
                             topPadding: 0; bottomPadding: 5
+                            onClicked: settingsContainer.setCurrentIndex(index)
 
                             background: Rectangle {
                                 height: 12
@@ -275,117 +280,173 @@ Window {
                     }
                 }
 
-                StackLayout {
-                    id: settingsContainer
-                    width: menuContainer.width
-                    height: menuContainer.height * (1 / 2) - menuContainer.spacing - settingsBar.height
+                Frame {
+                    id: settingsFrame
+                    width: settingsContainer.width
+                    height: settingsContainer.height
+                    clip: true
 
-                    Frame {
-                        id: settingsFrame
-                        width: settingsContainer.width
-                        height: settingsContainer.height
-                        spacing: 0
+                    SwipeView {
+                        id: settingsContainer
+                        width: menuContainer.width
+                        height: menuContainer.height * (1 / 2) - menuContainer.spacing - settingsBar.height
+                        currentIndex: settingsBar.currentIndex
 
-                        CheckBox {
-                            id: toggleCorrection
-                            x: -9
-                            y: -4
-                            text: qsTr("Apply text correction upon saving")
-                            display: AbstractButton.TextBesideIcon
-                            leftPadding: 8
-                            rightPadding: 8
-                            padding: 8
+                        Item {
+                            id: generalSettingsList
 
-                            height: 35
-                            font.pointSize: 9
+                            CheckBox {
+                                id: toggleCorrection
+                                x: -9
+                                y: -10
+                                text: qsTr("Apply text correction upon saving")
+                                display: AbstractButton.TextBesideIcon
+                                leftPadding: 8
+                                rightPadding: 8
+                                padding: 8
+
+                                height: 35
+                                font.pointSize: 9
+                            }
+
+                            SpinBox {
+                                id: inputLogFrequency
+                                x: 136
+                                y: 30
+                                width: 68
+                                height: 28
+                                font.pointSize: 8
+                                from: 1
+                                to: 30
+                            }
+
+                            Text {
+                                id: inputLogFrequencyLabel1
+                                x: 0
+                                y: 28
+                                text: qsTr("Logging frequency")
+                                width: 119
+                                height: 16
+                                font.pixelSize: 12
+                            }
+
+                            Text {
+                                id: inputLogFrequencyLabel2
+                                x: 0
+                                y: 42
+                                text: qsTr("(per second)")
+                                width: 119
+                                height: 16
+                                font.pixelSize: 12
+                            }
                         }
 
-                        CheckBox {
-                            id: toggleAutosave
-                            x: -9
-                            y: 28
-                            text: qsTr("Enable auto-save")
-                            height: 35
-                            font.pointSize: 9
-                        }
+                        Item {
+                            id: controlSettingsList
 
-                        CheckBox {
-                            id: toggleSsd
-                            x: -9
-                            y: 60
-                            text: qsTr("Optimize for 7-segment font")
-                            height: 35
-                            font.pointSize: 9
-                        }
+                            CheckBox {
+                                id: toggleControlSystem
+                                x: -9
+                                y: -10
+                                display: AbstractButton.TextBesideIcon
+                                leftPadding: 8
+                                rightPadding: 8
+                                padding: 8
+                                height: 35
+                                font.pointSize: 9
 
-                        SpinBox {
-                            id: inputLogFrequency
-                            x: 136
-                            y: 101
-                            width: 68
-                            height: 28
-                            font.pointSize: 8
-                            from: 1
-                            to: 30
-                        }
+                                checked: true
+                                text: qsTr("Enable control system")
+                            }
 
-                        Text {
-                            id: inputLogFrequencyLabel1
-                            x: 0
-                            y: 99
-                            text: qsTr("Logging frequency")
-                            width: 119
-                            height: 16
-                            font.pixelSize: 12
-                        }
+                            ComboBox {
+                                id: inputCtrlCond
+                                x: 84
+                                y: 30
+                                editable: false
+                                width: 120
+                                height: 28
+                                font.pointSize: 8
+                                enabled: toggleControlSystem.checked
 
-                        Text {
-                            id: inputLogFrequencyLabel2
-                            x: 0
-                            y: 113
-                            text: qsTr("per sec. (max 30)")
-                            width: 119
-                            height: 16
-                            font.pixelSize: 12
-                        }
+                                model: [qsTr("contains"), qsTr(">"), qsTr(">="), qsTr("<"), qsTr("<="), qsTr("equal to")]
+                            }
 
-                        ComboBox {
-                            id: inputDateFmt
-                            x: 84
-                            y: 141
-                            editable: false
-                            width: 120
-                            height: 28
-                            font.pointSize: 8
-                        }
+                            Text {
+                                id: inputCtrlCondLabel1
+                                x: 0
+                                y: 28
+                                text: qsTr("Control value")
+                                width: 119
+                                height: 16
+                                font.pixelSize: 12
+                                enabled: toggleControlSystem.checked
+                            }
 
-                        Text {
-                            id: inputDateFmtLabel1
-                            x: 0
-                            y: 139
-                            text: qsTr("Date")
-                            width: 119
-                            height: 16
-                            font.pixelSize: 12
-                        }
+                            Text {
+                                id: inputCtrlCondLabel2
+                                x: 0
+                                y: 42
+                                text: qsTr("condition")
+                                width: 119
+                                height: 16
+                                font.pixelSize: 12
+                                enabled: toggleControlSystem.checked
+                            }
 
-                        Text {
-                            id: inputDateFmtLabel2
-                            x: 0
-                            y: 153
-                            text: qsTr("format")
-                            width: 119
-                            height: 16
-                            font.pixelSize: 12
-                        }
+                            Rectangle {
+                                id: inputCtrlValContainer
+                                x: inputCtrlCond.x + 10
+                                y: inputCtrlValLabel1.y
+                                width: inputCtrlCond.width - 10
+                                height: inputCtrlCond.height
+                                border.width: inputCtrlVal.focus ? 2 : 1
+                                border.color: inputCtrlVal.focus ? Material.accent : "#959595"
+                                radius: 5
+                                enabled: toggleControlSystem.checked
 
-                        CheckBox {
-                            id: toggleDateMerge
-                            x: -9
-                            y: 174
-                            text: qsTr("Merge date and time")
-                            height: 35
-                            font.pointSize: 9
+                                TextInput{
+                                    id: inputCtrlVal
+                                    width: parent.width
+                                    leftPadding: 10; rightPadding: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    font.pixelSize: 12
+                                    color: acceptableInput ? "#000" : "#E91E63"
+
+                                    property var validNumber: DoubleValidator { notation: DoubleValidator.StandardNotation }
+                                    property var validText: RegularExpressionValidator { regularExpression: /(.|\s)*\S(.|\s)*/ }
+                                    validator: inputCtrlCond.currentValue === "contains" ? validText : validNumber
+                                }
+                            }
+
+                            Text {
+                                id: inputCtrlValLabel1
+                                x: 0
+                                y: 66
+                                text: qsTr("Value to check")
+                                width: 119
+                                height: 16
+                                font.pixelSize: 12
+                            }
+
+                            Text {
+                                id: inputCtrlValLabel2
+                                x: 0
+                                y: 80
+                                text: {
+                                    if (inputCtrlVal.acceptableInput) return qsTr("Valid input.")
+                                    else {
+                                        if (inputCtrlCond.currentValue === "contains") return qsTr("Enter text.")
+                                        else return qsTr("Enter numbers.")
+                                    }
+                                }
+
+                                width: 119
+                                height: 16
+                                font.pixelSize: 12
+                                color: inputCtrlVal.acceptableInput ? Material.accent : "#E91E63"
+                                visible: toggleControlSystem.checked
+                            }
                         }
                     }
                 }
@@ -540,6 +601,15 @@ Window {
             }
         }
 
+        // VIRTUAL KEYBOARD
+        // InputPanel {
+        //     id: inputPanel
+        //     y: Qt.inputMethod.visible ? parent.height - inputPanel.height : parent.height
+        //     anchors.left: parent.left
+        //     anchors.right: parent.right
+        // }
+
+
 
         // WINDOW STATE MANAGEMENT
         states: [
@@ -551,7 +621,7 @@ Window {
                     configDir { enabled: false }
                     operationStart { enabled: false }
                     operationStop { enabled: true }
-                    settingsFrame { enabled: false }
+                    settingsContainer { enabled: false }
                     inputLogFrequencyLabel1 { color: root.disabledColor }
                     inputLogFrequencyLabel2 { color: root.disabledColor }
                     inputDateFmtLabel1 { color: root.disabledColor }
@@ -566,7 +636,7 @@ Window {
                     configDir { enabled: false }
                     operationStart { enabled: false }
                     operationStop { enabled: false }
-                    settingsFrame { enabled: false }
+                    settingsContainer { enabled: false }
                     inputLogFrequencyLabel1 { color: root.disabledColor }
                     inputLogFrequencyLabel2 { color: root.disabledColor }
                     inputDateFmtLabel1 { color: root.disabledColor }
