@@ -8,7 +8,6 @@ import QtQuick.Layouts
 import QtQuick.Controls.Material
 
 
-
 Window {
     id: root
     width: 640; height: 480
@@ -64,6 +63,7 @@ Window {
                                 x: 2
                                 width: subCameraBorder.width * 5 / 8
                                 height: subCameraField.width / 16 * 9
+
                                 background: Rectangle {
                                     color: "#000000"
                                 }
@@ -96,12 +96,13 @@ Window {
                                     id: configRoi
                                     width: configContainer.width
                                     height: operationStop.height
-                                    text: qsTr("Set ROI")
                                     font.bold: true
                                     font.pointSize: 9
                                     Material.foreground: Material.accent
                                     Material.background: "#eeeeee"
                                     Material.elevation: 1
+
+                                    text: qsTr("Set ROI")
 
                                     onClicked: {
                                         main.state = "editroidir"
@@ -114,12 +115,13 @@ Window {
                                     id: configDir
                                     width: configContainer.width
                                     height: operationStop.height
-                                    text: qsTr("Set Dir")
                                     font.bold: true
                                     font.pointSize: 9
                                     Material.foreground: Material.accent
                                     Material.background: "#eeeeee"
                                     Material.elevation: 1
+
+                                    text: qsTr("Set Dir")
 
                                     onClicked: {
                                         main.state = "editroidir"
@@ -149,6 +151,7 @@ Window {
                                 anchors.centerIn: parent
                                 anchors.horizontalCenterOffset: -4
                                 rightInset: 0
+
                                 background: Rectangle {
                                     color: "#000000"
                                 }
@@ -172,8 +175,8 @@ Window {
                     ScrollBar.horizontal: ScrollBar {
                         policy: ScrollBar.AsNeeded
                         background: Rectangle {
-                            implicitHeight: 5
                             implicitWidth: predictTextScrollView.width - 20
+                            implicitHeight: 5
                             radius: 5
                             color: "#eeeeee"
                         }
@@ -195,8 +198,8 @@ Window {
                     ScrollBar.vertical: ScrollBar {
                         policy: ScrollBar.AsNeeded
                         background: Rectangle {
-                            implicitHeight: 0.85 * predictTextScrollView.height
                             implicitWidth: 4
+                            implicitHeight: 0.85 * predictTextScrollView.height
                             radius: 5
                             color: "#eeeeee"
                         }
@@ -218,31 +221,31 @@ Window {
 
                     TextArea {
                         id: predictTextArea
-                        // text: main.state
-                        // text: "PredictedPredictedPredictedPredictedPredicted\n\nHi there\n\nHi there\n\nHi there\n\nHi there\n\nHi there"
-                        text: bridge.data
                         anchors.fill: parent
+                        topInset: 4
+                        topPadding: 19
+                        leftPadding: 12
+                        rightPadding: 15
+                        bottomPadding: 15
+
+                        readOnly: true
                         activeFocusOnTab: false
                         focus: false
-                        bottomPadding: 15
                         clip: false
-                        topInset: 4
-                        rightPadding: 15
-                        leftPadding: 12
                         font.pointSize: 10
-                        topPadding: 19
                         cursorVisible: false
-                        readOnly: true
+
+                        text: bridge.data
                         placeholderText: qsTr("Predicted Text")
                     }
                 }
 
                 TabBar {
                     id: settingsBar
-
                     x: 10; y: 4
                     width: implicitWidth; height: 12
                     spacing: 8
+
                     currentIndex: settingsContainer.currentIndex
 
                     Repeater {
@@ -253,7 +256,6 @@ Window {
                             width: implicitWidth
                             leftPadding: 5; rightPadding: 5
                             topPadding: 0; bottomPadding: 5
-                            onClicked: settingsContainer.setCurrentIndex(index)
 
                             background: Rectangle {
                                 height: 12
@@ -267,6 +269,8 @@ Window {
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                             }
+
+                            onClicked: settingsContainer.setCurrentIndex(index)
                         }
                     }
                 }
@@ -281,6 +285,7 @@ Window {
                         id: settingsContainer
                         width: menuContainer.width
                         height: menuContainer.height * (1 / 2) - menuContainer.spacing - settingsBar.height
+
                         currentIndex: settingsBar.currentIndex
 
                         Item {
@@ -288,16 +293,14 @@ Window {
 
                             CheckBox {
                                 id: toggleCorrection
-                                x: -9
-                                y: -10
-                                text: qsTr("Apply text correction upon saving")
-                                display: AbstractButton.TextBesideIcon
-                                leftPadding: 8
-                                rightPadding: 8
-                                padding: 8
-
+                                x: -9; y: -10
                                 height: 35
+                                leftPadding: 8; rightPadding: 8
+                                padding: 8
                                 font.pointSize: 9
+                                display: AbstractButton.TextBesideIcon
+
+                                text: qsTr("Apply text correction upon saving")
                             }
 
                             Item {
@@ -331,33 +334,28 @@ Window {
 
                                 Text {
                                     id: inputLogFrequencyLabel1
-                                    x: 0
-                                    y: 28
-                                    text: qsTr("Log every:")
-                                    width: 119
-                                    height: 16
+                                    x: 0; y: 28
+                                    width: 119; height: 16
                                     font.pixelSize: 12
+                                    text: qsTr("Log every:")
                                 }
 
                                 Text {
                                     id: inputLogFrequencyLabel2
-                                    x: 0
-                                    y: 42
-                                    text: qsTr("(min: per 0.1 sec)")
-                                    width: 119
-                                    height: 16
+                                    x: 0; y: 42
+                                    width: 119; height: 16
                                     font.pixelSize: 12
                                     color: inputFreqVal.acceptableInput ? "#000" : "#E91E63"
+                                    text: qsTr("(min: per 0.1 sec)")
                                 }
 
                                 Text {
                                     id: inputLogFrequencyLabel3
                                     x: inputLogFrequency.x + inputLogFrequency.width + 5
                                     anchors.verticalCenter: inputLogFrequency.verticalCenter
-                                    text: qsTr("sec.")
-                                    width: 119
-                                    height: 16
+                                    width: 119; height: 16
                                     font.pixelSize: 12
+                                    text: qsTr("sec.")
                                 }
                             }
                         }
@@ -367,14 +365,12 @@ Window {
 
                             CheckBox {
                                 id: toggleControlSystem
-                                x: -9
-                                y: -10
-                                display: AbstractButton.TextBesideIcon
-                                leftPadding: 8
-                                rightPadding: 8
+                                x: -9; y: -10
+                                leftPadding: 8; rightPadding: 8
                                 padding: 8
                                 height: 35
                                 font.pointSize: 9
+                                display: AbstractButton.TextBesideIcon
 
                                 checked: true
                                 text: qsTr("Enable control system")
@@ -385,37 +381,33 @@ Window {
 
                                 ComboBox {
                                     id: inputCtrlCond
-                                    x: 84
-                                    y: 30
-                                    editable: false
-                                    width: 120
-                                    height: 28
+                                    x: 84; y: 30
+                                    width: 120; height: 28
                                     font.pointSize: 8
-                                    enabled: toggleControlSystem.checked
 
+                                    enabled: toggleControlSystem.checked
+                                    editable: false
                                     model: [qsTr("contains"), qsTr(">"), qsTr(">="), qsTr("<"), qsTr("<="), qsTr("equal to")]
                                 }
 
                                 Text {
                                     id: inputCtrlCondLabel1
-                                    x: 0
-                                    y: 28
-                                    text: qsTr("Control value")
-                                    width: 119
-                                    height: 16
+                                    x: 0; y: 28
+                                    width: 119; height: 16
                                     font.pixelSize: 12
+
                                     enabled: toggleControlSystem.checked
+                                    text: qsTr("Control value")
                                 }
 
                                 Text {
                                     id: inputCtrlCondLabel2
-                                    x: 0
-                                    y: 42
-                                    text: qsTr("condition")
-                                    width: 119
-                                    height: 16
+                                    x: 0; y: 42
+                                    width: 119; height: 16
                                     font.pixelSize: 12
+
                                     enabled: toggleControlSystem.checked
+                                    text: qsTr("condition")
                                 }
                             }
 
@@ -432,6 +424,7 @@ Window {
                                     border.color: inputCtrlVal.focus ? Material.accent : "#959595"
                                     radius: 5
                                     clip: true
+
                                     enabled: toggleControlSystem.checked
 
                                     TextInput{
@@ -441,6 +434,7 @@ Window {
                                         anchors.verticalCenter: parent.verticalCenter
                                         color: acceptableInput ? "#000" : "#E91E63"
                                         font.pixelSize: 12
+
                                         enabled: toggleControlSystem.checked
 
                                         property var validNumber: DoubleValidator { notation: DoubleValidator.StandardNotation }
@@ -451,18 +445,24 @@ Window {
 
                                 Text {
                                     id: inputCtrlValLabel1
-                                    x: 0
-                                    y: 66
-                                    text: qsTr("Value to check")
-                                    width: 119
-                                    height: 16
+                                    x: 0; y: 66
+                                    width: 119; height: 16
                                     font.pixelSize: 12
+
+                                    text: qsTr("Value to check")
                                 }
 
                                 Text {
                                     id: inputCtrlValLabel2
-                                    x: 0
-                                    y: 80
+                                    x: 0; y: 80
+                                    width: 119; height: 16
+                                    font.pixelSize: 12
+                                    color: !toggleControlSystem.checked
+                                           ? "#959595"
+                                           : inputCtrlVal.acceptableInput
+                                             ? Material.accent
+                                             : "#E91E63"
+
                                     text: {
                                         if (!toggleControlSystem.checked) return qsTr("System disabled.")
                                         else if (inputCtrlVal.acceptableInput) return qsTr("Valid input.")
@@ -471,15 +471,6 @@ Window {
                                             else return qsTr("Enter numbers.")
                                         }
                                     }
-
-                                    width: 119
-                                    height: 16
-                                    font.pixelSize: 12
-                                    color: !toggleControlSystem.checked
-                                           ? "#959595"
-                                           : inputCtrlVal.acceptableInput
-                                             ? Material.accent
-                                             : "#E91E63"
                                 }
                             }
                         }
@@ -490,8 +481,7 @@ Window {
                     id: operationContainer
                     width: menuContainer.width
                     height: menuContainer.height * (1 / 10)
-                    rightPadding: 0
-                    leftPadding: 0
+                    rightPadding: 0; leftPadding: 0
                     spacing: 8
 
                     Button {
@@ -499,19 +489,18 @@ Window {
                         width: operationContainer.width
                                - (operationStop.width + operationContainer.spacing)
                         height: operationContainer.height
-                        text: qsTr("Start")
                         font.bold: true
                         font.pointSize: 9
-                        rightPadding: 14
-                        leftPadding: 14
+                        leftPadding: 14; rightPadding: 14
                         highlighted: true
                         Material.elevation: 1
 
+                        text: qsTr("Start")
+
                         onClicked: {
-                            // processes for start operation
+                            // Check for invalid inputs
                             let allInputsValid = root.checkInputs(root.possibleInvalidInputs)
                             if (allInputsValid) {
-                                bridge.updateData(root.checkInputs(root.possibleInvalidInputs))
                                 main.state = "inop"
                             }
                             else {
@@ -524,18 +513,16 @@ Window {
                     Button {
                         id: operationStop
                         height: operationContainer.height
-                        text: qsTr("Stop + Save")
-                        // text: folderDialog.selectedFolder.toString()
                         font.bold: true
                         font.pointSize: 9
-                        leftPadding: 21
-                        rightPadding: 21
+                        leftPadding: 21; rightPadding: 21
                         highlighted: false
                         Material.foreground: Material.accent
                         Material.background: "#eeeeee"
                         Material.elevation: 1
 
                         enabled: false
+                        text: qsTr("Stop + Save")
                         onClicked: {
                             // finalize write CSV file
                             // processes
@@ -555,35 +542,30 @@ Window {
             id: subCameraContainerLabelBackground
             x: subCameraContainer.x + 19
             y: subCameraContainer.y + 4
-            width: 93
-            height: 12
+            width: 93; height: 12
             color: main.color
 
             Text {
                 id: subCameraContainerLabelText
-                x: 4
-                y: 2
+                x: 4; y: 2
                 color: "#959595"
-                text: qsTr("Camera Viewfinder")
                 font.pixelSize: 10
+                text: qsTr("Camera Viewfinder")
             }
         }
 
         Rectangle {
             id: cameraContainerLabelBackground
-            x: cameraContainer.x + 19
-            y: cameraContainer.y
-            width: 137
-            height: 12
+            x: cameraContainer.x + 19; y: cameraContainer.y
+            width: 137; height: 12
             color: main.color
 
             Text {
                 id: cameraContainerLabelText
-                x: 4
-                y: 2
+                x: 4; y: 2
                 color: "#959595"
-                text: qsTr("Region of Interest Viewfinder")
                 font.pixelSize: 10
+                text: qsTr("Region of Interest Viewfinder")
             }
         }
 
@@ -670,12 +652,12 @@ Window {
     ]
 
     function checkInputs(inputList) {
-        return inputList.every((field) => field.id.acceptableInput)
+        return inputList.every((field) => field.id.acceptableInput || !field.id.enabled)
     }
 
     function focusInvalidInput(inputList) {
         for (const field of inputList) {
-            if (!field.id.acceptableInput) {
+            if (!field.id.acceptableInput && field.id.enabled) {
                 settingsContainer.setCurrentIndex(field.pageIndex)
                 field.id.forceActiveFocus();
                 return field.name
