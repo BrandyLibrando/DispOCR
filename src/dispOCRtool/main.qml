@@ -8,7 +8,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Material
 
 
-Window {
+ApplicationWindow {
     id: root
     width: 640; height: 480
     minimumWidth: 640; minimumHeight: 480
@@ -73,14 +73,20 @@ Window {
                                 anchors.verticalCenterOffset: -1
 
                                 Image {
-                                    id: name
+                                    id: subCameraVF
 
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectFit
 
-                                    source: "image://numpy/test"
-                                    asynchronous: true
+                                    // asynchronous: true
                                     cache: false
+                                    source: "image://MyImageProvider/img"
+                                    property bool counter: false
+
+                                    function reloadImage() {
+                                        counter = !counter
+                                        source = "image://MyImageProvider/img?id=" + counter
+                                    }
                                 }
                             }
 
@@ -665,5 +671,23 @@ Window {
             }
         }
         return ""
+    }
+
+    Connections{
+        target: myImageProvider
+
+        function onImageChanged(image) {
+            console.log("emit")
+            subCameraVF.reloadImage()
+        }
+
+    }
+
+    Component.onCompleted: {
+        myImageProvider.start()
+    }
+
+    onClosing: {
+        myImageProvider.killThread()
     }
 }
