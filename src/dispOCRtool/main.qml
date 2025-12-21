@@ -7,7 +7,7 @@ import QtQuick.Layouts
 // import QtQuick.VirtualKeyboard
 import QtQuick.Controls.Material
 
-// import io.qt.textproperties 1.0
+
 
 Window {
     id: root
@@ -22,10 +22,6 @@ Window {
     Material.accent: Material.Cyan
     property string disabledColor: "#9f9f9f"
 
-
-    // Bridge {
-    //     id: bridge
-    // }
 
     Rectangle {
         id: main
@@ -84,12 +80,6 @@ Window {
                                     source: "image://live/image"
                                     asynchronous: true
                                     cache: false
-
-                                    function reload()
-                                    {
-                                        counter = !counter
-                                        source = "image://live/image?id=" + counter
-                                    }
                                 }
                             }
 
@@ -228,7 +218,9 @@ Window {
 
                     TextArea {
                         id: predictTextArea
-                        text: main.state
+                        // text: main.state
+                        // text: "PredictedPredictedPredictedPredictedPredicted\n\nHi there\n\nHi there\n\nHi there\n\nHi there\n\nHi there"
+                        text: bridge.data
                         anchors.fill: parent
                         activeFocusOnTab: false
                         focus: false
@@ -241,7 +233,7 @@ Window {
                         topPadding: 19
                         cursorVisible: false
                         readOnly: true
-                        placeholderText: qsTr("Text Area")
+                        placeholderText: qsTr("Predicted Text")
                     }
                 }
 
@@ -271,7 +263,6 @@ Window {
                                 text: modelData
 
                                 font.pointSize: 7
-                                opacity: enabled ? 1.0 : 0.3
                                 color: checked ? Material.accent : "#959595"
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
@@ -309,35 +300,65 @@ Window {
                                 font.pointSize: 9
                             }
 
-                            SpinBox {
-                                id: inputLogFrequency
-                                x: 136
-                                y: 30
-                                width: 68
-                                height: 28
-                                font.pointSize: 8
-                                from: 1
-                                to: 30
-                            }
+                            Item {
+                                id: groupInputLogFreq
 
-                            Text {
-                                id: inputLogFrequencyLabel1
-                                x: 0
-                                y: 28
-                                text: qsTr("Logging frequency")
-                                width: 119
-                                height: 16
-                                font.pixelSize: 12
-                            }
+                                Rectangle {
+                                    id: inputLogFrequency
+                                    x: inputCtrlCond.x + 20
+                                    y: inputLogFrequencyLabel1.y + 2
+                                    width: inputCtrlCond.width - 40
+                                    height: inputCtrlCond.height
+                                    border.width: 2
+                                    border.color: inputFreqVal.focus ? Material.accent : "#959595"
+                                    radius: 5
+                                    clip: true
 
-                            Text {
-                                id: inputLogFrequencyLabel2
-                                x: 0
-                                y: 42
-                                text: qsTr("(per second)")
-                                width: 119
-                                height: 16
-                                font.pixelSize: 12
+                                    TextInput{
+                                        id: inputFreqVal
+                                        width: parent.width
+                                        leftPadding: 10; rightPadding: 10
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: acceptableInput ? "#000" : "#E91E63"
+                                        font.pixelSize: 12
+
+                                        validator: DoubleValidator {
+                                            notation: DoubleValidator.StandardNotation
+                                            bottom: 0.1
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    id: inputLogFrequencyLabel1
+                                    x: 0
+                                    y: 28
+                                    text: qsTr("Log every:")
+                                    width: 119
+                                    height: 16
+                                    font.pixelSize: 12
+                                }
+
+                                Text {
+                                    id: inputLogFrequencyLabel2
+                                    x: 0
+                                    y: 42
+                                    text: qsTr("(min: per 0.1 sec)")
+                                    width: 119
+                                    height: 16
+                                    font.pixelSize: 12
+                                    color: inputFreqVal.acceptableInput ? "#000" : "#E91E63"
+                                }
+
+                                Text {
+                                    id: inputLogFrequencyLabel3
+                                    x: inputLogFrequency.x + inputLogFrequency.width + 5
+                                    anchors.verticalCenter: inputLogFrequency.verticalCenter
+                                    text: qsTr("sec.")
+                                    width: 119
+                                    height: 16
+                                    font.pixelSize: 12
+                                }
                             }
                         }
 
@@ -359,93 +380,107 @@ Window {
                                 text: qsTr("Enable control system")
                             }
 
-                            ComboBox {
-                                id: inputCtrlCond
-                                x: 84
-                                y: 30
-                                editable: false
-                                width: 120
-                                height: 28
-                                font.pointSize: 8
-                                enabled: toggleControlSystem.checked
+                            Item {
+                                id: groupInputCtrlCondition
 
-                                model: [qsTr("contains"), qsTr(">"), qsTr(">="), qsTr("<"), qsTr("<="), qsTr("equal to")]
-                            }
+                                ComboBox {
+                                    id: inputCtrlCond
+                                    x: 84
+                                    y: 30
+                                    editable: false
+                                    width: 120
+                                    height: 28
+                                    font.pointSize: 8
+                                    enabled: toggleControlSystem.checked
 
-                            Text {
-                                id: inputCtrlCondLabel1
-                                x: 0
-                                y: 28
-                                text: qsTr("Control value")
-                                width: 119
-                                height: 16
-                                font.pixelSize: 12
-                                enabled: toggleControlSystem.checked
-                            }
+                                    model: [qsTr("contains"), qsTr(">"), qsTr(">="), qsTr("<"), qsTr("<="), qsTr("equal to")]
+                                }
 
-                            Text {
-                                id: inputCtrlCondLabel2
-                                x: 0
-                                y: 42
-                                text: qsTr("condition")
-                                width: 119
-                                height: 16
-                                font.pixelSize: 12
-                                enabled: toggleControlSystem.checked
-                            }
-
-                            Rectangle {
-                                id: inputCtrlValContainer
-                                x: inputCtrlCond.x + 10
-                                y: inputCtrlValLabel1.y
-                                width: inputCtrlCond.width - 10
-                                height: inputCtrlCond.height
-                                border.width: inputCtrlVal.focus ? 2 : 1
-                                border.color: inputCtrlVal.focus ? Material.accent : "#959595"
-                                radius: 5
-                                enabled: toggleControlSystem.checked
-
-                                TextInput{
-                                    id: inputCtrlVal
-                                    width: parent.width
-                                    leftPadding: 10; rightPadding: 10
-                                    anchors.verticalCenter: parent.verticalCenter
+                                Text {
+                                    id: inputCtrlCondLabel1
+                                    x: 0
+                                    y: 28
+                                    text: qsTr("Control value")
+                                    width: 119
+                                    height: 16
                                     font.pixelSize: 12
-                                    color: acceptableInput ? "#000" : "#E91E63"
+                                    enabled: toggleControlSystem.checked
+                                }
 
-                                    property var validNumber: DoubleValidator { notation: DoubleValidator.StandardNotation }
-                                    property var validText: RegularExpressionValidator { regularExpression: /(.|\s)*\S(.|\s)*/ }
-                                    validator: inputCtrlCond.currentValue === "contains" ? validText : validNumber
+                                Text {
+                                    id: inputCtrlCondLabel2
+                                    x: 0
+                                    y: 42
+                                    text: qsTr("condition")
+                                    width: 119
+                                    height: 16
+                                    font.pixelSize: 12
+                                    enabled: toggleControlSystem.checked
                                 }
                             }
 
-                            Text {
-                                id: inputCtrlValLabel1
-                                x: 0
-                                y: 66
-                                text: qsTr("Value to check")
-                                width: 119
-                                height: 16
-                                font.pixelSize: 12
-                            }
+                            Item {
+                                id: groupInputCtrlValue
 
-                            Text {
-                                id: inputCtrlValLabel2
-                                x: 0
-                                y: 80
-                                text: {
-                                    if (inputCtrlVal.acceptableInput) return qsTr("Valid input.")
-                                    else {
-                                        if (inputCtrlCond.currentValue === "contains") return qsTr("Enter text.")
-                                        else return qsTr("Enter numbers.")
+                                Rectangle {
+                                    id: inputCtrlValContainer
+                                    x: inputCtrlCond.x + 10
+                                    y: inputCtrlValLabel1.y + 2
+                                    width: inputCtrlCond.width - 10
+                                    height: inputCtrlCond.height
+                                    border.width: 2
+                                    border.color: inputCtrlVal.focus ? Material.accent : "#959595"
+                                    radius: 5
+                                    clip: true
+                                    enabled: toggleControlSystem.checked
+
+                                    TextInput{
+                                        id: inputCtrlVal
+                                        width: parent.width
+                                        leftPadding: 10; rightPadding: 10
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: acceptableInput ? "#000" : "#E91E63"
+                                        font.pixelSize: 12
+                                        enabled: toggleControlSystem.checked
+
+                                        property var validNumber: DoubleValidator { notation: DoubleValidator.StandardNotation }
+                                        property var validText: RegularExpressionValidator { regularExpression: /(.|\s)*\S(.|\s)*/ }
+                                        validator: inputCtrlCond.currentValue === "contains" ? validText : validNumber
                                     }
                                 }
 
-                                width: 119
-                                height: 16
-                                font.pixelSize: 12
-                                color: inputCtrlVal.acceptableInput ? Material.accent : "#E91E63"
-                                visible: toggleControlSystem.checked
+                                Text {
+                                    id: inputCtrlValLabel1
+                                    x: 0
+                                    y: 66
+                                    text: qsTr("Value to check")
+                                    width: 119
+                                    height: 16
+                                    font.pixelSize: 12
+                                }
+
+                                Text {
+                                    id: inputCtrlValLabel2
+                                    x: 0
+                                    y: 80
+                                    text: {
+                                        if (!toggleControlSystem.checked) return qsTr("System disabled.")
+                                        else if (inputCtrlVal.acceptableInput) return qsTr("Valid input.")
+                                        else {
+                                            if (inputCtrlCond.currentValue === "contains") return qsTr("Enter text.")
+                                            else return qsTr("Enter numbers.")
+                                        }
+                                    }
+
+                                    width: 119
+                                    height: 16
+                                    font.pixelSize: 12
+                                    color: !toggleControlSystem.checked
+                                           ? "#959595"
+                                           : inputCtrlVal.acceptableInput
+                                             ? Material.accent
+                                             : "#E91E63"
+                                }
                             }
                         }
                     }
@@ -474,7 +509,15 @@ Window {
 
                         onClicked: {
                             // processes for start operation
-                            main.state = "inop"
+                            let allInputsValid = root.checkInputs(root.possibleInvalidInputs)
+                            if (allInputsValid) {
+                                bridge.updateData(root.checkInputs(root.possibleInvalidInputs))
+                                main.state = "inop"
+                            }
+                            else {
+                                let invalid = root.focusInvalidInput(root.possibleInvalidInputs)
+                                console.log("", invalid)
+                            }
                         }
                     }
 
@@ -544,24 +587,6 @@ Window {
             }
         }
 
-        // Rectangle {
-        //     id: settingsContainerLabelBackground
-        //     x: viewfinderContainer.width + 19
-        //     y: predictTextScrollView.height + 8
-        //     width: 45
-        //     height: 12
-        //     color: main.color
-
-        //     Text {
-        //         id: settingsContainerLabelText
-        //         x: 4
-        //         y: 2
-        //         color: "#959595"
-        //         text: qsTr("Settings")
-        //         font.pixelSize: 10
-        //     }
-        // }
-
 
         //////////////////
         /// HANDLERS
@@ -575,13 +600,13 @@ Window {
             onAccepted: {
                 main.state = ""
                 console.log("Selected folder:", folderDialog.selectedFolder)
+                bridge.updateData(folderDialog.selectedFolder)
             }
             onRejected: {
                 main.state = ""
                 console.log("Folder selection canceled")
             }
         }
-
 
         // ROI SELECTION HANDLER
         RoiDialog {
@@ -621,11 +646,7 @@ Window {
                     configDir { enabled: false }
                     operationStart { enabled: false }
                     operationStop { enabled: true }
-                    settingsContainer { enabled: false }
-                    inputLogFrequencyLabel1 { color: root.disabledColor }
-                    inputLogFrequencyLabel2 { color: root.disabledColor }
-                    inputDateFmtLabel1 { color: root.disabledColor }
-                    inputDateFmtLabel2 { color: root.disabledColor }
+                    settingsContainer { enabled: false; opacity: 0.3 }
                 }
             },
             State {
@@ -636,13 +657,30 @@ Window {
                     configDir { enabled: false }
                     operationStart { enabled: false }
                     operationStop { enabled: false }
-                    settingsContainer { enabled: false }
-                    inputLogFrequencyLabel1 { color: root.disabledColor }
-                    inputLogFrequencyLabel2 { color: root.disabledColor }
-                    inputDateFmtLabel1 { color: root.disabledColor }
-                    inputDateFmtLabel2 { color: root.disabledColor }
+                    settingsContainer { enabled: false; opacity: 0.3 }
                 }
             }
         ]
+    }
+
+    // JAVASCRIPT HANDLERS
+    property var possibleInvalidInputs: [
+        {id: inputFreqVal, name: "Log frequency", pageIndex: 0},
+        {id: inputCtrlVal, name: "Control value", pageIndex: 1},
+    ]
+
+    function checkInputs(inputList) {
+        return inputList.every((field) => field.id.acceptableInput)
+    }
+
+    function focusInvalidInput(inputList) {
+        for (const field of inputList) {
+            if (!field.id.acceptableInput) {
+                settingsContainer.setCurrentIndex(field.pageIndex)
+                field.id.forceActiveFocus();
+                return field.name
+            }
+        }
+        return ""
     }
 }
