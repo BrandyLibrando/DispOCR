@@ -63,9 +63,10 @@ Window {
                                 x: 2
                                 width: subCameraBorder.width * 5 / 8
                                 height: subCameraField.width / 16 * 9
+                                padding: 2
 
                                 background: Rectangle {
-                                    color: "#000000"
+                                    color: "transparent"
                                 }
 
                                 anchors.verticalCenter: parent.verticalCenter
@@ -77,7 +78,7 @@ Window {
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectFit
 
-                                    source: "image://live/image"
+                                    source: "image://numpy/test"
                                     asynchronous: true
                                     cache: false
                                 }

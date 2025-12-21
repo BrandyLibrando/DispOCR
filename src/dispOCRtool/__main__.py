@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import random, time
+import numpy as np
 
 # import PySide6.QtMultimedia
 from PySide6.QtGui import QGuiApplication
@@ -37,96 +38,43 @@ class Bridge(QObject):
     def updateData(self, new_data):
         self.setData(new_data)
 
-## TODO: FOR QML-PY INTEG
-# QML_IMPORT_NAME = "io.qt.textproperties"
-# QML_IMPORT_MAJOR_VERSION = 1
 
-# @QmlElement
-# class Bridge(QObject):
-#     @Slot(QImage)
-#     def capture(self, preview):
-#         # process placeholder
-#         print(type(preview))
+class NumpyImageProvider(QQuickImageProvider):
+    def __init__(self):
+        super().__init__(QQuickImageProvider.Image)
+        self.image = None
 
-# def request_permissions(app):
-#     """
-#     Request camera and location permissions at runtime.
-#     Works on platforms that require explicit user consent.
-#     """
-#     # Camera permission
-#     camera_perm = QCameraPermission()
-#     status = app.checkPermission(camera_perm)
-#     if status != Qt.PermissionStatus:
-#         print("Requesting camera permission...")
-#         app.requestPermission(camera_perm, lambda perm: print(f"Camera permission: {perm.status}"))
+    def set_array(self, array: np.ndarray):
+        """Convert NumPy array to QImage and store it."""
+        if array.ndim == 2:  # Grayscale
+            h, w = array.shape
+            qimg = QImage(array.data, w, h, w, QImage.Format_Grayscale8)
+        elif array.ndim == 3 and array.shape[2] == 3:  # RGB
+            h, w, _ = array.shape
+            qimg = QImage(array.data, w, h, 3 * w, QImage.Format_RGB888)
+        elif array.ndim == 3 and array.shape[2] == 4:  # RGBA
+            h, w, _ = array.shape
+            qimg = QImage(array.data, w, h, 4 * w, QImage.Format_RGBA8888)
+        else:
+            raise ValueError("Unsupported array shape for QImage conversion.")
+        self.image = qimg.copy()  # Copy to avoid referencing freed memory
 
-
-# class Camera_video(QQuickImageProvider):
-#     imageChange = Signal(bool)
-#     def __init__(self):
-#         # super().__init__(QQuickImageProvider)
-#         super().__init__(QQmlImageProviderBase.ImageType.Pixmap)
-#         # Thread in charge of updating the image
-#         self.th = ThreadQ(self)
-#         self._model = "yolov8n.pt"
-#         # updateModel.connect(self.get_model)
-#         self.th.updateFrame.connect(self.updateImage)
-#         # self.th.finished.connect(self.setlast)
-#         # self.nowstatus = self.saveState()
-
-#         # inpath = r"C:\Users\10696\Desktop\CV\ZouJiu1\Pytorch_YOLOV3\log\val"
-#         # self.imagelist = [os.path.join(inpath, i) for i in os.listdir(inpath)]
-#         self.pixmap = self.th.zeros
-
-#     def requestPixmap(self, id="image_elementll", size=QSize(0, 0),
-#                       requestedSize=QSize(0, 0)):
-#         # w, h = 640, 600
-#         # # image = np.zeros((w, h, 3)) * 255
-#         # image = cv2.imread(np.random.choice(self.imagelist, 1)[0])
-#         # image = cv2.resize(image, (w, h))
-#         # h, w, ch = image.shape
-#         # image = QImage(image.data, w, h, ch * w, QImage.Format_RGB888)
-#         # pixmap = QPixmap.fromImage(image)
-#         return self.pixmap
-
-#     @Slot(QImage)
-#     def updateImage(self, image):
-#         self.pixmap = image
-#         self.imageChange.emit(True)
-
-#     @Slot(str, result=None)
-#     def get_model(self, model):
-#         self.th.model = model.replace("file:///", "")
-
-#     @Slot(str, result=None)
-#     def get_video(self, video):
-#         self.th.video = video.replace("file:///", "")
-
-#     @Slot(str, result=None)
-#     def get_type(self, type):
-#         self.th.input = type
-
-#     @Slot(bool)
-#     def get_checked(self, ischecked):
-#         self.th.checked = ischecked
-
-#     @Slot()
-#     def start(self):
-#         self.th.start()
-#         # self.showFullScreen()
-
-#     @Slot()
-#     def stop(self):
-#         self.th.image_stop = True
-#         self.kill_thread()
-
-
-
+    def requestImage(self, id, size, requestedSize):
+        return self.image if self.image else (QImage(), (0, 0))
 
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
+
+    # Create a sample NumPy RGB image
+    h, w = 10, 10
+    array = np.zeros((h, w, 3), dtype=np.uint8)
+    array[:, :] = [255, 0, 0]  # Red image
+
+    # Create image provider and set array
+    provider = NumpyImageProvider()
+    provider.set_array(array)
 
     ##############################################
     ## PY-QML INTEG
@@ -134,6 +82,7 @@ if __name__ == "__main__":
     bridge = Bridge()
 
     # Expose Python object to QML
+    engine.rootContext().engine().addImageProvider("numpy", provider)
     engine.rootContext().setContextProperty("bridge", bridge)
 
 

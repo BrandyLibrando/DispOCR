@@ -29,6 +29,7 @@ requires = [
     "PySide6-Essentials",
     "PySide6-Addons",
     "shiboken6",
+    "numpy",
 ]
 test_requires = [
 ]
