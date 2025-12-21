@@ -1,14 +1,41 @@
-# This Python file uses the following encoding: utf-8
 import sys
 from pathlib import Path
+import random, time
 
 # import PySide6.QtMultimedia
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
 from PySide6.QtGui import QImage
-from PySide6.QtCore import QObject, Slot, Signal, QTimer, QUrl, QThread, QPermission, QCameraPermission
+from PySide6.QtCore import Slot, Signal, Property
+from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QPermission, QCameraPermission
 from PySide6.QtQuick import QQuickImageProvider, QQuickView
+
+
+class Bridge(QObject):
+    ## INITIAL VALUES
+    def __init__(self):
+        QObject.__init__(self)
+        self._data = "Hello from Python!"
+
+    ## SIGNALS
+    dataChanged = Signal()
+
+    ## GETTER-SETTER
+    def getData(self):
+        return self._data
+    def setData(self, value):
+        if self._data != value:
+            self._data = value
+            self.dataChanged.emit()
+
+    ## EXPOSED PROPERTIES
+    data = Property(str, getData, setData, notify=dataChanged)
+
+    ## EXPOSED SLOTS
+    @Slot(str)
+    def updateData(self, new_data):
+        self.setData(new_data)
 
 ## TODO: FOR QML-PY INTEG
 # QML_IMPORT_NAME = "io.qt.textproperties"
@@ -95,14 +122,27 @@ from PySide6.QtQuick import QQuickImageProvider, QQuickView
 
 
 
+
+
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
-
-    # request_permissions(app)
-
     engine = QQmlApplicationEngine()
+
+    ##############################################
+    ## PY-QML INTEG
+    ##############################################
+    bridge = Bridge()
+
+    # Expose Python object to QML
+    engine.rootContext().setContextProperty("bridge", bridge)
+
+
+    ##############################################
+    ## LOADING OF QML FILE FOR APP
+    ##############################################
     # qml_file = Path(__file__).resolve().parent / "tester.qml"
     qml_file = Path(__file__).resolve().parent / "main.qml"
+
     engine.load(qml_file)
 
     if not engine.rootObjects():
