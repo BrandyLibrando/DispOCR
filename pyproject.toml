@@ -4,7 +4,6 @@ name = "DispOCR"
 [tool.pyside6-project]
 files = ["src/dispOCRtool/RoiDialog.qml", "src/dispOCRtool/__init__.py", "src/dispOCRtool/__main__.py", "src/dispOCRtool/main.qml", "src/dispOCRtool/tester.qml", "src/dispOCRtool/util/Bridge.py", "src/dispOCRtool/util/__init__.py"]
 
-# This project was generated with 0.3.26 using template: https://github.com/beeware/briefcase-template @ v0.3.26
 [tool.briefcase]
 project_name = "DispOCR"
 bundle = "com.brandylibrando.apps"
@@ -17,10 +16,15 @@ author_email = "brandywritesthings@gmail.com"
 [tool.briefcase.app.dispOCRtool]
 formal_name = "DispOCR"
 description = "An OCR solution for recognizing text and numbers from electronic displays."
-long_description = """More details about the app should go here.
+long_description = """This application is part of an OCR system setup for my bachelor's thesis requirement.
+
+Overall, this thesis project aims to create a setup capable of recognizing characters from as many electronic displays as possible. It also aims to integrate hardware solutions into this OCR system, such as triggering actuators and a variable light system to improve performance on low-light conditions when using on screens with no backlight capabilities.
+
+This program mainly serves as the GUI of the setup, to be deployed in Raspberry Pi or any target desktop environment. This GUI connects to the scripts for predicting text in the OCR pipeline, as well as to web-hosted Ollama APIs for the text correction (result post-processing).
 """
 sources = [
     "src/dispOCRtool",
+    "src/dispOCRtool/util",
 ]
 test_sources = [
     "tests",
@@ -30,6 +34,7 @@ requires = [
     "PySide6-Addons",
     "shiboken6",
     "numpy",
+    "opencv-python",
 ]
 test_requires = [
 ]

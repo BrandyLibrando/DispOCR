@@ -14,8 +14,8 @@ from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QPermission, QCameraP
 from PySide6.QtQuick import QQuickImageProvider, QQuickView
 
 ## Own Utility/Class Imports
-from .util.Bridge import StringBridge
-from .util.NumpyQImageRenderer import NumpyImageProvider
+from util.Bridge import StringBridge
+# from util.NumpyQImageRenderer import NumpyImageProvider
 
 
 
@@ -25,17 +25,31 @@ class ThreadCamera(QThread):
 
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
+        self.cap = cv2.VideoCapture(0)
+        self._running = True
 
     def run(self):
-        self.cap = cv2.VideoCapture(0)
-        while self.cap.isOpened():
+        
+        while self._running:
             ret, frame = self.cap.read()
+            img = QImage("./images/network.png")
             if not ret:
-                img = QImage("./images/network.png")
                 self.updateFrame.emit(img)
-            color_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img = QImage(color_frame.data, color_frame.shape[1], color_frame.shape[0], QImage.Format_RGB888)
-            self.updateFrame.emit(img)
+            
+            try:
+                color_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            except:
+                self._running = False
+            finally:
+                img = QImage(color_frame.data, color_frame.shape[1], color_frame.shape[0], QImage.Format_RGB888)
+                self.updateFrame.emit(img)
+            
+    
+    def stop(self):
+        self.cap.release()
+        self._running = False
+
+            
 
 
 class ImageProvider(QQuickImageProvider):
@@ -71,10 +85,10 @@ class ImageProvider(QQuickImageProvider):
     @Slot()
     def killThread(self):
         print("Finishing...")
-        try:
-            self.cam.cap.release()
-        except:
-            pass
+        self.cam.cap.release()
+        trace = self.cam.stop()
+        print(trace)
+        
 
 
 if __name__ == "__main__":
@@ -108,5 +122,8 @@ if __name__ == "__main__":
 
     if not engine.rootObjects():
         sys.exit(-1)
+
+    window = engine.rootObjects()[0]  # Store root window
+    # window.closing.connect(myImageProvider.killThread())
 
     sys.exit(app.exec())
