@@ -1,4 +1,4 @@
-import QtMultimedia
+// import QtMultimedia
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
@@ -589,7 +589,7 @@ ApplicationWindow {
             onAccepted: {
                 main.state = ""
                 console.log("Selected folder:", folderDialog.selectedFolder)
-                bridge.updateData(folderDialog.selectedFolder)
+                bridge.setData(folderDialog.selectedFolder)
             }
             onRejected: {
                 main.state = ""
@@ -604,16 +604,16 @@ ApplicationWindow {
         }
 
         // CAMERA DEVICE HANDLERS
-        MediaDevices {
-            id: mediaDevices
-        }
+        // MediaDevices {
+        //     id: mediaDevices
+        // }
 
-        CaptureSession {
-            videoOutput: subCameraView
-            camera: Camera {
-                cameraDevice: mediaDevices.defaultVideoInput
-            }
-        }
+        // CaptureSession {
+        //     videoOutput: subCameraView
+        //     camera: Camera {
+        //         cameraDevice: mediaDevices.defaultVideoInput
+        //     }
+        // }
 
         // VIRTUAL KEYBOARD
         // InputPanel {

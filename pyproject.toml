@@ -2,7 +2,7 @@
 name = "DispOCR"
 
 [tool.pyside6-project]
-files = ["src/dispOCRtool/RoiDialog.qml", "src/dispOCRtool/__main__.py", "src/dispOCRtool/main.qml", "src/dispOCRtool/tester.qml"]
+files = ["src/dispOCRtool/RoiDialog.qml", "src/dispOCRtool/__init__.py", "src/dispOCRtool/__main__.py", "src/dispOCRtool/main.qml", "src/dispOCRtool/tester.qml", "src/dispOCRtool/util/Bridge.py", "src/dispOCRtool/util/__init__.py"]
 
 # This project was generated with 0.3.26 using template: https://github.com/beeware/briefcase-template @ v0.3.26
 [tool.briefcase]
