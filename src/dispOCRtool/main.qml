@@ -673,21 +673,15 @@ ApplicationWindow {
         return ""
     }
 
-    Connections{
+    Connections {
         target: myImageProvider
 
         function onImageChanged(image) {
-            console.log("emit")
             subCameraVF.reloadImage()
         }
-
     }
 
     Component.onCompleted: {
         myImageProvider.start()
-    }
-
-    onClosing: {
-        myImageProvider.killThread()
     }
 }
