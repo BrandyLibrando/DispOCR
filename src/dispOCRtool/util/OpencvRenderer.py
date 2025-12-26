@@ -10,10 +10,10 @@ from PySide6.QtQuick import QQuickImageProvider
 class ThreadCamera(QThread):
     updateFrame = Signal(QImage)
 
-    def __init__(self, index, parent=None):
+    def __init__(self, index, apiPreference=cv2.CAP_ANY, parent=None):
         QThread.__init__(self, parent)
 
-        self.cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+        self.cap = cv2.VideoCapture(index, apiPreference)
         self.image = None
         self._running = True
 
@@ -40,16 +40,18 @@ class ThreadCamera(QThread):
         self._running = False
         self.requestInterruption()
         self.wait()
+        print("Thread ended successfully.")
 
 
 class OpencvImageProvider(QQuickImageProvider):
     imageChanged = Signal(QImage)
 
-    def __init__(self):
+    def __init__(self, index=0, cv2backend=cv2.CAP_ANY):
         super(OpencvImageProvider, self).__init__(QQuickImageProvider.Image)
 
-        self.cam = ThreadCamera(0)
-        self.cam.updateFrame.connect(self.update_image)
+        self.api = cv2backend
+        self.index = index
+        self.cam = None
         self.image = None
 
     def requestImage(self, id, size, requestedSize):
@@ -57,14 +59,17 @@ class OpencvImageProvider(QQuickImageProvider):
             img = self.image
         else:
             img = QImage(600, 500, QImage.Format_RGBA8888)
-            img.fill("#4CAF50")
+            img.fill("#00BCD4")
 
         return img
 
-    @Slot()
-    def change_camera(self, index):
-        self.cam.cap.release()
-        self.cam.cap.open(index)
+    @Slot(int, str)
+    def change_camera(self, index, name):
+        self.killThread()
+        self.index = index
+
+        self.start()
+        print(f"Camera changed to: [{index}] {name}")
 
     @Slot()
     def update_image(self, img):
@@ -73,10 +78,13 @@ class OpencvImageProvider(QQuickImageProvider):
 
     @Slot()
     def start(self):
-        print("Starting...")
+        print("")
+        print("=====================\nStarting new camera thread...")
+        self.cam = ThreadCamera(self.index, self.api)
+        self.cam.updateFrame.connect(self.update_image)
         self.cam.start()
 
     @Slot()
     def killThread(self):
-        print("Finishing...")
+        print("Finishing current camera thread...")
         self.cam.stop()

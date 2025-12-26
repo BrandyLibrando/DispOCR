@@ -299,7 +299,7 @@ ApplicationWindow {
                             id: generalSettingsList
 
                             CheckBox {
-                                id: toggleCorrection
+                                id: toggleOakCamera
                                 x: -9; y: -10
                                 height: 35
                                 leftPadding: 8; rightPadding: 8
@@ -307,7 +307,46 @@ ApplicationWindow {
                                 font.pointSize: 9
                                 display: AbstractButton.TextBesideIcon
 
+                                text: qsTr("OAK camera preprocessing")
+                            }
+
+                            CheckBox {
+                                id: toggleCorrection
+                                x: -9; y: 20
+                                height: 35
+                                leftPadding: 8; rightPadding: 8
+                                padding: 8
+                                font.pointSize: 9
+                                display: AbstractButton.TextBesideIcon
+
                                 text: qsTr("Apply text correction upon saving")
+                            }
+
+                            Item {
+                                id: groupInputCameraDevice
+
+                                ComboBox {
+                                    id: inputCameraDevice
+                                    x: 0; y: inputCameraDeviceLabel1.y + 20
+                                    width: settingsContainer.width - 30; height: 28
+                                    font.pointSize: 8
+
+                                    editable: false
+                                    model: cameraList.data
+
+                                    onCurrentIndexChanged: {
+                                        if (currentText) myImageProvider.change_camera(currentIndex, currentText)
+                                    }
+                                }
+
+                                Text {
+                                    id: inputCameraDeviceLabel1
+                                    x: 0; y: 53
+                                    width: 119; height: 16
+                                    font.pixelSize: 12
+
+                                    text: qsTr("Choose input camera device")
+                                }
                             }
 
                             Item {
@@ -341,7 +380,7 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputLogFrequencyLabel1
-                                    x: 0; y: 28
+                                    x: 0; y: inputCameraDeviceLabel1.y + 55
                                     width: 119; height: 16
                                     font.pixelSize: 12
                                     text: qsTr("Log every:")
@@ -349,7 +388,7 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputLogFrequencyLabel2
-                                    x: 0; y: 42
+                                    x: 0; y: inputLogFrequencyLabel1.y + 14
                                     width: 119; height: 16
                                     font.pixelSize: 12
                                     color: inputFreqVal.acceptableInput ? "#000" : "#E91E63"
@@ -658,10 +697,12 @@ ApplicationWindow {
         {id: inputCtrlVal, name: "Control value", pageIndex: 1},
     ]
 
+    // Check validity of enabled inputs
     function checkInputs(inputList) {
         return inputList.every((field) => field.id.acceptableInput || !field.id.enabled)
     }
 
+    // Switch focus to enabled invalid input
     function focusInvalidInput(inputList) {
         for (const field of inputList) {
             if (!field.id.acceptableInput && field.id.enabled) {

@@ -35,6 +35,7 @@ requires = [
     "shiboken6",
     "numpy",
     "opencv-python",
+    "cv2_enumerate_cameras",
 ]
 test_requires = [
 ]

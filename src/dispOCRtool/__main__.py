@@ -3,6 +3,7 @@ from pathlib import Path
 import random, time
 import numpy as np
 import cv2
+from cv2_enumerate_cameras import enumerate_cameras
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
@@ -14,10 +15,10 @@ from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QSysInfo
 from PySide6.QtQuick import QQuickImageProvider, QQuickView
 
 ## Own Utility/Class Imports
-from util.Bridge import StringBridge
+from util.Bridge import ListBridge, StringBridge
 # from util.NumpyQImageRenderer import NumpyImageProvider
 from util.OpencvRenderer import OpencvImageProvider
-        
+
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
@@ -27,19 +28,26 @@ if __name__ == "__main__":
     ## PY-QML DATA BRIDGES
     ##############################################
     operating_system = QSysInfo.productType() if QSysInfo.productType() in ["windows", "macos", "unknown", "ios", "android"] else "linux"
-    print(operating_system)
+    preferred_backend = cv2.CAP_DSHOW if operating_system == "windows" else cv2.CAP_GSTREAMER if operating_system == "linux" else cv2.CAP_AVFOUNDATION if "macos" else cv2.CAP_ANY
+    camera_list = [cam.name for cam in enumerate_cameras(preferred_backend)]
+    index_list = [cam.index for cam in enumerate_cameras(preferred_backend)]
+
     bridge = StringBridge(operating_system)
+    camera_model = ListBridge(camera_list)
+
     engine.rootContext().setContextProperty("bridge", bridge)
+    engine.rootContext().setContextProperty("cameraList", camera_model)
 
 
     ##############################################
     ## CAMERA AND IMAGE RENDERING
     ##############################################
     # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
-    myImageProvider = OpencvImageProvider()
+    if (camera_list):
+        myImageProvider = OpencvImageProvider(cv2backend=preferred_backend)
 
-    engine.rootContext().setContextProperty("myImageProvider", myImageProvider)  # to access provider ID in QML
-    engine.addImageProvider("MyImageProvider", myImageProvider)  # expose provider to Image classes
+        engine.rootContext().setContextProperty("myImageProvider", myImageProvider)  # to access provider ID in QML
+        engine.addImageProvider("MyImageProvider", myImageProvider)  # expose provider to Image classes
 
 
     ##############################################
