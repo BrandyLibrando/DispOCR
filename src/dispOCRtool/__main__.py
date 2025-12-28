@@ -29,25 +29,25 @@ if __name__ == "__main__":
     ##############################################
     operating_system = QSysInfo.productType() if QSysInfo.productType() in ["windows", "macos", "unknown", "ios", "android"] else "linux"
     preferred_backend = cv2.CAP_DSHOW if operating_system == "windows" else cv2.CAP_GSTREAMER if operating_system == "linux" else cv2.CAP_AVFOUNDATION if "macos" else cv2.CAP_ANY
-    camera_list = [cam.name for cam in enumerate_cameras(preferred_backend)]
-    index_list = [cam.index for cam in enumerate_cameras(preferred_backend)]
+    camera_models = [cam.name for cam in enumerate_cameras(preferred_backend)]
+    camera_index = [cam.index for cam in enumerate_cameras(preferred_backend)]
 
     bridge = StringBridge(operating_system)
-    camera_model = ListBridge(camera_list)
+    camera_list = ListBridge(camera_models)
 
     engine.rootContext().setContextProperty("bridge", bridge)
-    engine.rootContext().setContextProperty("cameraList", camera_model)
+    engine.rootContext().setContextProperty("cameraList", camera_list)
 
 
     ##############################################
     ## CAMERA AND IMAGE RENDERING
     ##############################################
     # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
-    if (camera_list):
-        myImageProvider = OpencvImageProvider(cv2backend=preferred_backend)
+    if (camera_models):
+        cvCameraRenderer = OpencvImageProvider(cv2backend=preferred_backend)
 
-        engine.rootContext().setContextProperty("myImageProvider", myImageProvider)  # to access provider ID in QML
-        engine.addImageProvider("MyImageProvider", myImageProvider)  # expose provider to Image classes
+        engine.rootContext().setContextProperty("cvCameraRenderer", cvCameraRenderer)  # to access provider ID in QML
+        engine.addImageProvider("CvCameraFeed", cvCameraRenderer)  # expose provider to Image classes
 
 
     ##############################################
@@ -63,6 +63,7 @@ if __name__ == "__main__":
 
     window = engine.rootObjects()[0]  # Store root window
     # window.closing.connect(myImageProvider.killThread())
-    app.aboutToQuit.connect(myImageProvider.killThread)
+
+    app.aboutToQuit.connect(cvCameraRenderer.killThread)
 
     sys.exit(app.exec())

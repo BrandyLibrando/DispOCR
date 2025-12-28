@@ -28,6 +28,7 @@ ApplicationWindow {
 
         property real heightRatio: main.height/480
         property real widthRatio: main.width/640
+        property var editedImage
 
         Row {
             id: mainContainer
@@ -80,12 +81,12 @@ ApplicationWindow {
 
                                     // asynchronous: true
                                     cache: false
-                                    source: "image://MyImageProvider/img"
+                                    source: "image://CvCameraFeed/img"
                                     property bool counter: false
 
                                     function reloadImage() {
                                         counter = !counter
-                                        source = "image://MyImageProvider/img?id=" + counter
+                                        source = "image://CvCameraFeed/img?id=" + counter
                                     }
                                 }
                             }
@@ -114,7 +115,6 @@ ApplicationWindow {
                                     onClicked: {
                                         main.state = "editroidir"
                                         roiwindow.show()
-                                        console.log("pressed")
                                     }
                                 }
 
@@ -154,13 +154,61 @@ ApplicationWindow {
                             Pane {
                                 id: cameraField
                                 width: cameraBorder.width * 9 / 10
-                                height: cameraField.width / 16 * 9
+                                height: cameraField.width / 4.5 * 3
                                 anchors.centerIn: parent
                                 anchors.horizontalCenterOffset: -4
                                 rightInset: 0
+                                padding: 0
 
-                                background: Rectangle {
-                                    color: "#000000"
+                                Image {
+                                    id: cameraVF
+                                    property int paintedX: (cameraVF.width - cameraVF.paintedWidth) / 2
+                                    property int paintedY: (cameraVF.height - cameraVF.paintedHeight) / 2
+
+                                    anchors.fill: parent
+                                    fillMode: Image.PreserveAspectFit
+                                    anchors.margins: 0
+
+                                    // asynchronous: true
+                                    cache: false
+                                    source: "image://CvCameraFeed/img"
+                                    property bool counter: false
+
+                                    function reloadImage() {
+                                        counter = !counter
+                                        source = "image://CvCameraFeed/img?id=" + counter
+                                    }
+
+
+                                    property int roi_x1: 0
+                                    property int roi_y1: 0
+                                    property int roi_x2: 320
+                                    property int roi_y2: 240
+
+                                    property int imageWidth: 640
+                                    property int imageHeight: 480
+
+                                    function resetPoints() {
+                                        roi_x1 = 0
+                                        roi_y1 = 0
+                                        roi_x2 = cvCameraRenderer.getWidth()
+                                        roi_y2 = cvCameraRenderer.getHeight()
+                                        imageWidth = cvCameraRenderer.getWidth()
+                                        imageHeight = cvCameraRenderer.getHeight()
+                                    }
+
+                                    Rectangle {
+                                        id: roioverlay
+                                        color: Material.accent
+                                        opacity: 0.2
+
+                                        x: cameraVF.paintedX + (cameraVF.roi_x1 / cameraVF.imageWidth * cameraVF.paintedWidth)
+                                        y: cameraVF.paintedY + (cameraVF.roi_y1 / cameraVF.imageHeight * cameraVF.paintedHeight)
+                                        width: cameraVF.paintedWidth * (cameraVF.roi_x2 - cameraVF.roi_x1) / cameraVF.imageWidth
+                                        height: cameraVF.paintedHeight * (cameraVF.roi_y2 - cameraVF.roi_y1) / cameraVF.imageHeight
+                                    }
+
+                                    Component.onCompleted: console.log("", cameraVF.paintedX)
                                 }
                             }
                         }
@@ -332,10 +380,15 @@ ApplicationWindow {
                                     font.pointSize: 8
 
                                     editable: false
-                                    model: cameraList.data
+                                    model: if (cameraList.data.length) cameraList.data; else "No camera detected."
 
-                                    onCurrentIndexChanged: {
-                                        if (currentText) myImageProvider.change_camera(currentIndex, currentText)
+                                    Connections {
+                                        function onCurrentIndexChanged() {
+                                            if (inputCameraDevice.currentText) {
+                                                cvCameraRenderer.change_camera(inputCameraDevice.currentIndex)
+                                                cameraVF.resetPoints()
+                                            }
+                                        }
                                     }
                                 }
 
@@ -639,6 +692,7 @@ ApplicationWindow {
         // ROI SELECTION HANDLER
         RoiDialog {
             id: roiwindow
+            imageProvider: cvCameraRenderer
             onHidden: main.state = ""
         }
 
@@ -678,7 +732,7 @@ ApplicationWindow {
                 }
             },
             State {
-                id: statePopRoiDir
+                id: statePopulateRoiDir
                 name: "editroidir"
                 PropertyChanges {
                     configRoi { enabled: false }
@@ -706,7 +760,7 @@ ApplicationWindow {
     function focusInvalidInput(inputList) {
         for (const field of inputList) {
             if (!field.id.acceptableInput && field.id.enabled) {
-                settingsContainer.setCurrentIndex(field.pageIndex)
+                settingsContainer.setCurrentIndex(field.pageIndex);
                 field.id.forceActiveFocus();
                 return field.name
             }
@@ -715,14 +769,23 @@ ApplicationWindow {
     }
 
     Connections {
-        target: myImageProvider
+        target: cvCameraRenderer
 
         function onImageChanged(image) {
-            subCameraVF.reloadImage()
+            subCameraVF.reloadImage();
+            cameraVF.reloadImage();
+            if (!roiwindow.hidden) roiwindow.viewfinder.reloadImage();
+
+            // Pass `image` to cameraPreprocessor
+            //
+            main.editedImage = image;
         }
     }
 
     Component.onCompleted: {
-        myImageProvider.start()
+        if (cameraList.data.length) {
+            cvCameraRenderer.start();
+
+        }
     }
 }
