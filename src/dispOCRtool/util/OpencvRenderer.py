@@ -14,6 +14,9 @@ class ThreadCamera(QThread):
         QThread.__init__(self, parent)
 
         self.cap = cv2.VideoCapture(index, apiPreference)
+        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
         self.image = None
         self._running = True
 
@@ -54,6 +57,7 @@ class OpencvImageProvider(QQuickImageProvider):
         self.cam = None
         self.image = None
 
+
     def requestImage(self, id, size, requestedSize):
         if self.image:
             img = self.image
@@ -63,28 +67,36 @@ class OpencvImageProvider(QQuickImageProvider):
 
         return img
 
-    @Slot(int, str)
-    def change_camera(self, index, name):
+    @Slot(int)
+    def change_camera(self, index):
         self.killThread()
         self.index = index
 
         self.start()
-        print(f"Camera changed to: [{index}] {name}")
-
-    @Slot()
-    def update_image(self, img):
-        self.imageChanged.emit(img)
-        self.image = img
 
     @Slot()
     def start(self):
         print("")
         print("=====================\nStarting new camera thread...")
         self.cam = ThreadCamera(self.index, self.api)
-        self.cam.updateFrame.connect(self.update_image)
+        self.cam.updateFrame.connect(self.updateImage)
         self.cam.start()
 
     @Slot()
     def killThread(self):
         print("Finishing current camera thread...")
         self.cam.stop()
+
+    @Slot()
+    def updateImage(self, img):
+        self.imageChanged.emit(img)
+        self.image = img
+
+    @Slot()
+    def getWidth(self):
+        return self.cam.width
+
+    @Slot()
+    def getHeight(self):
+        return self.cam.height
+
