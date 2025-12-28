@@ -57,8 +57,7 @@ jobs:
      - name: Setup Python
        uses: actions/setup-python@v4
        with:
-         python-version: "3.8"  
-         # Locally using py 3.13, but code should be safe for 3.8 environments
+         python-version: "3.12"
 
      - name: Install Briefcase
        run: |
