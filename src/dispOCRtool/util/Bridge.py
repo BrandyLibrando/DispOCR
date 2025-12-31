@@ -1,3 +1,10 @@
+"""
+Bridge.py
+Contains classes for bidirectional model classes.
+Currently does not support generic classes due to C++-Py
+binding intricacies.
+"""
+
 from PySide6.QtCore import Slot, Signal, Property, QObject
 
 

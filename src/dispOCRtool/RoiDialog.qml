@@ -13,50 +13,83 @@ Window {
 
     Material.theme: Material.Light
     Material.accent: Material.Cyan
-    property var imageProvider
-    property alias image:  viewfinder
 
     signal hidden
 
+    property Image viewfinder
 
-    Image {
-        id: viewfinder
-
+    Column {
         anchors.fill: parent
-        anchors.margins: 15
-        anchors.bottomMargin: 40
-        fillMode: Image.PreserveAspectFit
 
-        // asynchronous: true
-        cache: false
-        source: "image://CvCameraFeed/img"
-        property bool counter: false
+        Pane {
+            height: root.height * 4/5
+            width: root.width
 
-        function reloadImage() {
-            console.log("lel")
-            counter = !counter
-            source = "image://CvCameraFeed/img?id=" + counter
+            // Image {
+            //     id: roiVF
+            //     property int paintedX: (roiVF.width - roiVF.paintedWidth) / 2
+            //     property int paintedY: (roiVF.height - roiVF.paintedHeight) / 2
+
+            //     anchors.fill: parent
+            //     fillMode: Image.PreserveAspectFit
+            //     anchors.margins: 0
+
+            //     cache: false
+            //     source: root.viewfinder.source
+
+
+            //     property int roi_x1: 0
+            //     property int roi_y1: 0
+            //     property int roi_x2: 320
+            //     property int roi_y2: 240
+
+            //     property int imageWidth: 640
+            //     property int imageHeight: 480
+
+            //     function resetPoints() {
+            //         roi_x1 = 0
+            //         roi_y1 = 0
+            //         roi_x2 = cvCameraRenderer.getWidth()
+            //         roi_y2 = cvCameraRenderer.getHeight()
+            //         imageWidth = cvCameraRenderer.getWidth()
+            //         imageHeight = cvCameraRenderer.getHeight()
+            //     }
+
+            //     Rectangle {
+            //         id: roioverlay
+            //         color: Material.accent
+            //         opacity: 0.2
+
+            //         x: roiVF.paintedX + (roiVF.roi_x1 / roiVF.imageWidth * roiVF.paintedWidth)
+            //         y: roiVF.paintedY + (roiVF.roi_y1 / roiVF.imageHeight * roiVF.paintedHeight)
+            //         width: roiVF.paintedWidth * (roiVF.roi_x2 - roiVF.roi_x1) / roiVF.imageWidth
+            //         height: roiVF.paintedHeight * (roiVF.roi_y2 - roiVF.roi_y1) / roiVF.imageHeight
+            //     }
+            // }
+
+            ImageViewfinder {
+                id: roiVF
+
+                imageSource: viewfinder.source
+                imageProvider: viewfinder.imageProvider
+            }
         }
 
+        Row {
+            height: root.height * 1/5
 
-        property int x1
-        property int x2
-        property int y1
-        property int y2
-        Rectangle {
-
+            Button {
+                text: "Close"
+                onClicked: {
+                    root.hidden()
+                    root.hide()
+                }
+            }
         }
     }
 
-    Button {
-        anchors.horizontalCenter: parent.horizontalCenter
 
-        text: "Close"
-        onClicked: {
-            root.hidden()
-            root.hide()
-        }
-    }
+
 
     onVisibleChanged: if (!root.visible) root.hidden()
 }

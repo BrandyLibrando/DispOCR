@@ -1,3 +1,10 @@
+"""
+NumpyQImageRenderer.py
+Class for rendering numpy matrices (representing
+image files) to QImages that can be passed to
+image providers for display.
+"""
+
 import numpy as np
 from PySide6.QtGui import QImage
 from PySide6.QtQuick import QQuickImageProvider

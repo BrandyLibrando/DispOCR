@@ -1,3 +1,9 @@
+"""
+OpencvRenderer.py
+Contains classes for handling QML threaded camera handling
+using OpenCV and QThreads.
+"""
+
 import cv2
 import numpy as np
 

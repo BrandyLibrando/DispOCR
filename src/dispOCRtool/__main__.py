@@ -1,3 +1,9 @@
+"""
+__main__.py
+Opens the main app for the GUI, and handles
+connections between Python backend and the QML components.
+"""
+
 import sys
 from pathlib import Path
 import random, time
@@ -43,7 +49,7 @@ if __name__ == "__main__":
     ## CAMERA AND IMAGE RENDERING
     ##############################################
     # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
-    if (camera_models):
+    if camera_models:
         cvCameraRenderer = OpencvImageProvider(cv2backend=preferred_backend)
 
         engine.rootContext().setContextProperty("cvCameraRenderer", cvCameraRenderer)  # to access provider ID in QML
