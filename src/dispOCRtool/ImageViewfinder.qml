@@ -11,8 +11,8 @@ Image {
     // Filled properties
     property int roi_x1: 0
     property int roi_y1: 0
-    property int roi_x2: imageWidth
-    property int roi_y2: imageHeight
+    property int roi_x2: imageWidth / 2
+    property int roi_y2: imageHeight / 2
 
     property int imageWidth: imageProvider.getWidth()
     property int imageHeight: imageProvider.getHeight()
@@ -29,16 +29,6 @@ Image {
     cache: false
     source: imageSource
 
-
-    function resetPoints() {
-        roi_x1 = 0
-        roi_y1 = 0
-        imageWidth = imageProvider.getWidth()
-        imageHeight = imageProvider.getHeight()
-        roi_x2 = root.imageWidth
-        roi_y2 = root.imageHeight
-    }
-
     Rectangle {
         id: roioverlay
         color: overlayColor
@@ -50,8 +40,13 @@ Image {
         height: root.paintedHeight * (root.roi_y2 - root.roi_y1) / root.imageHeight
     }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: console.log("", [root.paintedX, root.imageHeight, root.imageWidth, root.imageProvider.getWidth()])
+
+    function resetPoints() {
+        roi_x1 = 0
+        roi_y1 = 0
+        imageWidth = imageProvider.getWidth()
+        imageHeight = imageProvider.getHeight()
+        roi_x2 = root.imageWidth
+        roi_y2 = root.imageHeight
     }
 }

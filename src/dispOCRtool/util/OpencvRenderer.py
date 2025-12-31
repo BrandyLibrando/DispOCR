@@ -29,7 +29,7 @@ class ThreadCamera(QThread):
 
     def run(self):
         self.openedCamera.emit(self.width, self.height)
-        print(self.width, self.height)
+
         while self._running:
             if self.cap.isOpened:
                 ret, frame = self.cap.read()
