@@ -41,7 +41,7 @@ Image {
 
     Rectangle {
         id: roioverlay
-        color: accentColor
+        color: overlayColor
         opacity: 0.2
 
         x: root.paintedX + (root.roi_x1 / root.imageWidth * root.paintedWidth)

@@ -801,6 +801,12 @@ ApplicationWindow {
             //
             main.editedImage = image;
         }
+
+        function onCameraOpened(cameraWidth, cameraHeight) {
+            main.cameraWidth = cameraWidth;
+            main.cameraHeight = cameraHeight;
+            console.log("dimensions updated")
+        }
     }
 
     Component.onCompleted: {

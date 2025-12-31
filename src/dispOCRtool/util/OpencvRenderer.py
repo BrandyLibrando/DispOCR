@@ -15,6 +15,7 @@ from PySide6.QtQuick import QQuickImageProvider
 
 class ThreadCamera(QThread):
     updateFrame = Signal(QImage)
+    openedCamera = Signal(int, int)
 
     def __init__(self, index, apiPreference=cv2.CAP_ANY, parent=None):
         QThread.__init__(self, parent)
@@ -27,6 +28,8 @@ class ThreadCamera(QThread):
         self._running = True
 
     def run(self):
+        self.openedCamera.emit(self.width, self.height)
+        print(self.width, self.height)
         while self._running:
             if self.cap.isOpened:
                 ret, frame = self.cap.read()
@@ -54,6 +57,7 @@ class ThreadCamera(QThread):
 
 class OpencvImageProvider(QQuickImageProvider):
     imageChanged = Signal(QImage)
+    cameraOpened = Signal(int, int)
 
     def __init__(self, index=0, cv2backend=cv2.CAP_ANY):
         super(OpencvImageProvider, self).__init__(QQuickImageProvider.Image)
@@ -62,6 +66,8 @@ class OpencvImageProvider(QQuickImageProvider):
         self.index = index
         self.cam = None
         self.image = None
+        self.width = 0
+        self.height = 0
 
 
     def requestImage(self, id, size, requestedSize):
@@ -86,6 +92,7 @@ class OpencvImageProvider(QQuickImageProvider):
         print("=====================\nStarting new camera thread...")
         self.cam = ThreadCamera(self.index, self.api)
         self.cam.updateFrame.connect(self.updateImage)
+        self.cam.openedCamera.connect(self.setDimensions)
         self.cam.start()
 
     @Slot()
@@ -97,6 +104,12 @@ class OpencvImageProvider(QQuickImageProvider):
     def updateImage(self, img):
         self.imageChanged.emit(img)
         self.image = img
+
+    @Slot()
+    def setDimensions(self, width, height):
+        self.width = width
+        self.height = height
+        self.cameraOpened.emit(width, height)
 
     @Slot()
     def getWidth(self):
