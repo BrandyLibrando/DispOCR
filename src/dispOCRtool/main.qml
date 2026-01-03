@@ -355,9 +355,6 @@ ApplicationWindow {
                                         function onCurrentIndexChanged() {
                                             if (inputCameraDevice.currentText) {
                                                 cvCameraRenderer.change_camera(inputCameraDevice.currentIndex)
-                                                // main.cameraWidth = cvCameraRenderer.getWidth()
-                                                // main.cameraHeight = cvCameraRenderer.getHeight()
-                                                cameraVF.resetPoints()
                                             }
                                         }
                                     }

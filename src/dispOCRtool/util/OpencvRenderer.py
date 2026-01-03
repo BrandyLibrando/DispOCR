@@ -13,48 +13,6 @@ from PySide6.QtCore import QThread
 from PySide6.QtQuick import QQuickImageProvider
 
 
-class ThreadCamera(QThread):
-    updateFrame = Signal(QImage)
-    openedCamera = Signal(int, int)
-
-    def __init__(self, index, apiPreference=cv2.CAP_ANY, parent=None):
-        QThread.__init__(self, parent)
-
-        self.cap = cv2.VideoCapture(index, apiPreference)
-        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        self.image = None
-        self._running = True
-
-    def run(self):
-        self.openedCamera.emit(self.width, self.height)
-
-        while self._running:
-            if self.cap.isOpened:
-                ret, frame = self.cap.read()
-                if not ret:
-                    break
-
-                try:
-                    if self._running and ret: color_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    else: color_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-                except:
-                    self._running = False
-                    break
-
-                img = QImage(color_frame.data, color_frame.shape[1], color_frame.shape[0], QImage.Format_RGB888)
-                self.image = color_frame  # color_frame can be stored for later processing
-                self.updateFrame.emit(img)  # signal reload to Image class within QML
-
-    def stop(self):
-        self.cap.release()
-        self._running = False
-        self.requestInterruption()
-        self.wait()
-        print("Thread ended successfully.")
-
-
 class OpencvImageProvider(QQuickImageProvider):
     imageChanged = Signal(QImage)
     cameraOpened = Signal(int, int)
@@ -118,4 +76,47 @@ class OpencvImageProvider(QQuickImageProvider):
     @Slot()
     def getHeight(self):
         return self.cam.height
+
+
+
+class ThreadCamera(QThread):
+    updateFrame = Signal(QImage)
+    openedCamera = Signal(int, int)
+
+    def __init__(self, index, apiPreference=cv2.CAP_ANY, parent=None):
+        QThread.__init__(self, parent)
+
+        self.cap = cv2.VideoCapture(index, apiPreference)
+        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        self.image = None
+        self._running = True
+
+    def run(self):
+        self.openedCamera.emit(self.width, self.height)
+
+        while self._running:
+            if self.cap.isOpened:
+                ret, frame = self.cap.read()
+                if not ret:
+                    break
+
+                try:
+                    if self._running and ret: color_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    else: color_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
+                except:
+                    self._running = False
+                    break
+
+                img = QImage(color_frame.data, color_frame.shape[1], color_frame.shape[0], QImage.Format_RGB888)
+                self.image = color_frame  # color_frame can be stored for later processing
+                self.updateFrame.emit(img)  # signal reload to Image class within QML
+
+    def stop(self):
+        self.cap.release()
+        self._running = False
+        self.requestInterruption()
+        self.wait()
+        print("Thread ended successfully.")
 
