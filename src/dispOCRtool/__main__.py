@@ -4,11 +4,12 @@ Opens the main app for the GUI, and handles
 connections between Python backend and the QML components.
 """
 
-import sys
+import sys, os
 from pathlib import Path
 import random, time
 import numpy as np
 import cv2
+import depthai as dai
 from cv2_enumerate_cameras import enumerate_cameras
 
 from PySide6.QtGui import QGuiApplication
@@ -17,7 +18,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from PySide6.QtGui import QImage
 from PySide6.QtCore import Slot, Signal, Property
-from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QSysInfo
+from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QSysInfo, QStandardPaths
 from PySide6.QtQuick import QQuickImageProvider, QQuickView
 
 ## Own Utility/Class Imports
@@ -30,24 +31,33 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
-    ##############################################
     ## PY-QML DATA BRIDGES
-    ##############################################
+    # Enumerate webcams (with opencv and cv2_enumerate)
     operating_system = QSysInfo.productType() if QSysInfo.productType() in ["windows", "macos", "unknown", "ios", "android"] else "linux"
     preferred_backend = cv2.CAP_DSHOW if operating_system == "windows" else cv2.CAP_GSTREAMER if operating_system == "linux" else cv2.CAP_AVFOUNDATION if "macos" else cv2.CAP_ANY
     camera_models = [cam.name for cam in enumerate_cameras(preferred_backend)]
     camera_index = [cam.index for cam in enumerate_cameras(preferred_backend)]
 
-    bridge = StringBridge(operating_system)
-    camera_list = ListBridge(camera_models)
+    # Enumerate DepthAI cameras (mainly for OAK)
+    dai_models = dai.DeviceBootloader.getAllAvailableDevices()
+    dai_names = []
 
-    engine.rootContext().setContextProperty("bridge", bridge)
+    for idx, info in enumerate(dai_models):
+        with dai.Device(dai.Pipeline(), info, usb2Mode=False) as device:
+            calib = device.readCalibration()
+            eeprom = calib.getEepromData()
+            dai_names.append(f"[D{idx}] {eeprom.productName} ({eeprom.boardName})")
+
+    # Data bridges
+    initial_directory = QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation))
+    log_directory = StringBridge(initial_directory.toString())
+    camera_list = ListBridge(camera_models + dai_names)
+
+    engine.rootContext().setContextProperty("logDirectory", log_directory)
     engine.rootContext().setContextProperty("cameraList", camera_list)
 
 
-    ##############################################
     ## CAMERA AND IMAGE RENDERING
-    ##############################################
     # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
     if camera_models:
         cvCameraRenderer = OpencvImageProvider(cv2backend=preferred_backend)
@@ -56,20 +66,17 @@ if __name__ == "__main__":
         engine.addImageProvider("CvCameraFeed", cvCameraRenderer)  # expose provider to Image classes
 
 
-    ##############################################
     ## LOADING OF QML FILE FOR APP
-    ##############################################
     # qml_file = Path(__file__).resolve().parent / "tester.qml"
     qml_file = Path(__file__).resolve().parent / "main.qml"
-
     engine.load(qml_file)
+
 
     if not engine.rootObjects():
         sys.exit(-1)
 
-    window = engine.rootObjects()[0]  # Store root window
+    # window = engine.rootObjects()[0]  # Store root window
     # window.closing.connect(myImageProvider.killThread())
-
     app.aboutToQuit.connect(cvCameraRenderer.killThread)
 
     sys.exit(app.exec())

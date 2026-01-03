@@ -46,16 +46,14 @@ ApplicationWindow {
 
                 Column {
                     id: viewfinderSeparator
-                    anchors.fill: parent
                     spacing: 8
                     rightPadding: 8
                     padding: 0
 
-                    Row {
+                    Item {
                         id: subCameraContainer
                         width: viewfinderContainer.width
                         height: predictTextScrollView.height
-                        rightPadding: 0
 
                         Frame {
                             id: subCameraBorder
@@ -142,12 +140,11 @@ ApplicationWindow {
                         }
                     }
 
-                    Flow {
+                    Item {
                         id: cameraContainer
                         width: viewfinderContainer.width
                         height: viewfinderContainer.height
                                 - (subCameraContainer.height + viewfinderSeparator.spacing)
-                        rightPadding: 8
 
                         Frame {
                             id: cameraBorder
@@ -259,7 +256,7 @@ ApplicationWindow {
                         font.pointSize: 10
                         cursorVisible: false
 
-                        text: "Prediction"
+                        text: logDirectory.data
                         placeholderText: qsTr("Predicted Text")
                     }
                 }
@@ -273,7 +270,7 @@ ApplicationWindow {
                     currentIndex: settingsContainer.currentIndex
 
                     Repeater {
-                        model: [qsTr("General Settings"), qsTr("Control System Settings")]
+                        model: [qsTr("General"), qsTr("Control System"), qsTr("DepthAI Camera")]
 
                         TabButton {
                             id: settingsBarButton
@@ -541,6 +538,112 @@ ApplicationWindow {
                                 }
                             }
                         }
+
+                        Item {
+                            id: depthaiSettingsList
+
+                            CheckBox {
+                                id: a
+                                x: -9; y: -10
+                                height: 35
+                                leftPadding: 8; rightPadding: 8
+                                padding: 8
+                                font.pointSize: 9
+                                display: AbstractButton.TextBesideIcon
+
+                                text: qsTr("OAK camera preprocessing")
+                            }
+
+                            CheckBox {
+                                id: b
+                                x: -9; y: 20
+                                height: 35
+                                leftPadding: 8; rightPadding: 8
+                                padding: 8
+                                font.pointSize: 9
+                                display: AbstractButton.TextBesideIcon
+
+                                text: qsTr("Apply text correction upon saving")
+                            }
+
+                            Item {
+                                id: c
+
+                                ComboBox {
+                                    id: d
+                                    x: 0; y: inputCameraDeviceLabel1.y + 20
+                                    width: settingsContainer.width - 30; height: 28
+                                    font.pointSize: 8
+
+                                    editable: false
+                                    model: if (cameraList && cameraList.data.length) cameraList.data; else "No camera detected."
+
+                                    Connections {
+                                        function onCurrentIndexChanged() {
+                                            if (inputCameraDevice.currentText) {
+                                                cvCameraRenderer.change_camera(inputCameraDevice.currentIndex)
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    id: e
+                                    x: 0; y: 53
+                                    width: 119; height: 16
+                                    font.pixelSize: 12
+
+                                    text: qsTr("Choose input camera device")
+                                }
+                            }
+
+                            Item {
+                                id: f
+
+                                Rectangle {
+                                    id: g
+                                    x: inputCtrlCond.x + 20
+                                    y: inputLogFrequencyLabel1.y + 2
+                                    width: inputCtrlCond.width - 40
+                                    height: inputCtrlCond.height
+                                    border.width: 2
+                                    border.color: inputFreqVal.focus ? Material.accent : "#959595"
+                                    radius: 5
+                                    clip: true
+
+                                    TextInput{
+                                        id: h
+                                        width: parent.width
+                                        leftPadding: 10; rightPadding: 10
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: acceptableInput ? "#000" : "#E91E63"
+                                        font.pixelSize: 12
+
+                                        validator: DoubleValidator {
+                                            notation: DoubleValidator.StandardNotation
+                                            bottom: 0.1
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    id: i
+                                    x: 0; y: inputCameraDeviceLabel1.y + 55
+                                    width: 119; height: 16
+                                    font.pixelSize: 12
+                                    text: qsTr("Log every:")
+                                }
+
+                                Text {
+                                    id: k
+                                    x: 0; y: inputLogFrequencyLabel1.y + 14
+                                    width: 119; height: 16
+                                    font.pixelSize: 12
+                                    color: inputFreqVal.acceptableInput ? "#000" : "#E91E63"
+                                    text: qsTr("(min: per 0.1 sec)")
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -649,7 +752,7 @@ ApplicationWindow {
             onAccepted: {
                 main.state = ""
                 console.log("Selected folder:", folderDialog.selectedFolder)
-                bridge.setData(folderDialog.selectedFolder)
+                logDirectory.setData(folderDialog.selectedFolder)
             }
             onRejected: {
                 main.state = ""

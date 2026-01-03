@@ -47,10 +47,10 @@ Window {
 
                 Rectangle {
                     id: roiPt1
-                    width: 10
-                    height: 10
+                    width: 8
+                    height: width
                     color: "#f00"
-                    radius: 5
+                    radius: width/2
 
                     x:  roiVF.paintedX + (roiPt1.width / 2)
                     y:  roiVF.paintedY + (roiPt1.height / 2)
@@ -66,10 +66,10 @@ Window {
 
                 Rectangle {
                     id: roiPt2
-                    width: 10
-                    height: 10
+                    width: 8
+                    height: width
                     color: "#f00"
-                    radius: 5
+                    radius: width/2
 
                     x:  roiVF.paintedX + roiVF.paintedWidth - (roiPt2.width / 2)
                     y:  roiVF.paintedY + roiVF.paintedHeight - (roiPt2.height / 2)
@@ -101,7 +101,7 @@ Window {
 
 
     // Color inverter from hex string
-    function invertHexColor(base: string) {
+    function invertHexColor(base: string): string {
         if (base.charAt(0) === '#') base = base.slice(1);
         const colors = [base.slice(0,2), base.slice(2,4), base.slice(4,6)];
         const invert_colors = colors.map( (color) => (255 - parseInt(color, 16)).toString(16).toLowerCase() );
