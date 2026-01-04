@@ -36,6 +36,7 @@ requires = [
     "numpy",
     "opencv-python",
     "cv2_enumerate_cameras",
+    "depthai",
 ]
 test_requires = [
 ]

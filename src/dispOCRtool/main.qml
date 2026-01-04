@@ -26,9 +26,11 @@ ApplicationWindow {
         id: main
         anchors.fill: parent
 
+        // Camera image properties
+        property bool daiCameraSelected: true // inputCameraDevice.currentText.includes("[D")
         property real heightRatio: main.height/480
         property real widthRatio: main.width/640
-        property var editedImage
+        property var editedImage: null
 
         property int cameraWidth: 0
         property int cameraHeight: 0
@@ -130,6 +132,11 @@ ApplicationWindow {
                                     Material.elevation: 1
 
                                     text: qsTr("Set Dir")
+                                    hoverEnabled: true
+                                    ToolTip.delay: 250
+                                    ToolTip.timeout: 5000
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Current directory: %1").arg(logDirectory.data)
 
                                     onClicked: {
                                         main.state = "editroidir"
@@ -270,28 +277,45 @@ ApplicationWindow {
                     currentIndex: settingsContainer.currentIndex
 
                     Repeater {
-                        model: [qsTr("General"), qsTr("Control System"), qsTr("DepthAI Camera")]
+                        model: [
+                            { name: qsTr("General"), condition: true, tip: null },
+                            { name: qsTr("Control System"), condition: true, tip: null },
+                            { name: qsTr("DepthAI Camera"), condition: main.daiCameraSelected, tip: qsTr("Must select a DepthAI device first.") }
+                        ]
 
                         TabButton {
                             id: settingsBarButton
                             width: implicitWidth
                             leftPadding: 5; rightPadding: 5
                             topPadding: 0; bottomPadding: 5
+                            enabled: modelData.condition
 
                             background: Rectangle {
+                                id: settingsBarBg
                                 height: 12
                                 opacity: 1
                             }
                             contentItem: Text {
-                                text: modelData
+                                id: settingsBarLabel
+                                text: modelData.name
 
                                 font.pointSize: 7
-                                color: checked ? Material.accent : "#959595"
+                                color: checked ? Material.accent : !modelData.condition ? "#E91E63" : "#959595"
+                                opacity: modelData.condition ? 1 : 0.5
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
-                            }
 
-                            onClicked: settingsContainer.setCurrentIndex(index)
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: if (modelData.condition) settingsContainer.setCurrentIndex(index); else return  // Prevent invalid menu from being clickable
+
+                                    hoverEnabled: true
+                                    ToolTip.delay: 250
+                                    ToolTip.timeout: 5000
+                                    ToolTip.visible: hovered && !modelData.condition  // Only show tooltip for invalid menus
+                                    ToolTip.text: modelData.tip
+                                }
+                            }
                         }
                     }
                 }
@@ -308,33 +332,10 @@ ApplicationWindow {
                         height: menuContainer.height * (1 / 2) - menuContainer.spacing - settingsBar.height
 
                         currentIndex: settingsBar.currentIndex
+                        interactive: false
 
                         Item {
                             id: generalSettingsList
-
-                            CheckBox {
-                                id: toggleOakCamera
-                                x: -9; y: -10
-                                height: 35
-                                leftPadding: 8; rightPadding: 8
-                                padding: 8
-                                font.pointSize: 9
-                                display: AbstractButton.TextBesideIcon
-
-                                text: qsTr("OAK camera preprocessing")
-                            }
-
-                            CheckBox {
-                                id: toggleCorrection
-                                x: -9; y: 20
-                                height: 35
-                                leftPadding: 8; rightPadding: 8
-                                padding: 8
-                                font.pointSize: 9
-                                display: AbstractButton.TextBesideIcon
-
-                                text: qsTr("Apply text correction upon saving")
-                            }
 
                             Item {
                                 id: groupInputCameraDevice
@@ -359,9 +360,9 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputCameraDeviceLabel1
-                                    x: 0; y: 53
+                                    x: 0; y: -2
                                     width: 119; height: 16
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
 
                                     text: qsTr("Choose input camera device")
                                 }
@@ -387,7 +388,7 @@ ApplicationWindow {
                                         leftPadding: 10; rightPadding: 10
                                         anchors.verticalCenter: parent.verticalCenter
                                         color: acceptableInput ? "#000" : "#E91E63"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 11
 
                                         validator: DoubleValidator {
                                             notation: DoubleValidator.StandardNotation
@@ -398,9 +399,9 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputLogFrequencyLabel1
-                                    x: 0; y: inputCameraDeviceLabel1.y + 55
+                                    x: 0; y: 53
                                     width: 119; height: 16
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
                                     text: qsTr("Log every:")
                                 }
 
@@ -408,7 +409,7 @@ ApplicationWindow {
                                     id: inputLogFrequencyLabel2
                                     x: 0; y: inputLogFrequencyLabel1.y + 14
                                     width: 119; height: 16
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
                                     color: inputFreqVal.acceptableInput ? "#000" : "#E91E63"
                                     text: qsTr("(min: per 0.1 sec)")
                                 }
@@ -418,9 +419,21 @@ ApplicationWindow {
                                     x: inputLogFrequency.x + inputLogFrequency.width + 5
                                     anchors.verticalCenter: inputLogFrequency.verticalCenter
                                     width: 119; height: 16
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
                                     text: qsTr("sec.")
                                 }
+                            }
+
+                            CheckBox {
+                                id: toggleCorrection
+                                x: -9; y: 88
+                                height: 35
+                                leftPadding: 8; rightPadding: 8
+                                padding: 8
+                                font.pointSize: 8
+                                display: AbstractButton.TextBesideIcon
+
+                                text: qsTr("Apply LLM text correct upon save")
                             }
                         }
 
@@ -433,7 +446,7 @@ ApplicationWindow {
                                 leftPadding: 8; rightPadding: 8
                                 padding: 8
                                 height: 35
-                                font.pointSize: 9
+                                font.pointSize: 8
                                 display: AbstractButton.TextBesideIcon
 
                                 checked: true
@@ -458,7 +471,7 @@ ApplicationWindow {
                                     id: inputCtrlCondLabel1
                                     x: 0; y: 28
                                     width: 119; height: 16
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
 
                                     enabled: toggleControlSystem.checked
                                     text: qsTr("Control value")
@@ -468,7 +481,7 @@ ApplicationWindow {
                                     id: inputCtrlCondLabel2
                                     x: 0; y: 42
                                     width: 119; height: 16
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
 
                                     enabled: toggleControlSystem.checked
                                     text: qsTr("condition")
@@ -497,7 +510,7 @@ ApplicationWindow {
                                         leftPadding: 10; rightPadding: 10
                                         anchors.verticalCenter: parent.verticalCenter
                                         color: acceptableInput ? "#000" : "#E91E63"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 11
 
                                         enabled: toggleControlSystem.checked
 
@@ -511,7 +524,7 @@ ApplicationWindow {
                                     id: inputCtrlValLabel1
                                     x: 0; y: 66
                                     width: 119; height: 16
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
 
                                     text: qsTr("Value to check")
                                 }
@@ -520,7 +533,7 @@ ApplicationWindow {
                                     id: inputCtrlValLabel2
                                     x: 0; y: 80
                                     width: 119; height: 16
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
                                     color: !toggleControlSystem.checked
                                            ? "#959595"
                                            : inputCtrlVal.acceptableInput
@@ -543,104 +556,125 @@ ApplicationWindow {
                             id: depthaiSettingsList
 
                             CheckBox {
-                                id: a
+                                id: toggleOakCamera
                                 x: -9; y: -10
                                 height: 35
                                 leftPadding: 8; rightPadding: 8
                                 padding: 8
-                                font.pointSize: 9
+                                font.pointSize: 8
                                 display: AbstractButton.TextBesideIcon
 
                                 text: qsTr("OAK camera preprocessing")
                             }
 
-                            CheckBox {
-                                id: b
-                                x: -9; y: 20
-                                height: 35
-                                leftPadding: 8; rightPadding: 8
-                                padding: 8
-                                font.pointSize: 9
-                                display: AbstractButton.TextBesideIcon
+                            Column {
+                                id: groupDaiExposure
+                                x: -9; y: toggleOakCamera.y + 25
+                                width: settingsContainer.width - 5
+                                spacing: -22
 
-                                text: qsTr("Apply text correction upon saving")
-                            }
-
-                            Item {
-                                id: c
-
-                                ComboBox {
-                                    id: d
-                                    x: 0; y: inputCameraDeviceLabel1.y + 20
-                                    width: settingsContainer.width - 30; height: 28
+                                CheckBox {
+                                    id: toggleDaiExposure
                                     font.pointSize: 8
+                                    display: AbstractButton.TextBesideIcon
 
-                                    editable: false
-                                    model: if (cameraList && cameraList.data.length) cameraList.data; else "No camera detected."
-
-                                    Connections {
-                                        function onCurrentIndexChanged() {
-                                            if (inputCameraDevice.currentText) {
-                                                cvCameraRenderer.change_camera(inputCameraDevice.currentIndex)
-                                            }
-                                        }
-                                    }
+                                    text: qsTr("Manual exposure (Current: %1)").arg(daiExposure.value)
                                 }
 
-                                Text {
-                                    id: e
-                                    x: 0; y: 53
-                                    width: 119; height: 16
-                                    font.pixelSize: 12
+                                Slider {
+                                    id: daiExposure
+                                    width: parent.width
+                                    from: 1; to: 33000
+                                    value: daiConfig.data[0]
+                                    stepSize: 250
+                                    touchDragThreshold: 4
+                                    enabled: toggleDaiExposure.checked
 
-                                    text: qsTr("Choose input camera device")
+                                    ToolTip {
+                                        parent: daiExposure.handle
+                                        visible: daiExposure.pressed
+                                        text: daiExposure.value
+                                        background: Rectangle {
+                                            radius: width / 2
+                                            border.color: Material.accent; color: Material.accent
+                                        }
+                                    }
+
+                                    onMoved: main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
                                 }
                             }
 
-                            Item {
-                                id: f
+                            Column {
+                                id: groupDaiIso
+                                x: -9; y: toggleOakCamera.y + 85
+                                width: settingsContainer.width - 5
+                                spacing: -22
 
-                                Rectangle {
-                                    id: g
-                                    x: inputCtrlCond.x + 20
-                                    y: inputLogFrequencyLabel1.y + 2
-                                    width: inputCtrlCond.width - 40
-                                    height: inputCtrlCond.height
-                                    border.width: 2
-                                    border.color: inputFreqVal.focus ? Material.accent : "#959595"
-                                    radius: 5
-                                    clip: true
+                                CheckBox {
+                                    id: toggleDaiIso
+                                    font.pointSize: 8
+                                    display: AbstractButton.TextBesideIcon
 
-                                    TextInput{
-                                        id: h
-                                        width: parent.width
-                                        leftPadding: 10; rightPadding: 10
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        color: acceptableInput ? "#000" : "#E91E63"
-                                        font.pixelSize: 12
+                                    text: qsTr("Manual ISO (Current: %1)").arg(daiIso.value)
+                                }
 
-                                        validator: DoubleValidator {
-                                            notation: DoubleValidator.StandardNotation
-                                            bottom: 0.1
+                                Slider {
+                                    id: daiIso
+                                    width: parent.width
+                                    from: 100; to: 1600
+                                    value: daiConfig.data[1]
+                                    stepSize: 50
+                                    touchDragThreshold: 4
+                                    enabled: toggleDaiIso.checked
+
+                                    ToolTip {
+                                        parent: daiIso.handle
+                                        visible: daiIso.pressed
+                                        text: daiIso.value
+                                        background: Rectangle {
+                                            radius: width / 2
+                                            border.color: Material.accent; color: Material.accent
                                         }
                                     }
+
+                                    onMoved: main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
+                                }
+                            }
+
+                            Column {
+                                id: groupDaiFocus
+                                x: -9; y: toggleOakCamera.y + 145
+                                width: settingsContainer.width - 5
+                                spacing: -22
+
+                                CheckBox {
+                                    id: toggleDaiFocus
+                                    font.pointSize: 8
+                                    display: AbstractButton.TextBesideIcon
+
+                                    text: qsTr("Manual focus (Current: %1)").arg(daiFocus.value)
                                 }
 
-                                Text {
-                                    id: i
-                                    x: 0; y: inputCameraDeviceLabel1.y + 55
-                                    width: 119; height: 16
-                                    font.pixelSize: 12
-                                    text: qsTr("Log every:")
-                                }
+                                Slider {
+                                    id: daiFocus
+                                    width: parent.width
+                                    from: 0; to: 255
+                                    value: daiConfig.data[2]
+                                    stepSize: 5
+                                    touchDragThreshold: 4
+                                    enabled: toggleDaiFocus.checked
 
-                                Text {
-                                    id: k
-                                    x: 0; y: inputLogFrequencyLabel1.y + 14
-                                    width: 119; height: 16
-                                    font.pixelSize: 12
-                                    color: inputFreqVal.acceptableInput ? "#000" : "#E91E63"
-                                    text: qsTr("(min: per 0.1 sec)")
+                                    ToolTip {
+                                        parent: daiFocus.handle
+                                        visible: daiFocus.pressed
+                                        text: daiFocus.value
+                                        background: Rectangle {
+                                            radius: width / 2
+                                            border.color: Material.accent; color: Material.accent
+                                        }
+                                    }
+
+                                    onMoved: main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
                                 }
                             }
                         }
@@ -787,6 +821,12 @@ ApplicationWindow {
             }
         }
 
+        // DAI CONFIG HANDLER
+        function updateDaiConfig(exposure, iso, focus) {
+            daiConfig.setData([exposure, iso, focus]);
+            console.debug("", daiConfig.data)
+        }
+
         // VIRTUAL KEYBOARD
         // InputPanel {
         //     id: inputPanel
@@ -852,5 +892,8 @@ ApplicationWindow {
         if (cameraList.data.length) {
             cvCameraRenderer.start();
         }
+
+        // Test codes
+        console.log("", cameraList.data);
     }
 }

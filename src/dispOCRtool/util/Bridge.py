@@ -35,6 +35,7 @@ class StringBridge(QObject):
     def setData(self, new_data):
         self.putData(new_data)
 
+
 class ListBridge(QObject):
     def __init__(self, data:list=None):
         QObject.__init__(self)
@@ -55,7 +56,7 @@ class ListBridge(QObject):
     data = Property(list, getData, putData, notify=dataChanged)
 
     ## EXPOSED SLOTS/METHODS
-    @Slot(str)
+    @Slot(list)
     def setData(self, new_data):
         self.putData(new_data)
 

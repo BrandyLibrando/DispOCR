@@ -52,9 +52,11 @@ if __name__ == "__main__":
     initial_directory = QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation))
     log_directory = StringBridge(initial_directory.toString())
     camera_list = ListBridge(camera_models + dai_names)
+    dai_configs = ListBridge([16500, 800, 128])  # Defaults for [exposure, ISO, focus]
 
     engine.rootContext().setContextProperty("logDirectory", log_directory)
     engine.rootContext().setContextProperty("cameraList", camera_list)
+    engine.rootContext().setContextProperty("daiConfig", dai_configs)
 
 
     ## CAMERA AND IMAGE RENDERING
