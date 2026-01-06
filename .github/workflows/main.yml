@@ -1,4 +1,4 @@
-name: CI
+name: Package App
 on:
  pull_request:
  push:
@@ -24,15 +24,15 @@ jobs:
    strategy:
      fail-fast: false
      matrix:
-       target: [ "Windows", "macOS", "Ubuntu-24.04" ]
+       target: [ "Ubuntu-24.04" ]
        include:
-         - target: "Windows"
-           output-format: "app"
-           runs-on: "windows-latest"
+         # - target: "Windows"
+         #   output-format: "app"
+         #   runs-on: "windows-latest"
 
-         - target: "macOS"
-           output-format: "app"
-           runs-on: "macos-latest"
+         # - target: "macOS"
+         #   output-format: "app"
+         #   runs-on: "macos-latest"
 
          - target: "Ubuntu-24.04"
            platform: "Linux"
