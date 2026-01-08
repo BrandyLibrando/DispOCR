@@ -27,7 +27,7 @@ ApplicationWindow {
         anchors.fill: parent
 
         // Camera image properties
-        property bool daiCameraSelected: true // inputCameraDevice.currentText.includes("[D")
+        property bool daiCameraSelected: inputCameraDevice.currentText.includes("[D")
         property real heightRatio: main.height/480
         property real widthRatio: main.width/640
         property var editedImage: null
@@ -78,18 +78,19 @@ ApplicationWindow {
 
                                 Image {
                                     id: subCameraVF
+                                    property string providerId: main.daiCameraSelected ? "image://DaiRoiFeed/img" : "image://CvRoiFeed/img"
 
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectFit
 
                                     // asynchronous: true
                                     cache: false
-                                    source: "image://CvCameraFeed/img"
+                                    source: providerId
                                     property bool counter: false
 
                                     function reloadImage() {
                                         counter = !counter
-                                        source = "image://CvCameraFeed/img?id=" + counter
+                                        source = providerId + "?id=" + counter
                                     }
                                 }
                             }
@@ -169,18 +170,19 @@ ApplicationWindow {
 
                                 ImageViewfinder {
                                     id: cameraVF
+                                    property string providerId: main.daiCameraSelected ? "image://DaiCameraFeed/img" : "image://CvCameraFeed/img"
 
                                     overlayColor: Material.accent
                                     imageProvider: cvCameraRenderer
                                     imageWidth: main.cameraWidth
                                     imageHeight: main.cameraHeight
 
-                                    imageSource: "image://CvCameraFeed/img"
+                                    imageSource: providerId
                                     property bool counter: false
 
                                     function reloadImage() {
                                         counter = !counter
-                                        imageSource = "image://CvCameraFeed/img?id=" + counter
+                                        imageSource = providerId + "?id=" + counter
                                     }
                                 }
                             }
@@ -805,14 +807,15 @@ ApplicationWindow {
         Connections {
             target: cvCameraRenderer
 
-            function onImageChanged(image) {
+            function onImageChanged(image, roi_image) {
+                // main.editedImage = cvCameraRenderer.cropped_image
+
                 subCameraVF.reloadImage();
                 cameraVF.reloadImage();
                 if (!roiwindow.hidden) roiwindow.viewfinder.reloadImage();
 
                 // Pass `image` to preprocessing steps
                 //
-                main.editedImage = image;
             }
 
             function onCameraOpened(cameraWidth, cameraHeight) {

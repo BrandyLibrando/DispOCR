@@ -52,20 +52,27 @@ if __name__ == "__main__":
     initial_directory = QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation))
     log_directory = StringBridge(initial_directory.toString())
     camera_list = ListBridge(camera_models + dai_names)
+    # roi_coords = ListBridge([0, 0, ])
     dai_configs = ListBridge([16500, 800, 128])  # Defaults for [exposure, ISO, focus]
 
     engine.rootContext().setContextProperty("logDirectory", log_directory)
     engine.rootContext().setContextProperty("cameraList", camera_list)
     engine.rootContext().setContextProperty("daiConfig", dai_configs)
 
+    # = np_image[cameraVF.roi_y1:cameraVF.roi_y2, cameraVF.roi_x1:cameraVF.roi_x2]
+
 
     ## CAMERA AND IMAGE RENDERING
     # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
     if camera_models:
         cvCameraRenderer = OpencvImageProvider(cv2backend=preferred_backend)
+        cvRoiRenderer = cvCameraRenderer.getRoiRenderer()
 
-        engine.rootContext().setContextProperty("cvCameraRenderer", cvCameraRenderer)  # to access provider ID in QML
-        engine.addImageProvider("CvCameraFeed", cvCameraRenderer)  # expose provider to Image classes
+        engine.rootContext().setContextProperty("cvCameraRenderer", cvCameraRenderer)  # cv base img provider
+        engine.addImageProvider("CvCameraFeed", cvCameraRenderer)
+
+        engine.rootContext().setContextProperty("cvRoiRenderer", cvRoiRenderer)  # cv roi img provider
+        engine.addImageProvider("CvRoiFeed", cvRoiRenderer)
 
 
     ## LOADING OF QML FILE FOR APP
