@@ -119,9 +119,9 @@ class OpencvImageProvider(QQuickImageProvider):
         self.cameraOpened.emit(width, height)  # Send camera width and height to QML files
         self.cam.setRoiCoordinates(0, int(width), 0, int(height))  # Set default coordinates
 
-    @Slot()
+    @Slot(int, int, int, int)
     def setRoi(self, x1, y1, x2, y2):
-        self.cam.setRoiCoordinates(int(x1), int(x2), int(y1), int(y2))
+        self.cam.setRoiCoordinates(x1, x2, y1, y2)
 
     @Slot()
     def getWidth(self):
@@ -158,11 +158,17 @@ class ThreadCvCamera(QThread):
         self.x2 = self.width
         self.y1 = 0
         self.y2 = self.height
+        self.new_roi = (0, 0, 0, 0)
+        self.roi_changed = False
 
     def run(self):
         self.openedCamera.emit(self.width, self.height)  # Send width and height to ImageProvider
-
+    
         while self._running:
+            if self.roi_changed:
+                self.x1, self.x2, self.y1, self.y2 = self.new_roi
+                self.roi_changed = False
+
             if self.cap.isOpened:
                 ret, frame = self.cap.read()
                 if not ret:
@@ -193,10 +199,10 @@ class ThreadCvCamera(QThread):
 
     @Slot()
     def setRoiCoordinates(self, x1, x2, y1, y2):
-        self.x1 = x1
-        self.x2 = x2
-        self.y1 = y1
-        self.y2 = y2
+        print("coords:", x1, x2, y1, y2)
+        self.new_roi = (x1, x2, y1, y2)
+        self.roi_changed = True
+        print("> ROI coordinates set successfully.")
 
 
 

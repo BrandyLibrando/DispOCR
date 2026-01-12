@@ -27,7 +27,7 @@ ApplicationWindow {
         anchors.fill: parent
 
         // Camera image properties
-        property bool daiCameraSelected: inputCameraDevice.currentText.includes("[D")
+        property bool daiCameraSelected: true // inputCameraDevice.currentText.includes("[D")
         property real heightRatio: main.height/480
         property real widthRatio: main.width/640
         property var editedImage: null
@@ -359,7 +359,9 @@ ApplicationWindow {
                                                             inputCameraDevice.currentIndex,
                                                             inputCameraDevice.model[inputCameraDevice.currentIndex],
                                                             daiIndex,  // Check if camera is DAI based on CV2 cam count
-                                                            );
+                                                );
+                                                roiwindow.resetPoints();
+                                                cameraVF.resetPoints();
                                             }
                                         }
                                     }
@@ -806,6 +808,10 @@ ApplicationWindow {
             id: roiwindow
             viewfinder: cameraVF
             onHidden: main.state = ""
+            onRoiChanged: (x1, y1, x2, y2) => {
+                cvCameraRenderer.setRoi(x1, y1, x2, y2);
+                cameraVF.setRoi(x1, y1, x2, y2);
+            }
         }
 
         // DATA HANDLER FOR IMAGE PROVIDER CLASS

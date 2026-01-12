@@ -41,6 +41,13 @@ Image {
     }
 
 
+    function setRoi(x1, y1, x2, y2) {
+        roi_x1 = x1
+        roi_y1 = y1
+        roi_x2 = x2
+        roi_y2 = y2
+    }
+
     function resetPoints() {
         roi_x1 = 0
         roi_y1 = 0

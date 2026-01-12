@@ -42,12 +42,15 @@ if __name__ == "__main__":
     # Enumerate DepthAI cameras (mainly for OAK)
     dai_models = dai.DeviceBootloader.getAllAvailableDevices()
     dai_names = []
+    print(dai_models)
 
     for idx, info in enumerate(dai_models):
         with dai.Device(dai.Pipeline(), info) as device:
             calib = device.readCalibration()
             eeprom = calib.getEepromData()
-            dai_names.append(f"[D{idx}] {eeprom.productName} ({info.mxid})")
+            dai_names.append(f"[D{idx}] {eeprom.productName} ({info.deviceId})")
+
+    print(camera_models + dai_names)
 
     # Data bridges
     initial_directory = QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation))
@@ -70,7 +73,6 @@ if __name__ == "__main__":
 
         engine.rootContext().setContextProperty("cvCameraRenderer", cvCameraRenderer)  # cv base img provider
         engine.addImageProvider("CvCameraFeed", cvCameraRenderer)
-
         engine.rootContext().setContextProperty("cvRoiRenderer", cvRoiRenderer)  # cv roi img provider
         engine.addImageProvider("CvRoiFeed", cvRoiRenderer)
 

@@ -15,8 +15,13 @@ Window {
     Material.accent: Material.Cyan
 
     signal hidden
+    signal roiChanged(x1: int, y1: int, x2: int, y2: int)
 
     property Image viewfinder
+    property int x1: roiPt1.x / roiVF.width * roiVF.imageWidth
+    property int x2: roiPt2.x / roiVF.width * roiVF.imageWidth
+    property int y1: roiPt1.y / roiVF.height * roiVF.imageHeight
+    property int y2: roiPt2.y / roiVF.height * roiVF.imageHeight
 
     Column {
         anchors.fill: parent
@@ -52,15 +57,24 @@ Window {
                     color: "#f00"
                     radius: width/2
 
-                    x:  roiVF.paintedX + (roiPt1.width / 2)
-                    y:  roiVF.paintedY + (roiPt1.height / 2)
+                    x:  0
+                    y:  0
 
                     DragHandler {
                         target: roiPt1
                         xAxis.minimum: roiVF.paintedX - (roiPt1.width / 2)
-                        xAxis.maximum: roiVF.paintedX + roiVF.paintedWidth - (roiPt1.width / 2)
+                        xAxis.maximum: roiPt2.x
                         yAxis.minimum: roiVF.paintedY - (roiPt1.width / 2)
-                        yAxis.maximum: roiVF.paintedY + roiVF.paintedHeight - (roiPt1.width / 2)
+                        yAxis.maximum: roiPt2.y
+
+                        onTranslationChanged: {
+                           console.log("",
+                               roiPt1.x,
+                               Math.trunc(roiPt1.x / roiVF.paintedWidth * roiVF.imageWidth),
+                               roiPt1.y,
+                               Math.trunc(roiPt1.y / roiVF.paintedHeight * roiVF.imageHeight)
+                               )
+                       }
                     }
                 }
 
@@ -76,10 +90,19 @@ Window {
 
                     DragHandler {
                         target: roiPt2
-                        xAxis.minimum: roiVF.paintedX - (roiPt2.width / 2)
+                        xAxis.minimum: roiPt1.x
                         xAxis.maximum: roiVF.paintedX + roiVF.paintedWidth - (roiPt2.width / 2)
-                        yAxis.minimum: roiVF.paintedY - (roiPt2.width / 2)
+                        yAxis.minimum: roiPt1.y
                         yAxis.maximum: roiVF.paintedY + roiVF.paintedHeight - (roiPt2.width / 2)
+
+                        onTranslationChanged: {
+                           console.log("",
+                               roiPt2.x,
+                               Math.trunc(roiPt2.x / roiVF.paintedWidth * roiVF.imageWidth),
+                               roiPt2.y,
+                               Math.trunc(roiPt2.y / roiVF.paintedHeight * roiVF.imageHeight)
+                               )
+                       }
                     }
                 }
             }
@@ -88,9 +111,19 @@ Window {
         Row {
             height: root.height * 1/5
             anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 15
 
             Button {
-                text: "Close"
+                text: "Set new ROI"
+                highlighted: true
+                onClicked: {
+                    root.roiChanged(root.x1, root.y1, root.x2, root.y2)
+                    root.hide()
+                }
+            }
+
+            Button {
+                text: "Cancel"
                 onClicked: {
                     root.hidden()
                     root.hide()
@@ -106,6 +139,10 @@ Window {
         const colors = [base.slice(0,2), base.slice(2,4), base.slice(4,6)];
         const invert_colors = colors.map( (color) => (255 - parseInt(color, 16)).toString(16).toLowerCase() );
         return "#" + invert_colors.join("")
+    }
+
+    function resetPoints() {
+        roiVF.resetPoints();
     }
 
     onVisibleChanged: if (!root.visible) root.hidden()
