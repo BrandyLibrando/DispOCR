@@ -31,6 +31,7 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
+
     ## PY-QML DATA BRIDGES
     # Enumerate webcams (with opencv and cv2_enumerate)
     operating_system = QSysInfo.productType() if QSysInfo.productType() in ["windows", "macos", "unknown", "ios", "android"] else "linux"
@@ -43,29 +44,28 @@ if __name__ == "__main__":
     dai_names = []
 
     for idx, info in enumerate(dai_models):
-        with dai.Device(dai.Pipeline(), info, usb2Mode=False) as device:
+        with dai.Device(dai.Pipeline(), info) as device:
             calib = device.readCalibration()
             eeprom = calib.getEepromData()
-            dai_names.append(f"[D{idx}] {eeprom.productName} ({eeprom.boardName})")
+            dai_names.append(f"[D{idx}] {eeprom.productName} ({info.mxid})")
 
     # Data bridges
     initial_directory = QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation))
     log_directory = StringBridge(initial_directory.toString())
     camera_list = ListBridge(camera_models + dai_names)
-    # roi_coords = ListBridge([0, 0, ])
     dai_configs = ListBridge([16500, 800, 128])  # Defaults for [exposure, ISO, focus]
 
     engine.rootContext().setContextProperty("logDirectory", log_directory)
     engine.rootContext().setContextProperty("cameraList", camera_list)
+    engine.rootContext().setContextProperty("cvCamCount", len(camera_models))
+    engine.rootContext().setContextProperty("daiCamCount", len(dai_names))
     engine.rootContext().setContextProperty("daiConfig", dai_configs)
-
-    # = np_image[cameraVF.roi_y1:cameraVF.roi_y2, cameraVF.roi_x1:cameraVF.roi_x2]
 
 
     ## CAMERA AND IMAGE RENDERING
     # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
     if camera_models:
-        cvCameraRenderer = OpencvImageProvider(cv2backend=preferred_backend)
+        cvCameraRenderer = OpencvImageProvider( cv2backend=preferred_backend, daiSupport=len(dai_names), dai=(not len(camera_models) and len(dai_names)) )
         cvRoiRenderer = cvCameraRenderer.getRoiRenderer()
 
         engine.rootContext().setContextProperty("cvCameraRenderer", cvCameraRenderer)  # cv base img provider

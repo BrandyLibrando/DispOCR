@@ -11,8 +11,8 @@ Image {
     // Filled properties
     property int roi_x1: 0
     property int roi_y1: 0
-    property int roi_x2: imageWidth / 2
-    property int roi_y2: imageHeight / 2
+    property int roi_x2: imageWidth
+    property int roi_y2: imageHeight
 
     property int imageWidth: imageProvider.getWidth()
     property int imageHeight: imageProvider.getHeight()

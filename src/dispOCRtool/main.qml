@@ -78,7 +78,7 @@ ApplicationWindow {
 
                                 Image {
                                     id: subCameraVF
-                                    property string providerId: main.daiCameraSelected ? "image://DaiRoiFeed/img" : "image://CvRoiFeed/img"
+                                    property string providerId: "image://CvRoiFeed/img"
 
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectFit
@@ -170,7 +170,7 @@ ApplicationWindow {
 
                                 ImageViewfinder {
                                     id: cameraVF
-                                    property string providerId: main.daiCameraSelected ? "image://DaiCameraFeed/img" : "image://CvCameraFeed/img"
+                                    property string providerId: "image://CvCameraFeed/img"
 
                                     overlayColor: Material.accent
                                     imageProvider: cvCameraRenderer
@@ -354,7 +354,12 @@ ApplicationWindow {
                                     Connections {
                                         function onCurrentIndexChanged() {
                                             if (inputCameraDevice.currentText) {
-                                                cvCameraRenderer.change_camera(inputCameraDevice.currentIndex)
+                                                const daiIndex = Math.max(-1, inputCameraDevice.currentIndex - cvCamCount);
+                                                cvCameraRenderer.change_camera(
+                                                            inputCameraDevice.currentIndex,
+                                                            inputCameraDevice.model[inputCameraDevice.currentIndex],
+                                                            daiIndex,  // Check if camera is DAI based on CV2 cam count
+                                                            );
                                             }
                                         }
                                     }
@@ -889,6 +894,9 @@ ApplicationWindow {
         }
         return ""
     }
+
+    // Get MXID portion of DAI camera name
+    function getLastWord(str) { return str.trim().split(" ").pop(); }
 
 
     Component.onCompleted: {
