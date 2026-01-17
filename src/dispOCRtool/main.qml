@@ -755,7 +755,7 @@ ApplicationWindow {
             id: subCameraContainerLabelBackground
             x: subCameraContainer.x + 19
             y: subCameraContainer.y + 4
-            width: 93; height: 12
+            width: 137; height: 12
             color: main.color
 
             Text {
@@ -763,14 +763,14 @@ ApplicationWindow {
                 x: 4; y: 2
                 color: "#959595"
                 font.pixelSize: 10
-                text: qsTr("Camera Viewfinder")
+                text: qsTr("Region of Interest Viewfinder")
             }
         }
 
         Rectangle {
             id: cameraContainerLabelBackground
             x: cameraContainer.x + 19; y: cameraContainer.y
-            width: 137; height: 12
+            width: 93; height: 12
             color: main.color
 
             Text {
@@ -778,7 +778,7 @@ ApplicationWindow {
                 x: 4; y: 2
                 color: "#959595"
                 font.pixelSize: 10
-                text: qsTr("Region of Interest Viewfinder")
+                text: qsTr("Camera Viewfinder")
             }
         }
 

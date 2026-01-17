@@ -122,11 +122,11 @@ class OpencvImageProvider(QQuickImageProvider):
         self.width = width
         self.height = height
         self.cameraOpened.emit(width, height)  # Send camera width and height to QML files
-        self.cam.setRoiCoordinates(0, int(width), 0, int(height))  # Set default coordinates
+        self.cam.setRoiCoordinates(0, 0, int(width), int(height))  # Set default coordinates
 
     @Slot(int, int, int, int)
     def setRoi(self, x1, y1, x2, y2):
-        self.cam.setRoiCoordinates(x1, x2, y1, y2)
+        self.cam.setRoiCoordinates(x1, y1, x2, y2)
 
     @Slot()
     def getWidth(self):
@@ -171,7 +171,7 @@ class ThreadCvCamera(QThread):
     
         while self._running:
             if self.roi_changed:
-                self.x1, self.x2, self.y1, self.y2 = self.new_roi
+                self.x1, self.y1, self.x2, self.y2 = self.new_roi
                 self.roi_changed = False
 
             if self.cap.isOpened:
@@ -181,7 +181,7 @@ class ThreadCvCamera(QThread):
 
                 try:
                     if self._running and ret:
-                        roi_frame = frame[self.y1:self.y2, self.x1:self.x2].copy()
+                        roi_frame = np.ascontiguousarray(frame[self.y1:self.y2, self.x1:self.x2])
                     else:
                         roi_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
                         frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
@@ -190,7 +190,7 @@ class ThreadCvCamera(QThread):
                     break
 
                 img = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
-                roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], QImage.Format_BGR888)
+                roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], roi_frame.strides[0], QImage.Format_BGR888)  # try using deep copy later if fail
                 self.image = frame
                 self.roi_image = roi_frame
                 self.updateFrame.emit(img, roi_img)  # signal reload to Image class within QML
@@ -203,13 +203,10 @@ class ThreadCvCamera(QThread):
         print("> CV thread ended successfully.")
 
     @Slot()
-    def setRoiCoordinates(self, x1, x2, y1, y2):
-        self.new_roi = (x1, x2, y1, y2)
+    def setRoiCoordinates(self, x1, y1, x2, y2):
+        self.new_roi = (x1, y1, x2, y2)
         self.roi_changed = True
         print("> ROI coordinates set successfully.")
-
-
-
 
 
 class ThreadDaiCamera(QThread):
