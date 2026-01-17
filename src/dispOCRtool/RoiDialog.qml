@@ -18,10 +18,10 @@ Window {
     signal roiChanged(x1: int, y1: int, x2: int, y2: int)
 
     property Image viewfinder
-    property int x1: roiPt1.x / roiVF.width * roiVF.imageWidth
-    property int x2: roiPt2.x / roiVF.width * roiVF.imageWidth
-    property int y1: roiPt1.y / roiVF.height * roiVF.imageHeight
-    property int y2: roiPt2.y / roiVF.height * roiVF.imageHeight
+    property int x1: Math.trunc( (roiPt1.x - roiVF.paintedX + roiPt1.width/2) / roiVF.paintedWidth * roiVF.imageWidth)
+    property int x2: Math.trunc( (roiPt2.x - roiVF.paintedX + roiPt2.width/2) / roiVF.paintedWidth * roiVF.imageWidth)
+    property int y1: Math.trunc( (roiPt1.y - roiVF.paintedY + roiPt1.height/2) / roiVF.paintedHeight * roiVF.imageHeight)
+    property int y2: Math.trunc( (roiPt2.y - roiVF.paintedY + roiPt2.height/2) / roiVF.paintedHeight * roiVF.imageHeight)
 
     Column {
         anchors.fill: parent
@@ -57,8 +57,8 @@ Window {
                     color: "#f00"
                     radius: width/2
 
-                    x:  0
-                    y:  0
+                    x:  roiVF.paintedX
+                    y:  roiVF.paintedY
 
                     DragHandler {
                         target: roiPt1
@@ -66,15 +66,6 @@ Window {
                         xAxis.maximum: roiPt2.x
                         yAxis.minimum: roiVF.paintedY - (roiPt1.width / 2)
                         yAxis.maximum: roiPt2.y
-
-                        onTranslationChanged: {
-                           console.log("",
-                               roiPt1.x,
-                               Math.trunc(roiPt1.x / roiVF.paintedWidth * roiVF.imageWidth),
-                               roiPt1.y,
-                               Math.trunc(roiPt1.y / roiVF.paintedHeight * roiVF.imageHeight)
-                               )
-                       }
                     }
                 }
 
@@ -85,8 +76,8 @@ Window {
                     color: "#f00"
                     radius: width/2
 
-                    x:  roiVF.paintedX + roiVF.paintedWidth - (roiPt2.width / 2)
-                    y:  roiVF.paintedY + roiVF.paintedHeight - (roiPt2.height / 2)
+                    x: roiVF.paintedX + roiVF.paintedWidth - (roiPt2.width / 2)
+                    y: roiVF.paintedY + roiVF.paintedHeight - (roiPt2.height / 2)
 
                     DragHandler {
                         target: roiPt2
@@ -94,15 +85,6 @@ Window {
                         xAxis.maximum: roiVF.paintedX + roiVF.paintedWidth - (roiPt2.width / 2)
                         yAxis.minimum: roiPt1.y
                         yAxis.maximum: roiVF.paintedY + roiVF.paintedHeight - (roiPt2.width / 2)
-
-                        onTranslationChanged: {
-                           console.log("",
-                               roiPt2.x,
-                               Math.trunc(roiPt2.x / roiVF.paintedWidth * roiVF.imageWidth),
-                               roiPt2.y,
-                               Math.trunc(roiPt2.y / roiVF.paintedHeight * roiVF.imageHeight)
-                               )
-                       }
                     }
                 }
             }
@@ -117,6 +99,7 @@ Window {
                 text: "Set new ROI"
                 highlighted: true
                 onClicked: {
+                    roiVF.setRoi(root.x1, root.y1, root.x2, root.y2)
                     root.roiChanged(root.x1, root.y1, root.x2, root.y2)
                     root.hide()
                 }

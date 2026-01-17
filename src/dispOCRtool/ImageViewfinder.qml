@@ -5,8 +5,8 @@ Image {
     id: root
 
     // Computed properties
-    property int paintedX: (root.width - root.paintedWidth) / 2
-    property int paintedY: (root.height - root.paintedHeight) / 2
+    property int paintedX: (width - paintedWidth) / 2
+    property int paintedY: (height - paintedHeight) / 2
 
     // Filled properties
     property int roi_x1: 0
@@ -38,6 +38,11 @@ Image {
         y: root.paintedY + (root.roi_y1 / root.imageHeight * root.paintedHeight)
         width: root.paintedWidth * (root.roi_x2 - root.roi_x1) / root.imageWidth
         height: root.paintedHeight * (root.roi_y2 - root.roi_y1) / root.imageHeight
+    }
+
+    Rectangle {
+        id: background
+        color: "#000"
     }
 
 

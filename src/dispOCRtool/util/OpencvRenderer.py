@@ -6,6 +6,7 @@ using OpenCV and QThreads.
 
 import cv2
 import numpy as np
+import depthai as dai
 
 from PySide6.QtGui import QImage
 from PySide6.QtCore import Slot, Signal
@@ -61,26 +62,30 @@ class OpencvImageProvider(QQuickImageProvider):
             img.fill("#00BCD4")
         return img
 
-    @Slot(int)
-    def change_camera(self, index, camera_name, dai=-1):
+    @Slot(int, str, int)
+    def change_camera(self, index, camera_name=None, dai=-1):
         # Terminate current camera process
+        # End OAK cam
         if self.dai:
             # code for dai end
             print("> Trying to end DAI pipeline.")
 
+        # End webcam
         else:
             print("> Trying to end CV camera.")
             self.killThread()
 
 
         # if dai == -1, the index passed to this function is not a DAI camera
+        # Start OAK cam
         if dai != -1:
             # code for dai start
             print(f"> Trying to start DAI camera {camera_name}.")
 
-            mxid = getMxid(camera_name)
+            mxid = self.getMxid(camera_name)
             self.start(mxid)
 
+        # Start webcam
         elif dai >= 0:
             print(f"> Trying to start CV camera {camera_name}.")
             self.index = index
@@ -199,10 +204,11 @@ class ThreadCvCamera(QThread):
 
     @Slot()
     def setRoiCoordinates(self, x1, x2, y1, y2):
-        print("coords:", x1, x2, y1, y2)
         self.new_roi = (x1, x2, y1, y2)
         self.roi_changed = True
         print("> ROI coordinates set successfully.")
+
+
 
 
 
@@ -217,7 +223,7 @@ class ThreadDaiCamera(QThread):
         self.queue = self.cap.getOutputQueue("preview", maxSize=1, blocking=False)
         self.controls = self.cap.getInputQueue("control")
 
-        frame = q.get().getCvFrame()
+        frame = self.cap.get().getCvFrame()
         self.height, self.width = frame.shape[:2]
 
         self.image = None
@@ -233,7 +239,7 @@ class ThreadDaiCamera(QThread):
         self.openedCamera.emit(self.width, self.height)  # Send width and height to ImageProvider
 
         while self._running:
-            inFrame = q.tryGet()
+            inFrame = self.cap.tryGet()
             if inFrame is not None:
                 frame = inFrame.getCvFrame()
 
@@ -260,23 +266,23 @@ class ThreadDaiCamera(QThread):
         self.wait()
         print("> DAI thread ended successfully.")
 
-    @Slot()
-    def send_controls():
-        ctrl = dai.CameraControl()
+    # @Slot()
+    # def send_controls():
+    #     ctrl = dai.CameraControl()
 
-        if use_manual_exposure:
-            ctrl.setManualExposure(exposure_us, iso)  # (exposure time, ISO)
-        else:
-            ctrl.setAutoExposureEnable()
+    #     if use_manual_exposure:
+    #         ctrl.setManualExposure(exposure_us, iso)  # (exposure time, ISO)
+    #     else:
+    #         ctrl.setAutoExposureEnable()
 
-        if use_manual_focus:
-            ctrl.setManualFocus(focus)
-        else:
-            ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
+    #     if use_manual_focus:
+    #         ctrl.setManualFocus(focus)
+    #     else:
+    #         ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
 
-        if use_manual_wb:
-            ctrl.setManualWhiteBalance(wb_k)
-        else:
-            ctrl.setAutoWhiteBalanceMode(dai.CameraControl.AutoWhiteBalanceMode.AUTO)
+    #     if use_manual_wb:
+    #         ctrl.setManualWhiteBalance(wb_k)
+    #     else:
+    #         ctrl.setAutoWhiteBalanceMode(dai.CameraControl.AutoWhiteBalanceMode.AUTO)
 
-        ctrlQ.send(ctrl)
+    #     ctrlQ.send(ctrl)
