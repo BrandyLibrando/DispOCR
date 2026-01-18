@@ -2,7 +2,7 @@
 name = "DispOCR"
 
 [tool.pyside6-project]
-files = ["src/dispOCRtool/ImageViewfinder.qml", "src/dispOCRtool/RoiDialog.qml", "src/dispOCRtool/__init__.py", "src/dispOCRtool/__main__.py", "src/dispOCRtool/main.qml", "src/dispOCRtool/tester.py", "src/dispOCRtool/tester.qml", "src/dispOCRtool/util/Bridge.py", "src/dispOCRtool/util/CroppedImageRenderer.py", "src/dispOCRtool/util/DepthaiRenderer.py", "src/dispOCRtool/util/OpencvRenderer.py", "src/dispOCRtool/util/__init__.py"]
+files = ["src/dispOCRtool/ImageViewfinder.qml", "src/dispOCRtool/RoiDialog.qml", "src/dispOCRtool/__init__.py", "src/dispOCRtool/__main__.py", "src/dispOCRtool/main.qml", "src/dispOCRtool/tester.py", "src/dispOCRtool/tester.qml", "src/dispOCRtool/util/Bridge.py", "src/dispOCRtool/util/CroppedImageRenderer.py", "src/dispOCRtool/util/OpencvRenderer.py", "src/dispOCRtool/util/__init__.py"]
 
 [tool.briefcase]
 project_name = "DispOCR"
@@ -33,10 +33,13 @@ requires = [
     "PySide6-Essentials",
     "PySide6-Addons",
     "shiboken6",
-    "numpy",
-    "opencv-python",
+    "numpy<2.0",
+    "opencv-python<=4.10",
+    "opencv-python-headless<=4.10",
     "cv2_enumerate_cameras",
-    "depthai",
+    "depthai==3.0.0",
+    "paddleocr==2.7.3",
+    "paddlepaddle==3.2.0"
 ]
 test_requires = [
 ]

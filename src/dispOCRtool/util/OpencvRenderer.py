@@ -20,14 +20,14 @@ class OpencvImageProvider(QQuickImageProvider):
     imageChanged = Signal(QImage)
     cameraOpened = Signal(int, int)
 
-    def __init__(self, index=0, cv2backend=cv2.CAP_ANY, daiSupport=False, dai=False):
+    def __init__(self, index=0, cv2backend=cv2.CAP_ANY, daiSupport=False, daiInit=False):
         super(OpencvImageProvider, self).__init__(QQuickImageProvider.Image)
         self.roi_renderer = CroppedImageProvider()
 
         self.api = cv2backend
         self.index = index
         self.cam = None
-        self.dai = None
+        self.dai = daiInit
 
         self.image = None
         self.cropped_image = None

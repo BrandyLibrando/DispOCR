@@ -44,11 +44,9 @@ if __name__ == "__main__":
     dai_names = []
     print(dai_models)
 
-    for idx, info in enumerate(dai_models):
-        with dai.Device(dai.Pipeline(), info) as device:
-            calib = device.readCalibration()
-            eeprom = calib.getEepromData()
-            dai_names.append(f"[D{idx}] {eeprom.productName} ({info.deviceId})")
+    for idx, device in enumerate(dai.Device.getAllAvailableDevices()):
+        print(f"{device.getDeviceId()} {device.state}")
+        # dai_names.append(f"[D{idx}] ({device.getDeviceId()})")
 
     print(camera_models + dai_names)
 
@@ -68,7 +66,7 @@ if __name__ == "__main__":
     ## CAMERA AND IMAGE RENDERING
     # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
     if camera_models:
-        cvCameraRenderer = OpencvImageProvider( cv2backend=preferred_backend, daiSupport=len(dai_names), dai=(not len(camera_models) and len(dai_names)) )
+        cvCameraRenderer = OpencvImageProvider( cv2backend=preferred_backend, daiSupport=len(dai_names), daiInit=(not len(camera_models) and len(dai_names)) )
         cvRoiRenderer = cvCameraRenderer.getRoiRenderer()
 
         engine.rootContext().setContextProperty("cvCameraRenderer", cvCameraRenderer)  # cv base img provider
