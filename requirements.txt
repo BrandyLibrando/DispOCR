@@ -1,4 +1,10 @@
 PySide6-Essentials
 PySide6-Addons
-Shiboken6
-numpy
+shiboken6
+numpy<2.0
+opencv-python<=4.10
+opencv-python-headless<=4.10
+cv2_enumerate_cameras
+depthai==3.0.0
+paddleocr==2.7.3
+paddlepaddle==3.2.0
