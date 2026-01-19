@@ -1,7 +1,7 @@
 """
 OpencvRenderer.py
 Contains classes for handling QML threaded camera handling
-using OpenCV and QThreads.
+using OpenCV/DepthAI and QThread.
 """
 
 import cv2
@@ -14,6 +14,7 @@ from PySide6.QtCore import QThread
 from PySide6.QtQuick import QQuickImageProvider
 
 from util.CroppedImageRenderer import CroppedImageProvider
+# from ocr.ModelPaddleBase import ThreadOcrBase
 
 
 class OpencvImageProvider(QQuickImageProvider):
