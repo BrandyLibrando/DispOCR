@@ -8,60 +8,84 @@ import cv2
 import numpy as np
 from paddleocr import PaddleOCR
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Slot, Signal
 from PySide6.QtCore import QThread
 
 
 class ThreadOcrBase(QThread):
-    updatePrediction = Signal(str)
+    updatePrediction = Signal(str, float)
 
-    def __init__(self, image, scale=0.6, minimum_score=0.5, parent=None):
+    def __init__(self, image=None, scale=0.6, minimum_score=0.5, parent=None):
         QThread.__init__(self, parent)
 
+        self._running = False
+        self._setup = False
         self.image = image  # numpy image array
-        self.data = None
+        self.text = None
+        self.score = 0
 
         self.SCALE = scale
         self.MIN_SCORE = minimum_score
 
     def run(self):
         ocr = PaddleOCR(
-            lang="en", device="cpu",
-
-            text_detection_model_name="PP-OCRv5_mobile_det",
-            text_detection_model_dir=None,
-            text_recognition_model_name="",
-            text_recognition_model_dir=None,
+            device="cpu",
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
             use_textline_orientation=False,
+
+            text_detection_model_name="PP-OCRv5_mobile_det",
+            text_detection_model_dir=None,
+            text_recognition_model_name="en_PP-OCRv5_mobile_rec",
+            text_recognition_model_dir=None,
         )
 
         if not hasattr(ocr, "predict"):
             print("> ERROR: Your PaddleOCR install doesn't have PaddleOCR.predict(). Are you sure it's PaddleOCR 3.x?")
             return
 
-        ## Prepare frame for prediction
-        rgb = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+        print("> PaddleOCR successfully initialized.")
+        self._running = True
+        while self._running and self.image is not None:
+            ## Prepare frame for prediction
+            self._setup = True  # Prevent modifying self.image during color mode conversion
+            rgb = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+            self._setup = False
 
-        # resize for speed
-        h, w = rgb.shape[:2]
-        rgb_small = cv2.resize(
-            rgb,
-            (max(1, int(w * self.SCALE)), max(1, int(h * self.SCALE))),
-            interpolation=cv2.INTER_AREA,
-        )
+            # resize for speed
+            h, w = rgb.shape[:2]
+            rgb_small = cv2.resize(
+                rgb,
+                (max(1, int(w * self.SCALE)), max(1, int(h * self.SCALE))),
+                interpolation=cv2.INTER_AREA,
+            )
 
-        ## Prediction
-        results = ocr.predict(rgb_small)
-        dets = self.extract_detections(results, self.MIN_SCORE)
+            ## Prediction
+            results = ocr.predict(rgb_small)
+            dets = self.extract_detections(results, self.MIN_SCORE)
 
-        # end
-        self.updatePrediction.emit("hi")
+            final_str = ""
+            ave_score = 0
+            for txt, score in dets:
+                final_str += txt + " "
+                ave_score += score
+
+            if len(dets):
+                ave_score = ave_score / len(dets)
+
+            # end
+            self.updatePrediction.emit(final_str, ave_score)
 
     def stop(self):
+        self._running = False
         self.requestInterruption()
         self.wait()
+        print("> OCR thread ended successfully.")
+
+    @Slot(object)
+    def change_image(self, frame):
+        if not self._setup:
+            self.image = frame
 
 
     def unwrap_payload(self, res0):
@@ -76,10 +100,6 @@ class ThreadOcrBase(QThread):
         return payload if isinstance(payload, dict) else None
 
     def extract_detections(self, results, min_score: float):
-        """
-        Returns list of (poly, text, score) where:
-          poly: (N,2) float32
-        """
         if not results:
             return []
 
@@ -100,15 +120,14 @@ class ThreadOcrBase(QThread):
 
         dets = []
         if len(rec_texts) == len(dt_polys):
-            for poly, txt, sc in zip(dt_polys, rec_texts, rec_scores):
+            for txt, sc in zip(rec_texts, rec_scores):
                 try:
                     score = float(sc)
                 except Exception:
                     score = 0.0
                 txt = "" if txt is None else str(txt)
                 if txt and score >= min_score:
-                    poly = np.array(poly, dtype=np.float32).reshape(-1, 2)
-                    dets.append((poly, txt, score))
+                    dets.append((txt, score))
 
         return dets
 

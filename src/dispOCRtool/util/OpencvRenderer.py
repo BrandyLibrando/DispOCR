@@ -14,12 +14,13 @@ from PySide6.QtCore import QThread
 from PySide6.QtQuick import QQuickImageProvider
 
 from util.CroppedImageRenderer import CroppedImageProvider
-# from ocr.ModelPaddleBase import ThreadOcrBase
+from ocr.ModelPaddleBase import ThreadOcrBase
 
 
 class OpencvImageProvider(QQuickImageProvider):
     imageChanged = Signal(QImage)
     cameraOpened = Signal(int, int)
+    predictionChanged = Signal(str, float)
 
     def __init__(self, index=0, cv2backend=cv2.CAP_ANY, daiSupport=False, daiInit=False):
         super(OpencvImageProvider, self).__init__(QQuickImageProvider.Image)
@@ -34,6 +35,10 @@ class OpencvImageProvider(QQuickImageProvider):
         self.cropped_image = None
         self.width = 0
         self.height = 0
+
+        self.ocr = None
+        self.ocr_data = ""
+        self.ocr_score = 0
 
 
         # DEPTH AI PIPELINE INITIATION
@@ -107,17 +112,37 @@ class OpencvImageProvider(QQuickImageProvider):
         self.cam.openedCamera.connect(self.setDimensions)
         self.cam.start()
 
+        self.ocr = ThreadOcrBase()
+        self.ocr.updatePrediction.connect(self.updatePredictedText)
+        self.ocr.start()
+
     @Slot()
     def killThread(self):
         print("> Finishing current CV camera thread...")
         self.cam.stop()
+        self.ocr.stop()
 
     @Slot()
-    def updateImage(self, img, roi_img=None):
+    def destroyOcrThread(self):
+        self.ocr.stop()
+        self.ocr = None
+
+
+    @Slot()
+    def updateImage(self, img, roi_img=None, roi_frame=None):
         self.image = img
         self.cropped_image = roi_img
+
+        self.ocr.change_image(roi_frame)
         self.roi_renderer.setCroppedImage(roi_img)
         self.imageChanged.emit(img)
+
+    @Slot()
+    def updatePredictedText(self, output="", average_confidence=0):
+        self.ocr_data = output
+        self.ocr_score = average_confidence
+        print(self.ocr_data, self.ocr_score)
+
 
     def setDimensions(self, width, height):
         self.width = width
@@ -137,6 +162,7 @@ class OpencvImageProvider(QQuickImageProvider):
     def getHeight(self):
         return self.cam.height
 
+
     def getRoiRenderer(self):
         return self.roi_renderer
 
@@ -146,7 +172,7 @@ class OpencvImageProvider(QQuickImageProvider):
 
 
 class ThreadCvCamera(QThread):
-    updateFrame = Signal(QImage, QImage)
+    updateFrame = Signal(QImage, QImage, object)
     openedCamera = Signal(int, int)
 
     def __init__(self, index, apiPreference=cv2.CAP_ANY, parent=None):
@@ -194,7 +220,7 @@ class ThreadCvCamera(QThread):
                 roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], roi_frame.strides[0], QImage.Format_BGR888)  # try using deep copy later if fail
                 self.image = frame
                 self.roi_image = roi_frame
-                self.updateFrame.emit(img, roi_img)  # signal reload to Image class within QML
+                self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
 
     def stop(self):
         self.cap.release()

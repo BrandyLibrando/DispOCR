@@ -35,6 +35,9 @@ ApplicationWindow {
         property int cameraWidth: 0
         property int cameraHeight: 0
 
+        property string lastText: ""
+        property real lastScore: 0.0
+
         Row {
             id: mainContainer
             x: 8; y: 8
@@ -265,7 +268,6 @@ ApplicationWindow {
                         font.pointSize: 10
                         cursorVisible: false
 
-                        text: logDirectory.data
                         placeholderText: qsTr("Predicted Text")
                     }
                 }
@@ -832,6 +834,12 @@ ApplicationWindow {
             function onCameraOpened(cameraWidth, cameraHeight) {
                 main.cameraWidth = cameraWidth;
                 main.cameraHeight = cameraHeight;
+            }
+
+            function onPredictionChanged(predictText, predictScore) {
+                predictTextArea.text = predictText;
+                main.lastText = predictText;
+                main.lastScore = predictScore;
             }
         }
 
