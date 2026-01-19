@@ -265,10 +265,10 @@ ApplicationWindow {
                         activeFocusOnTab: false
                         focus: false
                         clip: false
-                        font.pointSize: 10
+                        font.pointSize: 12
                         cursorVisible: false
 
-                        placeholderText: qsTr("Predicted Text")
+                        placeholderText: qsTr("Predicted Text (%1%)").arg(main.lastScore)
                     }
                 }
 
@@ -757,14 +757,14 @@ ApplicationWindow {
             id: subCameraContainerLabelBackground
             x: subCameraContainer.x + 19
             y: subCameraContainer.y + 4
-            width: 137; height: 12
+            width: 162; height: 12
             color: main.color
 
             Text {
                 id: subCameraContainerLabelText
-                x: 4; y: 2
+                x: 4; y: 0
                 color: "#959595"
-                font.pixelSize: 10
+                font.pixelSize: 12
                 text: qsTr("Region of Interest Viewfinder")
             }
         }
@@ -772,14 +772,14 @@ ApplicationWindow {
         Rectangle {
             id: cameraContainerLabelBackground
             x: cameraContainer.x + 19; y: cameraContainer.y
-            width: 93; height: 12
+            width: 108; height: 12
             color: main.color
 
             Text {
                 id: cameraContainerLabelText
-                x: 4; y: 2
+                x: 4; y: 0
                 color: "#959595"
-                font.pixelSize: 10
+                font.pixelSize: 12
                 text: qsTr("Camera Viewfinder")
             }
         }
@@ -839,7 +839,7 @@ ApplicationWindow {
             function onPredictionChanged(predictText, predictScore) {
                 predictTextArea.text = predictText;
                 main.lastText = predictText;
-                main.lastScore = predictScore;
+                main.lastScore = (predictScore * 100).toFixed(2);
             }
         }
 

@@ -141,7 +141,7 @@ class OpencvImageProvider(QQuickImageProvider):
     def updatePredictedText(self, output="", average_confidence=0):
         self.ocr_data = output
         self.ocr_score = average_confidence
-        print(self.ocr_data, self.ocr_score)
+        self.predictionChanged.emit(self.ocr_data, self.ocr_score)
 
 
     def setDimensions(self, width, height):
@@ -161,6 +161,14 @@ class OpencvImageProvider(QQuickImageProvider):
     @Slot()
     def getHeight(self):
         return self.cam.height
+
+    @Slot()
+    def getOcrData(self):
+        return self.ocr_data
+
+    @Slot()
+    def getOcrScore(self):
+        return self.ocr_score
 
 
     def getRoiRenderer(self):
