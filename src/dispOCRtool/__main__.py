@@ -35,7 +35,7 @@ if __name__ == "__main__":
     ## PY-QML DATA BRIDGES
     # Enumerate webcams (with opencv and cv2_enumerate)
     operating_system = QSysInfo.productType() if QSysInfo.productType() in ["windows", "macos", "unknown", "ios", "android"] else "linux"
-    preferred_backend = cv2.CAP_DSHOW if operating_system == "windows" else cv2.CAP_GSTREAMER if operating_system == "linux" else cv2.CAP_AVFOUNDATION if "macos" else cv2.CAP_ANY
+    preferred_backend = cv2.CAP_DSHOW if operating_system == "windows" else cv2.CAP_V4L2 if operating_system == "linux" else cv2.CAP_AVFOUNDATION if "macos" else cv2.CAP_ANY
     camera_models = [cam.name for cam in enumerate_cameras(preferred_backend)]
     camera_index = [cam.index for cam in enumerate_cameras(preferred_backend)]
 

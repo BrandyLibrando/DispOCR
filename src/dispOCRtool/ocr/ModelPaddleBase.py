@@ -40,41 +40,31 @@ class ThreadOcrBase(QThread):
             text_recognition_model_dir=None,
         )
 
-        if not hasattr(ocr, "predict"):
-            print("> ERROR: Your PaddleOCR install doesn't have PaddleOCR.predict(). Are you sure it's PaddleOCR 3.x?")
-            return
-
         print("> PaddleOCR successfully initialized.")
         self._running = True
-        while self._running and self.image is not None:
-            ## Prepare frame for prediction
-            self._setup = True  # Prevent modifying self.image during color mode conversion
-            rgb = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-            self._setup = False
+        while self._running:
+            if self.image is not None:
+                ## Prepare frame for prediction
+                self._setup = True  # Prevent modifying self.image during color mode conversion
+                rgb = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+                self._setup = False
 
-            # resize for speed
-            h, w = rgb.shape[:2]
-            rgb_small = cv2.resize(
-                rgb,
-                (max(1, int(w * self.SCALE)), max(1, int(h * self.SCALE))),
-                interpolation=cv2.INTER_AREA,
-            )
+                # Resize for speed
+                h, w = rgb.shape[:2]
+                rgb_small = cv2.resize(
+                    rgb,
+                    (max(1, int(w * self.SCALE)), max(1, int(h * self.SCALE))),
+                    interpolation=cv2.INTER_AREA,
+                )
 
-            ## Prediction
-            results = ocr.predict(rgb_small)
-            dets = self.extract_detections(results, self.MIN_SCORE)
+                ## Prediction
+                if hasattr(ocr, "predict"):
+                    final_str, ave_score = self.paddle_v3_predict(ocr, rgb_small)
+                else:
+                    final_str, ave_score = self.paddle_v2_predict(ocr, rgb_small)
 
-            final_str = ""
-            ave_score = 0
-            for txt, score in dets:
-                final_str += txt + " "
-                ave_score += score
-
-            if len(dets):
-                ave_score = ave_score / len(dets)
-
-            # end
-            self.updatePrediction.emit(final_str, ave_score)
+                ## Emit results to main
+                self.updatePrediction.emit(final_str, ave_score)
 
     def stop(self):
         self._running = False
@@ -85,7 +75,45 @@ class ThreadOcrBase(QThread):
     @Slot(object)
     def change_image(self, frame):
         if not self._setup:
-            self.image = frame
+            self.image = frame.copy()
+
+
+    def paddle_v2_predict(self, ocr, image):
+        results = ocr.ocr(image, det=False, rec=True, cls=False)
+
+        # Parse result
+        final_str = ""
+        ave_score = 0
+        count = 0
+        if isinstance(results, list) and len(results) > 0:
+            for r in results[0]:
+                try:
+                    txt = str(r[0])
+                    conf = float(r[1])
+                    final_str += " " + txt
+                    ave_score += conf
+                    count += 1
+                except Exception:
+                    pass
+            ave_score = ave_score / count
+
+        return final_str, ave_score
+    
+
+    def paddle_v3_predict(self, ocr, image):
+        results = ocr.predict(image)
+        dets = self.extract_detections(results, self.MIN_SCORE)
+
+        final_str = ""
+        ave_score = 0
+        for txt, score in dets:
+            final_str += txt + " "
+            ave_score += score
+
+        if len(dets):
+            ave_score = ave_score / len(dets)
+
+        return final_str, ave_score
 
 
     def unwrap_payload(self, res0):
