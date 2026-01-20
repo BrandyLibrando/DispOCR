@@ -140,7 +140,7 @@ ApplicationWindow {
                                     ToolTip.delay: 250
                                     ToolTip.timeout: 5000
                                     ToolTip.visible: hovered
-                                    ToolTip.text: qsTr("Current directory: %1").arg(logDirectory.data)
+                                    ToolTip.text: qsTr("Current directory: %1").arg(logDirectory?.data)
 
                                     onClicked: {
                                         main.state = "editroidir"
@@ -265,7 +265,7 @@ ApplicationWindow {
                         activeFocusOnTab: false
                         focus: false
                         clip: false
-                        font.pointSize: 12
+                        font.pointSize: 10
                         cursorVisible: false
 
                         placeholderText: qsTr("Predicted Text (%1%)").arg(main.lastScore)
@@ -505,7 +505,7 @@ ApplicationWindow {
                                 Rectangle {
                                     id: inputCtrlValContainer
                                     x: inputCtrlCond.x + 10
-                                    y: inputCtrlValLabel1.y + 2
+                                    y: inputCtrlValLabel1.y + 22
                                     width: inputCtrlCond.width - 10
                                     height: inputCtrlCond.height
                                     border.width: 2
@@ -542,7 +542,8 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputCtrlValLabel2
-                                    x: 0; y: 80
+                                    anchors.right: inputCtrlValContainer.right
+                                    y: 66
                                     width: 119; height: 16
                                     font.pixelSize: 11
                                     color: !toggleControlSystem.checked
@@ -757,14 +758,14 @@ ApplicationWindow {
             id: subCameraContainerLabelBackground
             x: subCameraContainer.x + 19
             y: subCameraContainer.y + 4
-            width: 162; height: 12
+            width: 152; height: 12
             color: main.color
 
             Text {
                 id: subCameraContainerLabelText
-                x: 4; y: 0
+                x: 4; y: 3
                 color: "#959595"
-                font.pixelSize: 12
+                font.pixelSize: 10
                 text: qsTr("Region of Interest Viewfinder")
             }
         }
@@ -772,14 +773,14 @@ ApplicationWindow {
         Rectangle {
             id: cameraContainerLabelBackground
             x: cameraContainer.x + 19; y: cameraContainer.y
-            width: 108; height: 12
+            width: 103; height: 12
             color: main.color
 
             Text {
                 id: cameraContainerLabelText
-                x: 4; y: 0
+                x: 4; y: 3
                 color: "#959595"
-                font.pixelSize: 12
+                font.pixelSize: 10
                 text: qsTr("Camera Viewfinder")
             }
         }
