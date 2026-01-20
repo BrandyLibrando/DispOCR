@@ -36,10 +36,11 @@ class OpencvImageProvider(QQuickImageProvider):
         self.width = 0
         self.height = 0
 
-        self.ocr = None
         self.ocr_data = ""
         self.ocr_score = 0
-
+        self.ocr = ThreadOcrBase()
+        self.ocr.updatePrediction.connect(self.updatePredictedText)
+        self.ocr.start()
 
         # DEPTH AI PIPELINE INITIATION
         if daiSupport:
@@ -72,6 +73,7 @@ class OpencvImageProvider(QQuickImageProvider):
     def change_camera(self, index, camera_name=None, dai=-1):
         # Terminate current camera process
         # End OAK cam
+        print(index, camera_name, dai)
         if self.dai:
             # code for dai end
             print("> Trying to end DAI pipeline.")
@@ -92,13 +94,10 @@ class OpencvImageProvider(QQuickImageProvider):
             self.start(mxid)
 
         # Start webcam
-        elif dai >= 0:
+        else:
             print(f"> Trying to start CV camera {camera_name}.")
             self.index = index
             self.start()
-
-        else:
-            print("An error occurred.")
 
     @Slot()
     def start(self, dai_mxid=None):
@@ -112,15 +111,10 @@ class OpencvImageProvider(QQuickImageProvider):
         self.cam.openedCamera.connect(self.setDimensions)
         self.cam.start()
 
-        self.ocr = ThreadOcrBase()
-        self.ocr.updatePrediction.connect(self.updatePredictedText)
-        self.ocr.start()
-
     @Slot()
     def killThread(self):
         print("> Finishing current CV camera thread...")
         self.cam.stop()
-        self.ocr.stop()
 
     @Slot()
     def destroyOcrThread(self):

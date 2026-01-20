@@ -357,13 +357,12 @@ ApplicationWindow {
                                         function onCurrentIndexChanged() {
                                             if (inputCameraDevice.currentText) {
                                                 const daiIndex = Math.max(-1, inputCameraDevice.currentIndex - cvCamCount);
+                                                console.log("", daiIndex);
                                                 cvCameraRenderer.change_camera(
                                                             inputCameraDevice.currentIndex,
                                                             inputCameraDevice.model[inputCameraDevice.currentIndex],
                                                             daiIndex,  // Check if camera is DAI based on CV2 cam count
                                                 );
-                                                roiwindow.resetPoints();
-                                                cameraVF.resetPoints();
                                             }
                                         }
                                     }
@@ -835,6 +834,8 @@ ApplicationWindow {
             function onCameraOpened(cameraWidth, cameraHeight) {
                 main.cameraWidth = cameraWidth;
                 main.cameraHeight = cameraHeight;
+                roiwindow.resetPoints();
+                cameraVF.resetPoints();
             }
 
             function onPredictionChanged(predictText, predictScore) {

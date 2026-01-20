@@ -87,5 +87,6 @@ if __name__ == "__main__":
     # window = engine.rootObjects()[0]  # Store root window
     # window.closing.connect(myImageProvider.killThread())
     app.aboutToQuit.connect(cvCameraRenderer.killThread)
+    app.aboutToQuit.connect(cvCameraRenderer.destroyOcrThread)
 
     sys.exit(app.exec())
