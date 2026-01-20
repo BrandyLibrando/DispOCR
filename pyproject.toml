@@ -2,7 +2,7 @@
 name = "DispOCR"
 
 [tool.pyside6-project]
-files = ["src/dispOCRtool/ImageViewfinder.qml", "src/dispOCRtool/RoiDialog.qml", "src/dispOCRtool/__init__.py", "src/dispOCRtool/__main__.py", "src/dispOCRtool/main.qml", "src/dispOCRtool/ocr/ModelPaddleBase.py", "src/dispOCRtool/tester.py", "src/dispOCRtool/tester.qml", "src/dispOCRtool/util/Bridge.py", "src/dispOCRtool/util/CroppedImageRenderer.py", "src/dispOCRtool/util/OpencvRenderer.py", "src/dispOCRtool/util/__init__.py"]
+files = ["src/dispOCRtool/ImageViewfinder.qml", "src/dispOCRtool/RoiDialog.qml", "src/dispOCRtool/__init__.py", "src/dispOCRtool/__main__.py", "src/dispOCRtool/main.qml", "src/dispOCRtool/ocr/ModelPaddleBase.py", "src/dispOCRtool/util/Bridge.py", "src/dispOCRtool/util/CameraThreads.py", "src/dispOCRtool/util/CroppedImageRenderer.py", "src/dispOCRtool/util/OpencvRenderer.py", "src/dispOCRtool/util/__init__.py"]
 
 [tool.briefcase]
 project_name = "DispOCR"

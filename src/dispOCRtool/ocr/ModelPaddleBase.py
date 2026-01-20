@@ -4,16 +4,18 @@ Contains class for OCR prediction thread.
 Inherits from QThread.
 """
 
+from collections import deque
 import cv2
 import numpy as np
 from paddleocr import PaddleOCR
 
 from PySide6.QtCore import Slot, Signal
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QThread, QElapsedTimer
 
 
 class ThreadOcrBase(QThread):
     updatePrediction = Signal(str, float)
+    updateFps = Signal(float)
 
     def __init__(self, image=None, scale=0.6, minimum_score=0.5, parent=None):
         QThread.__init__(self, parent)
@@ -26,6 +28,10 @@ class ThreadOcrBase(QThread):
 
         self.SCALE = scale
         self.MIN_SCORE = minimum_score
+
+        self.timer = QElapsedTimer()  # For performance measure
+        self.elapsed_queue = deque(maxlen=10)  # To compute moving ave
+
 
     def run(self):
         ocr = PaddleOCR(
@@ -44,6 +50,8 @@ class ThreadOcrBase(QThread):
         self._running = True
         while self._running:
             if self.image is not None:
+                self.timer.start()  # Start performance timer
+
                 ## Prepare frame for prediction
                 self._setup = True  # Prevent modifying self.image during color mode conversion
                 rgb = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
@@ -65,6 +73,12 @@ class ThreadOcrBase(QThread):
 
                 ## Emit results to main
                 self.updatePrediction.emit(final_str, ave_score)
+
+                ## Profiling
+                self.elapsed_queue.append(1000/self.timer.restart())
+                ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
+                self.updateFps.emit(ave)
+
 
     def stop(self):
         self._running = False
@@ -158,69 +172,3 @@ class ThreadOcrBase(QThread):
                     dets.append((txt, score))
 
         return dets
-
-
-
-# class ThreadCvCamera(QThread):
-#     updateFrame = Signal(QImage, QImage)
-#     openedCamera = Signal(int, int)
-
-#     def __init__(self, index, apiPreference=cv2.CAP_ANY, parent=None):
-#         QThread.__init__(self, parent)
-
-#         self.cap = cv2.VideoCapture(index, apiPreference)
-#         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-#         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-#         self.image = None
-#         self.roi_image = None
-#         self._running = True
-
-#         self.x1 = 0
-#         self.x2 = self.width
-#         self.y1 = 0
-#         self.y2 = self.height
-#         self.new_roi = (0, 0, 0, 0)
-#         self.roi_changed = False
-
-#     def run(self):
-#         self.openedCamera.emit(self.width, self.height)  # Send width and height to ImageProvider
-
-#         while self._running:
-#             if self.roi_changed:
-#                 self.x1, self.y1, self.x2, self.y2 = self.new_roi
-#                 self.roi_changed = False
-
-#             if self.cap.isOpened:
-#                 ret, frame = self.cap.read()
-#                 if not ret:
-#                     break
-
-#                 try:
-#                     if self._running and ret:
-#                         roi_frame = np.ascontiguousarray(frame[self.y1:self.y2, self.x1:self.x2])
-#                     else:
-#                         roi_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-#                         frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-#                 except:
-#                     self._running = False
-#                     break
-
-#                 img = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
-#                 roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], roi_frame.strides[0], QImage.Format_BGR888)  # try using deep copy later if fail
-#                 self.image = frame
-#                 self.roi_image = roi_frame
-#                 self.updateFrame.emit(img, roi_img)  # signal reload to Image class within QML
-
-#     def stop(self):
-#         self.cap.release()
-#         self._running = False
-#         self.requestInterruption()
-#         self.wait()
-#         print("> CV thread ended successfully.")
-
-#     @Slot()
-#     def setRoiCoordinates(self, x1, y1, x2, y2):
-#         self.new_roi = (x1, y1, x2, y2)
-#         self.roi_changed = True
-#         print("> ROI coordinates set successfully.")

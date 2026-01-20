@@ -17,7 +17,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 # import PySide6.QtMultimedia
 
 from PySide6.QtGui import QImage
-from PySide6.QtCore import Slot, Signal, Property
+from PySide6.QtCore import QCoreApplication, Slot, Signal, Property
 from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QSysInfo, QStandardPaths
 from PySide6.QtQuick import QQuickImageProvider, QQuickView
 
@@ -28,6 +28,8 @@ from util.OpencvRenderer import OpencvImageProvider
 
 
 if __name__ == "__main__":
+    QCoreApplication.setOrganizationName("BrandyLibrando")
+    QCoreApplication.setApplicationName("DispOCR")
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
@@ -76,7 +78,6 @@ if __name__ == "__main__":
 
 
     ## LOADING OF QML FILE FOR APP
-    # qml_file = Path(__file__).resolve().parent / "tester.qml"
     qml_file = Path(__file__).resolve().parent / "main.qml"
     engine.load(qml_file)
 

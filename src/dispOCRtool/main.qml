@@ -147,6 +147,20 @@ ApplicationWindow {
                                         folderDialog.open()
                                     }
                                 }
+
+                                Text {
+                                    id: labelFpsCam
+                                    color: Material.accent
+                                    font.pixelSize: 10
+                                    text: qsTr("Hi")
+                                }
+
+                                Text {
+                                    id: labelFpsOcr
+                                    color: Material.accent
+                                    font.pixelSize: 10
+                                    text: qsTr("Hi")
+                                }
                             }
                         }
                     }
@@ -827,8 +841,8 @@ ApplicationWindow {
                 cameraVF.reloadImage();
                 if (!roiwindow.hidden) roiwindow.viewfinder.reloadImage();
 
-                // Pass `image` to preprocessing steps
-                //
+                // TODO: REMOVE LATER AND UNCOMMENT ONPREDICTIONCHANGED()
+                predictTextArea.text = Date.now();
             }
 
             function onCameraOpened(cameraWidth, cameraHeight) {
@@ -838,11 +852,14 @@ ApplicationWindow {
                 cameraVF.resetPoints();
             }
 
-            function onPredictionChanged(predictText, predictScore) {
-                predictTextArea.text = predictText;
-                main.lastText = predictText;
-                main.lastScore = (predictScore * 100).toFixed(2);
-            }
+            // function onPredictionChanged(predictText, predictScore) {
+            //     predictTextArea.text = predictText;
+            //     main.lastText = predictText;
+            //     main.lastScore = (predictScore * 100).toFixed(2);
+            // }
+
+            function onFpsCamChanged(fps) { labelFpsCam.text = qsTr("Camera: %1 FPS").arg(fps.toFixed(2)); }
+            function onFpsOcrChanged(fps) { labelFpsOcr.text = qsTr("OCR: %1 FPS").arg(fps.toFixed(2)); }
         }
 
         // DAI CONFIG HANDLER

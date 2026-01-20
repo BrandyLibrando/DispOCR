@@ -1,7 +1,7 @@
 """
 OpencvRenderer.py
-Contains classes for handling QML threaded camera handling
-using OpenCV/DepthAI and QThread.
+Contains QQuickImageProvider class for
+handling Dai/Cv camera threads and OCR thread.
 """
 
 import cv2
@@ -14,6 +14,7 @@ from PySide6.QtCore import QThread
 from PySide6.QtQuick import QQuickImageProvider
 
 from util.CroppedImageRenderer import CroppedImageProvider
+from util.CameraThreads import ThreadCvCamera, ThreadDaiCamera
 from ocr.ModelPaddleBase import ThreadOcrBase
 
 
@@ -21,6 +22,8 @@ class OpencvImageProvider(QQuickImageProvider):
     imageChanged = Signal(QImage)
     cameraOpened = Signal(int, int)
     predictionChanged = Signal(str, float)
+    fpsCamChanged = Signal(float)
+    fpsOcrChanged = Signal(float)
 
     def __init__(self, index=0, cv2backend=cv2.CAP_ANY, daiSupport=False, daiInit=False):
         super(OpencvImageProvider, self).__init__(QQuickImageProvider.Image)
@@ -36,11 +39,17 @@ class OpencvImageProvider(QQuickImageProvider):
         self.width = 0
         self.height = 0
 
+        self.cam_fps = 0
+        self.ocr_fps = 0
+
         self.ocr_data = ""
         self.ocr_score = 0
         self.ocr = ThreadOcrBase()
         self.ocr.updatePrediction.connect(self.updatePredictedText)
+        self.ocr.updateFps.connect(self.getOcrFps)
         self.ocr.start()
+
+
 
         # DEPTH AI PIPELINE INITIATION
         if daiSupport:
@@ -68,6 +77,7 @@ class OpencvImageProvider(QQuickImageProvider):
             img = QImage(640, 480, QImage.Format_RGBA8888)
             img.fill("#00BCD4")
         return img
+
 
     @Slot(int, str, int)
     def change_camera(self, index, camera_name=None, dai=-1):
@@ -107,9 +117,12 @@ class OpencvImageProvider(QQuickImageProvider):
         else:
             print("=====================\n> Starting new CV camera thread...")
             self.cam = ThreadCvCamera(self.index, self.api)
+
         self.cam.updateFrame.connect(self.updateImage)
+        self.cam.updateFps.connect(self.getCamFps)
         self.cam.openedCamera.connect(self.setDimensions)
         self.cam.start()
+
 
     @Slot()
     def killThread(self):
@@ -131,13 +144,7 @@ class OpencvImageProvider(QQuickImageProvider):
         self.roi_renderer.setCroppedImage(roi_img)
         self.imageChanged.emit(img)
 
-    @Slot()
-    def updatePredictedText(self, output="", average_confidence=0):
-        self.ocr_data = output
-        self.ocr_score = average_confidence
-        self.predictionChanged.emit(self.ocr_data, self.ocr_score)
-
-
+    @Slot(int, int)
     def setDimensions(self, width, height):
         self.width = width
         self.height = height
@@ -150,11 +157,18 @@ class OpencvImageProvider(QQuickImageProvider):
 
     @Slot()
     def getWidth(self):
-        return self.cam.width
+        return self.width
 
     @Slot()
     def getHeight(self):
-        return self.cam.height
+        return self.height
+
+
+    @Slot()
+    def updatePredictedText(self, output="", average_confidence=0):
+        self.ocr_data = output
+        self.ocr_score = average_confidence
+        self.predictionChanged.emit(self.ocr_data, self.ocr_score)
 
     @Slot()
     def getOcrData(self):
@@ -171,144 +185,12 @@ class OpencvImageProvider(QQuickImageProvider):
     def getMxid(self, text):
         return text.strip().rsplit(" ", 1)
 
-
-
-class ThreadCvCamera(QThread):
-    updateFrame = Signal(QImage, QImage, object)
-    openedCamera = Signal(int, int)
-
-    def __init__(self, index, apiPreference=cv2.CAP_ANY, parent=None):
-        QThread.__init__(self, parent)
-
-        self.cap = cv2.VideoCapture(index, apiPreference)
-        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        self.image = None
-        self.roi_image = None
-        self._running = True
-
-        self.x1 = 0
-        self.x2 = self.width
-        self.y1 = 0
-        self.y2 = self.height
-        self.new_roi = (0, 0, 0, 0)
-        self.roi_changed = False
-
-    def run(self):
-        self.openedCamera.emit(self.width, self.height)  # Send width and height to ImageProvider
-    
-        while self._running:
-            if self.roi_changed:
-                self.x1, self.y1, self.x2, self.y2 = self.new_roi
-                self.roi_changed = False
-
-            if self.cap.isOpened:
-                ret, frame = self.cap.read()
-                if not ret:
-                    break
-
-                try:
-                    if self._running and ret:
-                        roi_frame = np.ascontiguousarray(frame[self.y1:self.y2, self.x1:self.x2])
-                    else:
-                        roi_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-                        frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-                except:
-                    self._running = False
-                    break
-
-                img = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
-                roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], roi_frame.strides[0], QImage.Format_BGR888)  # try using deep copy later if fail
-                self.image = frame
-                self.roi_image = roi_frame
-                self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
-
-    def stop(self):
-        self.cap.release()
-        self._running = False
-        self.requestInterruption()
-        self.wait()
-        print("> CV thread ended successfully.")
+    @Slot()
+    def getCamFps(self, average_fps):
+        self.cam_fps = average_fps
+        self.fpsCamChanged.emit(average_fps)
 
     @Slot()
-    def setRoiCoordinates(self, x1, y1, x2, y2):
-        self.new_roi = (x1, y1, x2, y2)
-        self.roi_changed = True
-        print("> ROI coordinates set successfully.")
-
-
-class ThreadDaiCamera(QThread):
-    updateFrame = Signal(QImage, QImage)
-    openedCamera = Signal(int, int)
-
-    def __init__(self, pipeline, mxid, parent=None):
-        QThread.__init__(self, parent)
-
-        self.cap = dai.Device(pipeline, mxid)
-        self.queue = self.cap.getOutputQueue("preview", maxSize=1, blocking=False)
-        self.controls = self.cap.getInputQueue("control")
-
-        frame = self.cap.get().getCvFrame()
-        self.height, self.width = frame.shape[:2]
-
-        self.image = None
-        self.roi_image = None
-        self._running = True
-
-        self.x1 = 0
-        self.x2 = self.width
-        self.y1 = 0
-        self.y2 = self.height
-
-    def run(self):
-        self.openedCamera.emit(self.width, self.height)  # Send width and height to ImageProvider
-
-        while self._running:
-            inFrame = self.cap.tryGet()
-            if inFrame is not None:
-                frame = inFrame.getCvFrame()
-
-                try:
-                    if self._running and frame:
-                        roi_frame = frame[self.y1:self.y2, self.x1:self.x2].copy()
-                    else:
-                        roi_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-                        frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-                except:
-                    self._running = False
-                    break
-
-                img = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
-                roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], QImage.Format_BGR888)
-                self.image = frame
-                self.roi_image = roi_frame
-                self.updateFrame.emit(img, roi_img)  # signal reload to Image class within QML
-
-    def stop(self):
-        self.cap.close()
-        self._running = False
-        self.requestInterruption()
-        self.wait()
-        print("> DAI thread ended successfully.")
-
-    # @Slot()
-    # def send_controls():
-    #     ctrl = dai.CameraControl()
-
-    #     if use_manual_exposure:
-    #         ctrl.setManualExposure(exposure_us, iso)  # (exposure time, ISO)
-    #     else:
-    #         ctrl.setAutoExposureEnable()
-
-    #     if use_manual_focus:
-    #         ctrl.setManualFocus(focus)
-    #     else:
-    #         ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
-
-    #     if use_manual_wb:
-    #         ctrl.setManualWhiteBalance(wb_k)
-    #     else:
-    #         ctrl.setAutoWhiteBalanceMode(dai.CameraControl.AutoWhiteBalanceMode.AUTO)
-
-    #     ctrlQ.send(ctrl)
+    def getOcrFps(self, average_fps):
+        self.ocr_fps = average_fps
+        self.fpsOcrChanged.emit(average_fps)
