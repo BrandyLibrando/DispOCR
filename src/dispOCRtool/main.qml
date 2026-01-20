@@ -38,6 +38,8 @@ ApplicationWindow {
         property string lastText: ""
         property real lastScore: 0.0
 
+        property string saveDir: ""
+
         Row {
             id: mainContainer
             x: 8; y: 8
@@ -140,7 +142,7 @@ ApplicationWindow {
                                     ToolTip.delay: 250
                                     ToolTip.timeout: 5000
                                     ToolTip.visible: hovered
-                                    ToolTip.text: qsTr("Current directory: %1").arg(logDirectory?.data)
+                                    ToolTip.text: qsTr("Current directory: %1").arg(main.saveDir)
 
                                     onClicked: {
                                         main.state = "editroidir"
@@ -809,13 +811,14 @@ ApplicationWindow {
             title: "Select a Folder"
             // property QUrl prevFolder: none
             onAccepted: {
-                main.state = ""
-                console.log("Selected folder:", folderDialog.selectedFolder)
-                logDirectory.setData(folderDialog.selectedFolder)
+                main.state = "";
+                console.log("Selected folder:", folderDialog.selectedFolder);
+                appSettings.setSaveDir(folderDialog.selectedFolder);
+                main.saveDir = appSettings.getSaveDir();
             }
             onRejected: {
-                main.state = ""
-                console.log("Folder selection canceled")
+                main.state = "";
+                console.log("Folder selection canceled");
             }
         }
 
@@ -935,7 +938,11 @@ ApplicationWindow {
     Component.onCompleted: {
         if (cameraList.data.length) {
             cvCameraRenderer.start();
+        } else {
+            console.log("No camera detected.");
         }
+
+        main.saveDir = appSettings.getSaveDir();
 
         // Test codes
         console.log("", cameraList.data);

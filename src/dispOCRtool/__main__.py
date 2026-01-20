@@ -1,7 +1,8 @@
 """
-__main__.py
-Opens the main app for the GUI, and handles
-connections between Python backend and the QML components.
+THS_DispOCR
+Authored by: Julius Librando
+In fulfillment of thesis requirement along with
+Seungkwan Bang, Harish Chawla, and Aidan Albert Narvaez.
 """
 
 import sys, os
@@ -25,6 +26,7 @@ from PySide6.QtQuick import QQuickImageProvider, QQuickView
 from util.Bridge import ListBridge, StringBridge
 # from util.NumpyQImageRenderer import NumpyImageProvider
 from util.OpencvRenderer import OpencvImageProvider
+from app.settings import AppSettings
 
 
 if __name__ == "__main__":
@@ -32,6 +34,10 @@ if __name__ == "__main__":
     QCoreApplication.setApplicationName("DispOCR")
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
+
+    ## SETTINGS
+    settings = AppSettings()
+    engine.rootContext().setContextProperty("appSettings", settings)
 
 
     ## PY-QML DATA BRIDGES
@@ -53,12 +59,13 @@ if __name__ == "__main__":
     print(camera_models + dai_names)
 
     # Data bridges
-    initial_directory = QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation))
-    log_directory = StringBridge(initial_directory.toString())
+
+    # initial_directory =
+    # log_directory = StringBridge(initial_directory.toString())
     camera_list = ListBridge(camera_models + dai_names)
     dai_configs = ListBridge([16500, 800, 128])  # Defaults for [exposure, ISO, focus]
 
-    engine.rootContext().setContextProperty("logDirectory", log_directory)
+    # engine.rootContext().setContextProperty("logDirectory", log_directory)
     engine.rootContext().setContextProperty("cameraList", camera_list)
     engine.rootContext().setContextProperty("cvCamCount", len(camera_models))
     engine.rootContext().setContextProperty("daiCamCount", len(dai_names))

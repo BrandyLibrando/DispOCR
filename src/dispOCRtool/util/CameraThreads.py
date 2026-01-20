@@ -71,7 +71,7 @@ class ThreadCvCamera(QThread):
                 self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
 
                 ## Profiling
-                self.elapsed_queue.append(1000/self.timer.restart())
+                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart())
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 
@@ -144,7 +144,7 @@ class ThreadDaiCamera(QThread):
                 self.updateFrame.emit(img, roi_img)  # signal reload to Image class within QML
 
                 ## Profiling
-                self.elapsed_queue.append(1000/self.timer.restart())
+                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart())
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 
