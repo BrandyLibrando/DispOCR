@@ -154,14 +154,14 @@ ApplicationWindow {
                                     id: labelFpsCam
                                     color: Material.accent
                                     font.pixelSize: 10
-                                    text: qsTr("Hi")
+                                    text: qsTr("Starting cam...")
                                 }
 
                                 Text {
                                     id: labelFpsOcr
                                     color: Material.accent
                                     font.pixelSize: 10
-                                    text: qsTr("Hi")
+                                    text: qsTr("Starting OCR...")
                                 }
                             }
                         }
@@ -732,11 +732,12 @@ ApplicationWindow {
                             // Check for invalid inputs
                             let allInputsValid = root.checkInputs(root.possibleInvalidInputs)
                             if (allInputsValid) {
-                                main.state = "inop"
+                                main.state = "inop";
+                                fileLogger.start( parseFloat(inputFreqVal.text) * 1000 );
                             }
                             else {
-                                let invalid = root.focusInvalidInput(root.possibleInvalidInputs)
-                                console.log("", invalid)
+                                let invalid = root.focusInvalidInput(root.possibleInvalidInputs);
+                                console.log("", invalid);
                             }
                         }
                     }
@@ -757,7 +758,8 @@ ApplicationWindow {
                         onClicked: {
                             // finalize write CSV file
                             // processes
-                            main.state = ""
+                            fileLogger.stop();
+                            main.state = "";
                         }
                     }
                 }
@@ -809,11 +811,11 @@ ApplicationWindow {
         FolderDialog {
             id: folderDialog
             title: "Select a Folder"
-            // property QUrl prevFolder: none
+            currentFolder: main.saveDir
             onAccepted: {
                 main.state = "";
-                console.log("Selected folder:", folderDialog.selectedFolder);
                 appSettings.setSaveDir(folderDialog.selectedFolder);
+                fileLogger.update_dir(folderDialog.selectedFolder);
                 main.saveDir = appSettings.getSaveDir();
             }
             onRejected: {
@@ -845,7 +847,7 @@ ApplicationWindow {
                 if (!roiwindow.hidden) roiwindow.viewfinder.reloadImage();
 
                 // TODO: REMOVE LATER AND UNCOMMENT ONPREDICTIONCHANGED()
-                predictTextArea.text = Date.now();
+                // predictTextArea.text = Date.now();
             }
 
             function onCameraOpened(cameraWidth, cameraHeight) {
@@ -855,11 +857,12 @@ ApplicationWindow {
                 cameraVF.resetPoints();
             }
 
-            // function onPredictionChanged(predictText, predictScore) {
-            //     predictTextArea.text = predictText;
-            //     main.lastText = predictText;
-            //     main.lastScore = (predictScore * 100).toFixed(2);
-            // }
+            function onPredictionChanged(predictText, predictScore) {
+                fileLogger.update_data(predictText);
+                predictTextArea.text = predictText;
+                main.lastText = predictText;
+                main.lastScore = (predictScore * 100).toFixed(2);
+            }
 
             function onFpsCamChanged(fps) { labelFpsCam.text = qsTr("Camera: %1 FPS").arg(fps.toFixed(2)); }
             function onFpsOcrChanged(fps) { labelFpsOcr.text = qsTr("OCR: %1 FPS").arg(fps.toFixed(2)); }

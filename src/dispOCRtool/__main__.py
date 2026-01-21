@@ -23,10 +23,11 @@ from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QSysInfo, QStandardPa
 from PySide6.QtQuick import QQuickImageProvider, QQuickView
 
 ## Own Utility/Class Imports
+from app.settings import AppSettings
+from util.IntervalLogger import FileWriter
 from util.Bridge import ListBridge, StringBridge
 # from util.NumpyQImageRenderer import NumpyImageProvider
 from util.OpencvRenderer import OpencvImageProvider
-from app.settings import AppSettings
 
 
 if __name__ == "__main__":
@@ -59,20 +60,21 @@ if __name__ == "__main__":
     print(camera_models + dai_names)
 
     # Data bridges
-
-    # initial_directory =
-    # log_directory = StringBridge(initial_directory.toString())
     camera_list = ListBridge(camera_models + dai_names)
     dai_configs = ListBridge([16500, 800, 128])  # Defaults for [exposure, ISO, focus]
 
-    # engine.rootContext().setContextProperty("logDirectory", log_directory)
     engine.rootContext().setContextProperty("cameraList", camera_list)
     engine.rootContext().setContextProperty("cvCamCount", len(camera_models))
     engine.rootContext().setContextProperty("daiCamCount", len(dai_names))
     engine.rootContext().setContextProperty("daiConfig", dai_configs)
 
 
-    ## CAMERA AND IMAGE RENDERING
+    ## HELPERS
+    # Logger timer
+    logger = FileWriter(settings.getSaveDir())
+    engine.rootContext().setContextProperty("fileLogger", logger)
+
+    # Camera initialization and image rendering
     # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
     if camera_models:
         cvCameraRenderer = OpencvImageProvider( cv2backend=preferred_backend, daiSupport=len(dai_names), daiInit=(not len(camera_models) and len(dai_names)) )

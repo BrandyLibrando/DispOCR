@@ -1,3 +1,9 @@
+"""
+CroppedImageRenderer.py
+Contains rudimentary QQuickImageProvider class,
+used for displaying cropped version of image.
+"""
+
 from PySide6.QtGui import QImage
 from PySide6.QtQuick import QQuickImageProvider
 
