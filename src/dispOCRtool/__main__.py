@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
 
     ## LOADING OF QML FILE FOR APP
-    qml_file = Path(__file__).resolve().parent / "main.qml"
+    qml_file = Path(__file__).resolve().parent / "qml/main.qml"
     engine.load(qml_file)
 
 

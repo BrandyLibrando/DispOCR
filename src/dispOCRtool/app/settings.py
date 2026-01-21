@@ -1,7 +1,8 @@
 """
 settings.py
 Creates persistent settings.
-Used for
+Used for the save directory and the setup settings
+that are helpful when persistent (e.g., log frequency).
 """
 
 from PySide6.QtCore import QObject, Slot, QSettings, QUrl, QStandardPaths
