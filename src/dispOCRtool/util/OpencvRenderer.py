@@ -140,7 +140,7 @@ class OpencvImageProvider(QQuickImageProvider):
         self.image = img
         self.cropped_image = roi_img
 
-        self.ocr.change_image(roi_frame)
+        if self.ocr is not None: self.ocr.change_image(roi_frame)
         self.roi_renderer.setCroppedImage(roi_img)
         self.imageChanged.emit(img)
 
@@ -155,11 +155,11 @@ class OpencvImageProvider(QQuickImageProvider):
     def setRoi(self, x1, y1, x2, y2):
         self.cam.setRoiCoordinates(x1, y1, x2, y2)
 
-    @Slot()
+    @Slot(result=int)
     def getWidth(self):
         return self.width
 
-    @Slot()
+    @Slot(result=int)
     def getHeight(self):
         return self.height
 
@@ -170,11 +170,11 @@ class OpencvImageProvider(QQuickImageProvider):
         self.ocr_score = average_confidence
         self.predictionChanged.emit(self.ocr_data, self.ocr_score)
 
-    @Slot()
+    @Slot(result=str)
     def getOcrData(self):
         return self.ocr_data
 
-    @Slot()
+    @Slot(result=float)
     def getOcrScore(self):
         return self.ocr_score
 

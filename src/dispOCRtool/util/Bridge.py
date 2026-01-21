@@ -20,8 +20,10 @@ class StringBridge(QObject):
     dataChanged = Signal()
 
     ## GETTER-SETTER
+    @Slot(result=str)
     def getData(self):
         return self._data
+
     def putData(self, value):
         if self._data != value:
             self._data = value

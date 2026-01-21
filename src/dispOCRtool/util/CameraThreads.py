@@ -83,7 +83,7 @@ class ThreadCvCamera(QThread):
         self.wait()
         print("> CV thread ended successfully.")
 
-    @Slot()
+    @Slot(int, int, int, int)
     def setRoiCoordinates(self, x1, y1, x2, y2):
         self.new_roi = (x1, y1, x2, y2)
         self.roi_changed = True
@@ -156,7 +156,7 @@ class ThreadDaiCamera(QThread):
         self.wait()
         print("> DAI thread ended successfully.")
 
-    # @Slot()
+    # @Slot(int, int, int, int)
     # def setRoiCoordinates(self, x1, y1, x2, y2):
     #     self.new_roi = (x1, y1, x2, y2)
     #     self.roi_changed = True

@@ -420,6 +420,10 @@ ApplicationWindow {
                                             notation: DoubleValidator.StandardNotation
                                             bottom: 0.1
                                         }
+
+                                        onTextChanged: {
+                                            if (inputFreqVal.acceptableInput) appSettings.setLogFrequency(inputFreqVal.text);
+                                        }
                                     }
                                 }
 
@@ -460,6 +464,7 @@ ApplicationWindow {
                                 display: AbstractButton.TextBesideIcon
 
                                 text: qsTr("Apply LLM text correct upon save")
+                                onCheckedChanged: appSettings.setEnableTextCorrection(checked);
                             }
                         }
 
@@ -475,8 +480,8 @@ ApplicationWindow {
                                 font.pointSize: 8
                                 display: AbstractButton.TextBesideIcon
 
-                                checked: true
                                 text: qsTr("Enable control system")
+                                onCheckedChanged: appSettings.setEnableController(checked);
                             }
 
                             Item {
@@ -520,7 +525,7 @@ ApplicationWindow {
                                 Rectangle {
                                     id: inputCtrlValContainer
                                     x: inputCtrlCond.x + 10
-                                    y: inputCtrlValLabel1.y + 22
+                                    y: inputCtrlValLabel1.y + 2
                                     width: inputCtrlCond.width - 10
                                     height: inputCtrlCond.height
                                     border.width: 2
@@ -539,10 +544,14 @@ ApplicationWindow {
                                         font.pixelSize: 11
 
                                         enabled: toggleControlSystem.checked
+                                        opacity: enabled ? 1.0 : 0.3
 
                                         property var validNumber: DoubleValidator { notation: DoubleValidator.StandardNotation }
                                         property var validText: RegularExpressionValidator { regularExpression: /(.|\s)*\S(.|\s)*/ }
                                         validator: inputCtrlCond.currentValue === "contains" ? validText : validNumber
+                                        onTextChanged: {
+                                            if (inputCtrlVal.acceptableInput) appSettings.setControllerValue(inputCtrlVal.text);
+                                        }
                                     }
                                 }
 
@@ -557,8 +566,7 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputCtrlValLabel2
-                                    anchors.right: inputCtrlValContainer.right
-                                    y: 66
+                                    x: 0; y: inputCtrlValLabel1.y + 14
                                     width: 119; height: 16
                                     font.pixelSize: 11
                                     color: !toggleControlSystem.checked
@@ -568,7 +576,7 @@ ApplicationWindow {
                                              : "#E91E63"
 
                                     text: {
-                                        if (!toggleControlSystem.checked) return qsTr("System disabled.")
+                                        if (!toggleControlSystem.checked) return qsTr("Disabled.")
                                         else if (inputCtrlVal.acceptableInput) return qsTr("Valid input.")
                                         else {
                                             if (inputCtrlCond.currentValue === "contains") return qsTr("Enter text.")
@@ -582,23 +590,24 @@ ApplicationWindow {
                         Item {
                             id: depthaiSettingsList
 
-                            CheckBox {
-                                id: toggleOakCamera
-                                x: -9; y: -10
-                                height: 35
-                                leftPadding: 8; rightPadding: 8
-                                padding: 8
-                                font.pointSize: 8
-                                display: AbstractButton.TextBesideIcon
+                            // CheckBox {
+                            //     id: toggleOakCamera
+                            //     x: -9; y: -10
+                            //     height: 35
+                            //     leftPadding: 8; rightPadding: 8
+                            //     padding: 8
+                            //     font.pointSize: 8
+                            //     display: AbstractButton.TextBesideIcon
 
-                                text: qsTr("OAK camera preprocessing")
-                            }
+                            //     text: qsTr("OAK camera preprocessing")
+                            //     onCheckedChanged: appSettings.setEnableManualAll(checked);
+                            // }
 
                             Column {
                                 id: groupDaiExposure
-                                x: -9; y: toggleOakCamera.y + 25
+                                x: -9; y: -15  //toggleOakCamera.y + 25
                                 width: settingsContainer.width - 5
-                                spacing: -22
+                                spacing: -20
 
                                 CheckBox {
                                     id: toggleDaiExposure
@@ -606,13 +615,13 @@ ApplicationWindow {
                                     display: AbstractButton.TextBesideIcon
 
                                     text: qsTr("Manual exposure (Current: %1)").arg(daiExposure.value)
+                                    onCheckedChanged: appSettings.setEnableManualExposure(checked)
                                 }
 
                                 Slider {
                                     id: daiExposure
                                     width: parent.width
                                     from: 1; to: 33000
-                                    value: daiConfig.data[0]
                                     stepSize: 250
                                     touchDragThreshold: 4
                                     enabled: toggleDaiExposure.checked
@@ -627,15 +636,15 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
+                                    onMoved: appSettings.setManualExposure(value);  // main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
                                 }
                             }
 
                             Column {
                                 id: groupDaiIso
-                                x: -9; y: toggleOakCamera.y + 85
+                                x: -9; y: groupDaiExposure.y + 70
                                 width: settingsContainer.width - 5
-                                spacing: -22
+                                spacing: -20
 
                                 CheckBox {
                                     id: toggleDaiIso
@@ -643,13 +652,13 @@ ApplicationWindow {
                                     display: AbstractButton.TextBesideIcon
 
                                     text: qsTr("Manual ISO (Current: %1)").arg(daiIso.value)
+                                    onCheckedChanged: appSettings.setEnableManualIso(checked);
                                 }
 
                                 Slider {
                                     id: daiIso
                                     width: parent.width
                                     from: 100; to: 1600
-                                    value: daiConfig.data[1]
                                     stepSize: 50
                                     touchDragThreshold: 4
                                     enabled: toggleDaiIso.checked
@@ -664,15 +673,15 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
+                                    onMoved: appSettings.setManualIso(value); //  main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
                                 }
                             }
 
                             Column {
                                 id: groupDaiFocus
-                                x: -9; y: toggleOakCamera.y + 145
+                                x: -9; y: groupDaiIso.y + 70
                                 width: settingsContainer.width - 5
-                                spacing: -22
+                                spacing: -20
 
                                 CheckBox {
                                     id: toggleDaiFocus
@@ -680,13 +689,13 @@ ApplicationWindow {
                                     display: AbstractButton.TextBesideIcon
 
                                     text: qsTr("Manual focus (Current: %1)").arg(daiFocus.value)
+                                    onCheckedChanged: appSettings.setEnableManualFocus(checked);
                                 }
 
                                 Slider {
                                     id: daiFocus
                                     width: parent.width
                                     from: 0; to: 255
-                                    value: daiConfig.data[2]
                                     stepSize: 5
                                     touchDragThreshold: 4
                                     enabled: toggleDaiFocus.checked
@@ -701,7 +710,7 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
+                                    onMoved: appSettings.setManualFocus(value); //  main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
                                 }
                             }
                         }
@@ -874,15 +883,6 @@ ApplicationWindow {
             console.debug("", daiConfig.data)
         }
 
-        // VIRTUAL KEYBOARD
-        // InputPanel {
-        //     id: inputPanel
-        //     y: Qt.inputMethod.visible ? parent.height - inputPanel.height : parent.height
-        //     anchors.left: parent.left
-        //     anchors.right: parent.right
-        // }
-
-
 
         // WINDOW STATE MANAGEMENT
         states: [
@@ -945,9 +945,21 @@ ApplicationWindow {
             console.log("No camera detected.");
         }
 
-        main.saveDir = appSettings.getSaveDir();
+        // Preload app settings with previous settings
+        const cfg = appSettings;
+        main.saveDir                = cfg.getSaveDir();
+        inputFreqVal.text           = cfg.getLogFrequency();
+        toggleCorrection.checked    = cfg.getEnableTextCorrection();
 
-        // Test codes
-        console.log("", cameraList.data);
+        toggleControlSystem.checked = cfg.getEnableController();
+        inputCtrlVal.text           = cfg.getControllerValue();
+
+        // toggleOakCamera.checked     = cfg.getEnableManualAll();
+        toggleDaiExposure.checked   = cfg.getEnableManualExposure();
+        toggleDaiIso.checked        = cfg.getEnableManualIso();
+        toggleDaiFocus.checked      = cfg.getEnableManualFocus();
+        daiExposure.value           = cfg.getManualExposure();
+        daiIso.value                = cfg.getManualIso();
+        daiFocus.value              = cfg.getManualFocus();
     }
 }
