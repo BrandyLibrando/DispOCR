@@ -26,9 +26,9 @@ jobs:
      matrix:
        target: [ "Ubuntu-24.04" ]
        include:
-         # - target: "Windows"
-         #   output-format: "app"
-         #   runs-on: "windows-latest"
+         - target: "Windows"
+           output-format: "app"
+           runs-on: "windows-latest"
 
          # - target: "macOS"
          #   output-format: "app"
@@ -57,7 +57,7 @@ jobs:
      - name: Setup Python
        uses: actions/setup-python@v4
        with:
-         python-version: "3.12"
+         python-version: "3.10"
 
      - name: Install Briefcase
        run: |
@@ -83,17 +83,39 @@ jobs:
            --update --adhoc-sign --no-input --log \
            ${{ matrix.briefcase-args }} \
            ${{ matrix.briefcase-package-args }}
+           
+     - name: Install rclone (Linux)
+       if: runner.os == 'Linux'
+       run: |
+          curl https://rclone.org/install.sh | sudo bash
+     - name: Install rclone (Windows)
+       if: runner.os == 'Windows'
+       shell: pwsh
+       run: |
+          choco install rclone -y
 
-     - name: Upload App
-       uses: actions/upload-artifact@v4
-       with:
-         name: DispOCR - ${{ matrix.target }}
-         path: dist
-         if-no-files-found: error
+     - name: Configure rclone
+       shell: bash
+       run: |
+          mkdir -p ~/.config/rclone
+          cat << 'EOF' > ~/.config/rclone/rclone.conf
+          ${{ secrets.RCLONE_DLSU_DRIVE }}
+          EOF
 
-     - name: Upload Log
-       if: failure()
-       uses: actions/upload-artifact@v4
-       with:
-         name: Error Log - ${{ matrix.target }}
-         path: logs/*
+     - name: Get commit keyword
+       shell: bash
+       run: |
+          COMMIT_VERSION=$(git log -1 --pretty=%s | awk '{print $1}' | tr '[:upper:]' '[:lower:]')
+          echo "COMMIT_VERSION=$COMMIT_VERSION" >> $GITHUB_ENV
+     
+     - name: Check rclone config
+       run: |
+          ls -lah ~/.config/rclone
+          rclone listremotes
+    
+     - name: Upload to Google Drive
+       shell: bash
+       run: |
+          rclone copy dist/ \
+             google_andeng:/ths_artifacts/${{ github.repository }}/${{ matrix.target }}/$COMMIT_VERSION \
+            -v
