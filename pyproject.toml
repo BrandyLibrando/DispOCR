@@ -3,11 +3,20 @@ name = "DispOCR"
 
 [tool.pyside6-project]
 files = [
-    "src/dispOCRtool/__main__.py", "src/dispOCRtool/__init__.py",
-    "src/dispOCRtool/qml/ImageViewfinder.qml", "src/dispOCRtool/qml/RoiDialog.qml", "src/dispOCRtool/qml/main.qml",
+    "src/dispOCRtool/__init__.py",
+    "src/dispOCRtool/__main__.py",
     "src/dispOCRtool/app/settings.py",
     "src/dispOCRtool/ocr/ModelPaddleBase.py",
-    "src/dispOCRtool/util/Bridge.py", "src/dispOCRtool/util/CameraThreads.py", "src/dispOCRtool/util/CroppedImageRenderer.py", "src/dispOCRtool/util/OpencvRenderer.py", "src/dispOCRtool/util/__init__.py"]
+    "src/dispOCRtool/ocr/TextCorrection.py",
+    "src/dispOCRtool/qml/ImageViewfinder.qml",
+    "src/dispOCRtool/qml/RoiDialog.qml",
+    "src/dispOCRtool/qml/main.qml",
+    "src/dispOCRtool/util/Bridge.py",
+    "src/dispOCRtool/util/CameraThreads.py",
+    "src/dispOCRtool/util/CroppedImageRenderer.py",
+    "src/dispOCRtool/util/OpencvRenderer.py",
+    "src/dispOCRtool/util/__init__.py",
+]
 
 [tool.briefcase]
 project_name = "DispOCR"
@@ -45,6 +54,7 @@ requires = [
     "depthai==3.0.0",
     "paddleocr==3.3.2",
     "paddlepaddle==3.2.0",
+    "language-tool-python",
 ]
 test_requires = [
 ]
