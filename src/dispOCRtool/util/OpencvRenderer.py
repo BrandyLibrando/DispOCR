@@ -50,7 +50,6 @@ class OpencvImageProvider(QQuickImageProvider):
         self.ocr.start()
 
 
-
         # DEPTH AI PIPELINE INITIATION
         if daiSupport:
             self.pipeline = dai.Pipeline()

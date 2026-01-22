@@ -15,6 +15,7 @@ class CroppedImageProvider(QQuickImageProvider):
 
         self.image = None
 
+
     def requestImage(self, id, size, requestedSize):
         if self.image:
             img = self.image

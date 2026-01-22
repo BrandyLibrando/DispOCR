@@ -638,7 +638,7 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: appSettings.setManualExposure(value);  // main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
+                                    onMoved: appSettings.setManualExposure(value);
                                 }
                             }
 
@@ -675,7 +675,7 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: appSettings.setManualIso(value); //  main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
+                                    onMoved: appSettings.setManualIso(value);
                                 }
                             }
 
@@ -712,7 +712,7 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: appSettings.setManualFocus(value); //  main.updateDaiConfig(daiExposure.value, daiIso.value, daiFocus.value);
+                                    onMoved: appSettings.setManualFocus(value);
                                 }
                             }
                         }
@@ -857,8 +857,6 @@ ApplicationWindow {
                 cameraVF.reloadImage();
                 if (!roiwindow.hidden) roiwindow.viewfinder.reloadImage();
 
-                // TODO: REMOVE LATER AND UNCOMMENT ONPREDICTIONCHANGED()
-                // predictTextArea.text = Date.now();
             }
 
             function onCameraOpened(cameraWidth, cameraHeight) {
@@ -877,12 +875,6 @@ ApplicationWindow {
 
             function onFpsCamChanged(fps) { labelFpsCam.text = qsTr("Camera: %1 FPS").arg(fps.toFixed(2)); }
             function onFpsOcrChanged(fps) { labelFpsOcr.text = qsTr("OCR: %1 FPS").arg(fps.toFixed(2)); }
-        }
-
-        // DAI CONFIG HANDLER
-        function updateDaiConfig(exposure, iso, focus) {
-            daiConfig.setData([exposure, iso, focus]);
-            console.debug("", daiConfig.data)
         }
 
 

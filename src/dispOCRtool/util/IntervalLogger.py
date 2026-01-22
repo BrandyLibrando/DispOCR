@@ -1,6 +1,7 @@
 """
 IntervalLogger.py
 Helper class for interval logging.
+Uses QTimer.
 Also serves as controller for text correct threads.
 """
 

@@ -24,7 +24,7 @@ from PySide6.QtQuick import QQuickImageProvider, QQuickView
 ## Own Utility/Class Imports
 from app.settings import AppSettings
 from util.IntervalLogger import FileWriter
-from util.Bridge import ListBridge, StringBridge
+from util.Bridge import ListBridge
 from util.OpencvRenderer import OpencvImageProvider
 
 
@@ -59,12 +59,10 @@ if __name__ == "__main__":
 
     # Data bridges
     camera_list = ListBridge(camera_models + dai_names)
-    dai_configs = ListBridge([16500, 800, 128])  # Defaults for [exposure, ISO, focus]
 
     engine.rootContext().setContextProperty("cameraList", camera_list)
     engine.rootContext().setContextProperty("cvCamCount", len(camera_models))
     engine.rootContext().setContextProperty("daiCamCount", len(dai_names))
-    engine.rootContext().setContextProperty("daiConfig", dai_configs)
 
 
     ## HELPERS
@@ -73,7 +71,6 @@ if __name__ == "__main__":
     engine.rootContext().setContextProperty("fileLogger", logger)
 
     # Camera initialization and image rendering
-    # engine.rootContext().engine().addImageProvider("numpy", provider)  # to render numpy images to QML
     if camera_models:
         cvCameraRenderer = OpencvImageProvider( cv2backend=preferred_backend, daiSupport=len(dai_names), daiInit=(not len(camera_models) and len(dai_names)) )
         cvRoiRenderer = cvCameraRenderer.getRoiRenderer()
@@ -105,10 +102,6 @@ if __name__ == "__main__":
         while logger.timer.isActive():
             app.processEvents()
 
-    # window = engine.rootObjects()[0]  # Store root window
-    # window.closing.connect(myImageProvider.killThread())
-    # app.aboutToQuit.connect(cvCameraRenderer.killThread)
-    # app.aboutToQuit.connect(cvCameraRenderer.destroyOcrThread)
     app.aboutToQuit.connect(cleanup_on_exit)
 
     sys.exit(app.exec())

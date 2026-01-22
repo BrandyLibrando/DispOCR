@@ -1,6 +1,7 @@
 """
-Bridge.py
-Contains classes for bidirectional model classes.
+ListBridge.py
+Contains class for bidirectional models.
+Intended for lists but a list can be used as a wrapper.
 Currently does not support generic classes due to C++-Py
 binding intricacies.
 """
@@ -8,60 +9,34 @@ binding intricacies.
 from PySide6.QtCore import Slot, Signal, Property, QObject
 
 
-## StringBridge() <= QObject
-## - Bidirectional model for passing strings between QML and Python
-
-class StringBridge(QObject):
-    def __init__(self, data:str=None):
-        QObject.__init__(self)
-        self._data = data
-
-    ## SIGNALS
-    dataChanged = Signal()
-
-    ## GETTER-SETTER
-    @Slot(result=str)
-    def getData(self):
-        return self._data
-
-    def putData(self, value):
-        if self._data != value:
-            self._data = value
-            self.dataChanged.emit()
-
-    ## EXPOSED PROPERTIES
-    data = Property(str, getData, putData, notify=dataChanged)
-
-    ## EXPOSED SLOTS/METHODS
-    @Slot(str)
-    def setData(self, new_data):
-        self.putData(new_data)
-
-
 class ListBridge(QObject):
     def __init__(self, data:list=None):
         QObject.__init__(self)
         self._data = data
 
-    ## SIGNALS
-    dataChanged = Signal()
-
-    ## GETTER-SETTER
-    def getData(self):
-        return self._data
+    ## Internal use
     def putData(self, value):
         if self._data != value:
             self._data = value
-            self.dataChanged.emit()
+            self.dataChanged.emit(self._data)
 
-    ## EXPOSED PROPERTIES
-    data = Property(list, getData, putData, notify=dataChanged)
 
     ## EXPOSED SLOTS/METHODS
     @Slot(list)
     def setData(self, new_data):
         self.putData(new_data)
 
-    @Slot()
+    @Slot(result=list)
+    def getData(self):
+        return self._data
+
+    @Slot(int)
     def size(self):
         return self._data.__len__()
+
+    ## SIGNALS
+    dataChanged = Signal(list)
+
+    ## EXPOSED PROPERTIES
+    data = Property(list, getData, putData, notify=dataChanged)
+
