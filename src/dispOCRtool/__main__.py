@@ -15,7 +15,6 @@ from cv2_enumerate_cameras import enumerate_cameras
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
-# import PySide6.QtMultimedia
 
 from PySide6.QtGui import QImage
 from PySide6.QtCore import QCoreApplication, Slot, Signal, Property
@@ -26,7 +25,6 @@ from PySide6.QtQuick import QQuickImageProvider, QQuickView
 from app.settings import AppSettings
 from util.IntervalLogger import FileWriter
 from util.Bridge import ListBridge, StringBridge
-# from util.NumpyQImageRenderer import NumpyImageProvider
 from util.OpencvRenderer import OpencvImageProvider
 
 
@@ -90,13 +88,25 @@ if __name__ == "__main__":
     qml_file = Path(__file__).resolve().parent / "qml/main.qml"
     engine.load(qml_file)
 
-
     if not engine.rootObjects():
         sys.exit(-1)
 
+
+    ## EXIT CLEANUP
+    def cleanup_on_exit():
+        # Exit camera and OCR threads
+        cvCameraRenderer.killThread()
+        cvCameraRenderer.destroyOcrThread()
+
+        # Safely close file (no text correction applied)
+        logger.abort()
+        while logger.timer.isActive():
+            app.processEvents()
+
     # window = engine.rootObjects()[0]  # Store root window
     # window.closing.connect(myImageProvider.killThread())
-    app.aboutToQuit.connect(cvCameraRenderer.killThread)
-    app.aboutToQuit.connect(cvCameraRenderer.destroyOcrThread)
+    # app.aboutToQuit.connect(cvCameraRenderer.killThread)
+    # app.aboutToQuit.connect(cvCameraRenderer.destroyOcrThread)
+    app.aboutToQuit.connect(cleanup_on_exit)
 
     sys.exit(app.exec())

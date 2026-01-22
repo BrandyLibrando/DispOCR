@@ -767,7 +767,7 @@ ApplicationWindow {
                         onClicked: {
                             // finalize write CSV file
                             // processes
-                            fileLogger.stop();
+                            fileLogger.stop(appSettings.getEnableTextCorrection());
                             main.state = "";
                         }
                     }

@@ -21,6 +21,8 @@ class FileWriter(QObject):
         self.data = ""
         self.directory = QUrl.toLocalFile(folder_url)
         self.filename = ""
+        self.file = None
+        self.aborted = False
 
         self.lt = language_tool_python.LanguageTool("en-US")
         self.lt_threads = []
@@ -33,12 +35,15 @@ class FileWriter(QObject):
             now = QDateTime.currentDateTime()
             now = now.toString("yyyyMMdd_HHmmss")
             self.filename = f"log_{now}.txt"
+            self.file = open(Path(self.directory) / self.filename, "a")
 
             self.timer.start(interval_ms)
 
     @Slot(bool)
     def stop(self, enable_correction):
+        print("> Stopping log.")
         self.timer.stop()
+        self.file.close()
         if enable_correction:
             lt_thread = TextCorrector(
                 dir=self.directory,
@@ -48,6 +53,7 @@ class FileWriter(QObject):
             self.lt_threads.append(lt_thread)
             lt_thread.finished.connect(lambda: self.lt_threads.remove(lt_thread))
             lt_thread.start()
+        print("> Logging stopped successfully.")
 
     @Slot(QUrl)
     def update_dir(self, dir):
@@ -62,5 +68,17 @@ class FileWriter(QObject):
             now = QDateTime.currentDateTime()
             nowContents = now.toString("[yyyy-MM-dd HH:mm:ss.zzz]")
 
-            with open(Path(self.directory) / self.filename, "a") as file:
-                file.write(f"{nowContents} - {self.data}\n")
+            self.file.write(f"{nowContents} - {self.data}\n")
+            self.file.flush()
+
+        if self.aborted:
+            self.stop(False)
+
+    @Slot()
+    def stop_threads(self):
+        for thread in self.lt_threads:
+            thread.stop()
+
+    @Slot()
+    def abort(self):
+        self.aborted = True
