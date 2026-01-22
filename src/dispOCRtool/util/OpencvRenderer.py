@@ -98,21 +98,21 @@ class OpencvImageProvider(QQuickImageProvider):
         # Start OAK cam
         if dai != -1:
             # code for dai start
-            print(f"> Trying to start DAI camera {camera_name}.")
+            print(f"\n> Trying to start DAI camera {camera_name}.")
 
             mxid = self.getMxid(camera_name)
             self.start(mxid)
 
         # Start webcam
         else:
-            print(f"> Trying to start CV camera {camera_name}.")
+            print(f"\n> Trying to start CV camera {camera_name}.")
             self.index = index
             self.start()
 
     @Slot()
     def start(self, dai_mxid=None):
         if self.dai:
-            print("=====================\n> Starting new DAI camera thread...")
+            print("\n=====================\n> Starting new DAI camera thread...")
             self.cam = ThreadDaiCamera(self.pipeline, dai_mxid)
         else:
             print("=====================\n> Starting new CV camera thread...")

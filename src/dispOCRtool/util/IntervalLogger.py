@@ -1,6 +1,7 @@
 """
 IntervalLogger.py
 Helper class for interval logging.
+Also serves as controller for text correct threads.
 """
 
 from pathlib import Path
@@ -31,7 +32,7 @@ class FileWriter(QObject):
     @Slot(int)
     def start(self, interval_ms):
         if not self.timer.isActive():
-            print("> Logging started.")
+            print("\n> Logging started.")
             now = QDateTime.currentDateTime()
             now = now.toString("yyyyMMdd_HHmmss")
             self.filename = f"log_{now}.txt"
@@ -41,7 +42,7 @@ class FileWriter(QObject):
 
     @Slot(bool)
     def stop(self, enable_correction):
-        print("> Stopping log.")
+        print("> Stopping log...")
         self.timer.stop()
         self.file.close()
         if enable_correction:
@@ -82,3 +83,5 @@ class FileWriter(QObject):
     @Slot()
     def abort(self):
         self.aborted = True
+        self.stop_threads()
+        self.lt.close()

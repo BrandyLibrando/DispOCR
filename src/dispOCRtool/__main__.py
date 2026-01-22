@@ -94,6 +94,8 @@ if __name__ == "__main__":
 
     ## EXIT CLEANUP
     def cleanup_on_exit():
+        print("\n>> Exiting...")
+
         # Exit camera and OCR threads
         cvCameraRenderer.killThread()
         cvCameraRenderer.destroyOcrThread()
