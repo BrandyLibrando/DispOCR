@@ -19,7 +19,7 @@ class TextCorrector(QThread):
         self.filename = filename
         self.lt = lt_instance if lt_instance is not None else language_tool_python.LanguageTool("en-US")
 
-        self.timer = QElapsedTimer()  # For performance measure
+        # self.timer = QElapsedTimer()  # For performance measure
         self.aborted = False
 
     def run(self):
@@ -30,20 +30,19 @@ class TextCorrector(QThread):
             print(f"{self.filename}.txt does not exist.")
 
         else:
-            self.timer.start()
+            # self.timer.start()
             with open(src_path, "r", encoding="utf-8") as src_file:
                 lines = src_file.readlines()
 
             with open(dst_path, "w", encoding="utf-8") as dst_file:
                 for line in lines:
-                    print(line)
                     if self.aborted: break
                     if line.strip():
                         matches = self.lt.check(line)
                         line = correct(line, matches)
 
                     dst_file.write(line)
-                    print(self.timer.restart())
+                    # print(self.timer.restart())
 
         print("> Text correct thread finished successfully.")
 

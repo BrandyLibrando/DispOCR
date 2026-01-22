@@ -270,7 +270,8 @@ ApplicationWindow {
 
                     TextArea {
                         id: predictTextArea
-                        anchors.fill: parent
+                        width: parent.width
+                        height: parent.height
                         topInset: 4
                         topPadding: 19
                         leftPadding: 12
@@ -281,6 +282,7 @@ ApplicationWindow {
                         activeFocusOnTab: false
                         focus: false
                         clip: false
+                        wrapMode: TextEdit.WordWrap
                         font.pointSize: 10
                         cursorVisible: false
 
