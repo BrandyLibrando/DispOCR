@@ -5,17 +5,19 @@ name = "DispOCR"
 files = [
     "src/dispOCRtool/__init__.py",
     "src/dispOCRtool/__main__.py",
+    "src/dispOCRtool/app/__init__.py",
     "src/dispOCRtool/app/settings.py",
+    "src/dispOCRtool/ocr/__init__.py",
     "src/dispOCRtool/ocr/ModelPaddleBase.py",
     "src/dispOCRtool/ocr/TextCorrection.py",
     "src/dispOCRtool/qml/ImageViewfinder.qml",
     "src/dispOCRtool/qml/RoiDialog.qml",
     "src/dispOCRtool/qml/main.qml",
+    "src/dispOCRtool/util/__init__.py",
     "src/dispOCRtool/util/Bridge.py",
     "src/dispOCRtool/util/CameraThreads.py",
     "src/dispOCRtool/util/CroppedImageRenderer.py",
     "src/dispOCRtool/util/OpencvRenderer.py",
-    "src/dispOCRtool/util/__init__.py",
 ]
 
 [tool.briefcase]
@@ -38,6 +40,8 @@ This program mainly serves as the GUI of the setup, to be deployed in Raspberry 
 """
 sources = [
     "src/dispOCRtool",
+    "src/dispOCRtool/app",
+    "src/dispOCRtool/ocr",
     "src/dispOCRtool/util",
 ]
 test_sources = [
