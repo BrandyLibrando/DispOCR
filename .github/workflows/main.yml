@@ -24,7 +24,7 @@ jobs:
    strategy:
      fail-fast: false
      matrix:
-       target: [ "Ubuntu-24.04" ]
+       target: [ "Windows", "Ubuntu-24.04", "Debian-12" ]
        include:
          - target: "Windows"
            output-format: "app"
@@ -42,13 +42,13 @@ jobs:
            briefcase-run-prefix: "xvfb-run"
            briefcase-args: "--target ubuntu:24.04"
 
-         # - target: "Fedora-40"
-         #   platform: "Linux"
-         #   output-format: "system"
-         #   runs-on: "ubuntu-latest"
-         #   pre-command: "sudo apt -y install socat"
-         #   briefcase-run-prefix: "xvfb-run"
-         #   briefcase-args: "--target fedora:40"
+         - target: "Debian-12"
+           platform: "Linux"
+           output-format: "system"
+           runs-on: "ubuntu-latest"
+           pre-command: "sudo apt -y install socat"
+           briefcase-run-prefix: "xvfb-run"
+           briefcase-args: "--target debian:12"
 
    steps:
      - name: Checkout
@@ -102,10 +102,10 @@ jobs:
           ${{ secrets.RCLONE_DLSU_DRIVE }}
           EOF
 
-     - name: Get commit keyword
+     - name: Get commit name
        shell: bash
        run: |
-          COMMIT_VERSION=$(git log -1 --pretty=%s | awk '{print $1}' | tr '[:upper:]' '[:lower:]')
+          COMMIT_VERSION=$(git log -1 --pretty=%s)
           echo "COMMIT_VERSION=$COMMIT_VERSION" >> $GITHUB_ENV
      
      - name: Check rclone config
