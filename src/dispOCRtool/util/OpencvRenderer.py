@@ -25,7 +25,7 @@ class OpencvImageProvider(QQuickImageProvider):
     fpsCamChanged = Signal(float)
     fpsOcrChanged = Signal(float)
 
-    def __init__(self, index=0, cv2backend=cv2.CAP_ANY, daiSupport=False, daiInit=False):
+    def __init__(self, index=0, cv2backend=cv2.CAP_ANY, daiInit=False):
         super(OpencvImageProvider, self).__init__(QQuickImageProvider.Image)
         self.roi_renderer = CroppedImageProvider()
 
@@ -50,25 +50,6 @@ class OpencvImageProvider(QQuickImageProvider):
         self.ocr.start()
 
 
-        # DEPTH AI PIPELINE INITIATION
-        if daiSupport:
-            self.pipeline = dai.Pipeline()
-
-            self.dai_cam = self.pipeline.create(dai.node.ColorCamera)
-            self.dai_cam.setPreviewSize(640, 480)
-            self.dai_cam.setInterleaved(False)
-            self.dai_cam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-            self.dai_cam.setFps(30)
-
-            self.dai_xout = self.pipeline.create(dai.node.XLinkOut)
-            self.dai_xout.setStreamName("preview")
-            self.dai_cam.preview.link(self.dai_xout.input)
-
-            self.dai_control_in = self.pipeline.create(dai.node.XLinkIn)
-            self.dai_control_in.setStreamName("control")
-            self.dai_control_in.out.link(self.dai_cam.inputControl)
-
-
     def requestImage(self, id, size, requestedSize):
         if self.image:
             img = self.image
@@ -86,6 +67,7 @@ class OpencvImageProvider(QQuickImageProvider):
         if self.dai:
             # code for dai end
             print("> Trying to end DAI pipeline.")
+            self.killThread()
 
         # End webcam
         else:
@@ -95,11 +77,12 @@ class OpencvImageProvider(QQuickImageProvider):
 
         # if dai == -1, the index passed to this function is not a DAI camera
         # Start OAK cam
-        if dai != -1:
+        if dai >= 0:
             # code for dai start
             print(f"\n> Trying to start DAI camera {camera_name}.")
 
             mxid = self.getMxid(camera_name)
+            self.dai = True
             self.start(mxid)
 
         # Start webcam
@@ -112,7 +95,7 @@ class OpencvImageProvider(QQuickImageProvider):
     def start(self, dai_mxid=None):
         if self.dai:
             print("\n=====================\n> Starting new DAI camera thread...")
-            self.cam = ThreadDaiCamera(self.pipeline, dai_mxid)
+            self.cam = ThreadDaiCamera(dai_mxid)
         else:
             print("=====================\n> Starting new CV camera thread...")
             self.cam = ThreadCvCamera(self.index, self.api)

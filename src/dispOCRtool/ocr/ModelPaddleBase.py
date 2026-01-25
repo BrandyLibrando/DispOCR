@@ -17,7 +17,7 @@ class ThreadOcrBase(QThread):
     updatePrediction = Signal(str, float)
     updateFps = Signal(float)
 
-    def __init__(self, image=None, scale=0.6, minimum_score=0.5, parent=None):
+    def __init__(self, image=None, scale=0.6, minimum_score=0.65, parent=None):
         QThread.__init__(self, parent)
 
         self._running = False
@@ -35,15 +35,26 @@ class ThreadOcrBase(QThread):
 
     def run(self):
         ocr = PaddleOCR(
-            device="cpu",
+            ## GENERAL OPTIONS
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
             use_textline_orientation=False,
+            show_log=False,
+            
+            ## PADDLEV3 OPTIONS (Tested on 3.3.2)
+            # device="cpu",
+            # text_detection_model_name="PP-OCRv4_mobile_det",
+            # text_detection_model_dir=None,
+            # text_recognition_model_name="en_PP-OCRv4_mobile_rec",
+            # text_recognition_model_dir=None,
 
-            text_detection_model_name="PP-OCRv5_mobile_det",
-            text_detection_model_dir=None,
-            text_recognition_model_name="en_PP-OCRv5_mobile_rec",
-            text_recognition_model_dir=None,
+            ## PADDLEV2 OPTIONS (Tested on 2.9.1)
+            lang="en",
+            det_model_dir="en_PP-OCRv3_mobile_det",
+            rec_model_dir="en_PP-OCRv3_mobile_rec",
+            # rec_algorithm="SVTR_LCNet",
+            drop_score=self.MIN_SCORE,
+
         )
 
         print("> PaddleOCR successfully initialized.")
@@ -75,7 +86,7 @@ class ThreadOcrBase(QThread):
                 self.updatePrediction.emit(final_str, ave_score)
 
                 ## Profiling
-                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart())
+                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart() + 1)
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 
@@ -93,17 +104,17 @@ class ThreadOcrBase(QThread):
 
 
     def paddle_v2_predict(self, ocr, image):
-        results = ocr.ocr(image, det=False, rec=True, cls=False)
+        results = ocr.ocr(image, cls=False)
 
         # Parse result
         final_str = ""
         ave_score = 0
         count = 0
-        if isinstance(results, list) and len(results) > 0:
+        if isinstance(results, list) and len(results) > 0 and results[0] is not None:
             for r in results[0]:
                 try:
-                    txt = str(r[0])
-                    conf = float(r[1])
+                    txt = str(r[1][0])
+                    conf = float(r[1][1])
                     final_str += " " + txt
                     ave_score += conf
                     count += 1

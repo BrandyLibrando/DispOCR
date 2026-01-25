@@ -71,7 +71,7 @@ class ThreadCvCamera(QThread):
                 self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
 
                 ## Profiling
-                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart())
+                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart() + 1)
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 
@@ -91,18 +91,34 @@ class ThreadCvCamera(QThread):
 
 
 class ThreadDaiCamera(QThread):
-    updateFrame = Signal(QImage, QImage)
+    updateFrame = Signal(QImage, QImage, object)
+    updateFps = Signal(float)
     openedCamera = Signal(int, int)
 
-    def __init__(self, pipeline, mxid, parent=None):
+    def __init__(self, mxid, parent=None):
         QThread.__init__(self, parent)
 
-        self.cap = dai.Device(pipeline, mxid)
-        self.queue = self.cap.getOutputQueue("preview", maxSize=1, blocking=False)
-        self.controls = self.cap.getInputQueue("control")
+        self.pipeline = dai.Pipeline()
 
-        frame = self.cap.get().getCvFrame()
-        self.height, self.width = frame.shape[:2]
+        self.dai_cam = self.pipeline.create(dai.node.ColorCamera)
+        self.dai_cam.setPreviewSize(640, 480)
+        self.dai_cam.setInterleaved(False)
+        self.dai_cam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+        self.dai_cam.setFps(15)
+
+        # DEPRECATED CODE
+        # self.dai_xout = self.pipeline.create(dai.node.XLinkOut) 
+        # self.dai_xout.setStreamName("preview")
+        # self.dai_cam.preview.link(self.dai_xout.input)
+
+        # self.dai_control_in = self.pipeline.create(dai.node.XLinkIn)
+        # self.dai_control_in.setStreamName("control")
+        # self.dai_control_in.out.link(self.dai_cam.inputControl)
+        self.dai_out = self.dai_cam.preview.createOutputQueue()
+        self.dai_in  = self.dai_cam.inputControl.createInputQueue()
+
+        self.height = self.pipeline.getPreviewHeight()
+        self.width  = self.pipeline.getPreviewWidth()
 
         self.image = None
         self.roi_image = None
@@ -115,6 +131,8 @@ class ThreadDaiCamera(QThread):
         self.new_roi = (0, 0, 0, 0)
         self.roi_changed = False
 
+        self.pipeline.start()
+
         self.timer = QElapsedTimer()  # For performance measure
         self.elapsed_queue = deque(maxlen=10)  # To compute moving ave
 
@@ -123,13 +141,14 @@ class ThreadDaiCamera(QThread):
         self.timer.start()  # Start performance timer
 
         while self._running:
-            inFrame = self.cap.tryGet()
-            if inFrame is not None:
-                frame = inFrame.getCvFrame()
+            with self.pipeline:
+                inFrame = self.videoQueue.get()
+                if inFrame is not None:
+                    frame = inFrame.getCvFrame()
 
                 try:
                     if self._running and frame:
-                        roi_frame = frame[self.y1:self.y2, self.x1:self.x2].copy()
+                        roi_frame = np.ascontiguousarray(frame[self.y1:self.y2, self.x1:self.x2])
                     else:
                         roi_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
                         frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
@@ -138,13 +157,13 @@ class ThreadDaiCamera(QThread):
                     break
 
                 img = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
-                roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], QImage.Format_BGR888)
+                roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], roi_frame.strides[0], QImage.Format_BGR888)  # try using deep copy later if fail
                 self.image = frame
                 self.roi_image = roi_frame
-                self.updateFrame.emit(img, roi_img)  # signal reload to Image class within QML
+                self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
 
                 ## Profiling
-                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart())
+                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart() + 1)
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 

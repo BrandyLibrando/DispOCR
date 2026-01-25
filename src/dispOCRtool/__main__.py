@@ -49,13 +49,13 @@ if __name__ == "__main__":
     # Enumerate DepthAI cameras (mainly for OAK)
     dai_models = dai.DeviceBootloader.getAllAvailableDevices()
     dai_names = []
-    print(dai_models)
+    print("Dai: ", dai_models)
 
     for idx, device in enumerate(dai.Device.getAllAvailableDevices()):
         print(f"{device.getDeviceId()} {device.state}")
-        # dai_names.append(f"[D{idx}] ({device.getDeviceId()})")
+        dai_names.append(f"[D{idx}] ({device.getDeviceId()})")
 
-    print(camera_models + dai_names)
+    print("All: ", camera_models + dai_names)
 
     # Data bridges
     camera_list = ListBridge(camera_models + dai_names)
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     # Camera initialization and image rendering
     if camera_models:
-        cvCameraRenderer = OpencvImageProvider( cv2backend=preferred_backend, daiSupport=len(dai_names), daiInit=(not len(camera_models) and len(dai_names)) )
+        cvCameraRenderer = OpencvImageProvider( cv2backend=preferred_backend, daiInit=(not len(camera_models) and len(dai_names)) )
         cvRoiRenderer = cvCameraRenderer.getRoiRenderer()
 
         engine.rootContext().setContextProperty("cvCameraRenderer", cvCameraRenderer)  # cv base img provider
