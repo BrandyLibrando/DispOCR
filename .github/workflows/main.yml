@@ -117,5 +117,5 @@ jobs:
        shell: bash
        run: |
           rclone copy dist/ \
-             google_andeng:/ths_artifacts/${{ github.repository }}/${{ matrix.target }}/$COMMIT_VERSION \
+             "google_andeng:/ths_artifacts/${{ github.repository }}/${{ matrix.target }}/$COMMIT_VERSION" \
             -v
