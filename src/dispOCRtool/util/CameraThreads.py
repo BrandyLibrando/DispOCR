@@ -71,7 +71,7 @@ class ThreadCvCamera(QThread):
                 self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
 
                 ## Profiling
-                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart() + 1)
+                if self.timer.elapsed() != 0: self.elapsed_queue.append(1000/self.timer.restart())
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 
@@ -98,27 +98,21 @@ class ThreadDaiCamera(QThread):
     def __init__(self, mxid, parent=None):
         QThread.__init__(self, parent)
 
+        self.width  = 640
+        self.height = 480
+
         self.pipeline = dai.Pipeline()
 
-        self.dai_cam = self.pipeline.create(dai.node.ColorCamera)
-        self.dai_cam.setPreviewSize(640, 480)
-        self.dai_cam.setInterleaved(False)
-        self.dai_cam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-        self.dai_cam.setFps(15)
+        self.dai_cam = self.pipeline.create(dai.node.Camera).build()
+        # self.dai_cam.setFps(15)
+        self.dai_prev = self.dai_cam.requestOutput(
+                (self.width, self.height), 
+                type=dai.ImgFrame.Type.BGR888p,
+                fps=30
+            )
 
-        # DEPRECATED CODE
-        # self.dai_xout = self.pipeline.create(dai.node.XLinkOut) 
-        # self.dai_xout.setStreamName("preview")
-        # self.dai_cam.preview.link(self.dai_xout.input)
-
-        # self.dai_control_in = self.pipeline.create(dai.node.XLinkIn)
-        # self.dai_control_in.setStreamName("control")
-        # self.dai_control_in.out.link(self.dai_cam.inputControl)
-        self.dai_out = self.dai_cam.preview.createOutputQueue()
+        self.dai_out = self.dai_prev.createOutputQueue()
         self.dai_in  = self.dai_cam.inputControl.createInputQueue()
-
-        self.height = self.pipeline.getPreviewHeight()
-        self.width  = self.pipeline.getPreviewWidth()
 
         self.image = None
         self.roi_image = None
@@ -131,28 +125,33 @@ class ThreadDaiCamera(QThread):
         self.new_roi = (0, 0, 0, 0)
         self.roi_changed = False
 
-        self.pipeline.start()
-
         self.timer = QElapsedTimer()  # For performance measure
         self.elapsed_queue = deque(maxlen=10)  # To compute moving ave
 
     def run(self):
+        self.pipeline.start()
         self.openedCamera.emit(self.width, self.height)  # Send width and height to ImageProvider
         self.timer.start()  # Start performance timer
 
-        while self._running:
-            with self.pipeline:
-                inFrame = self.videoQueue.get()
+        with self.pipeline:
+            while self._running:
+                if self.roi_changed:
+                    self.x1, self.y1, self.x2, self.y2 = self.new_roi
+                    self.roi_changed = False
+                    
+                try: inFrame = self.dai_out.get() 
+                except dai.MessageQueue.QueueException: print("> Cannot proceed getting frame from DAI, queue closed.")
+                
                 if inFrame is not None:
                     frame = inFrame.getCvFrame()
 
                 try:
-                    if self._running and frame:
+                    if self._running and frame is not None:
                         roi_frame = np.ascontiguousarray(frame[self.y1:self.y2, self.x1:self.x2])
                     else:
                         roi_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
                         frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-                except:
+                except Exception as e:
                     self._running = False
                     break
 
@@ -163,23 +162,26 @@ class ThreadDaiCamera(QThread):
                 self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
 
                 ## Profiling
-                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart() + 1)
+                if self.timer.elapsed() != 0: self.elapsed_queue.append(1000/self.timer.restart())
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 
+                if not self._running:
+                    break
+
 
     def stop(self):
-        self.cap.close()
         self._running = False
+        self.pipeline.stop()
         self.requestInterruption()
         self.wait()
         print("> DAI thread ended successfully.")
 
-    # @Slot(int, int, int, int)
-    # def setRoiCoordinates(self, x1, y1, x2, y2):
-    #     self.new_roi = (x1, y1, x2, y2)
-    #     self.roi_changed = True
-    #     print("> ROI coordinates set successfully.")
+    @Slot(int, int, int, int)
+    def setRoiCoordinates(self, x1, y1, x2, y2):
+        self.new_roi = (x1, y1, x2, y2)
+        self.roi_changed = True
+        print("> ROI coordinates set successfully.")
 
     # @Slot()
     # def send_controls():

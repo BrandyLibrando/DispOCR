@@ -63,9 +63,9 @@ Window {
                     DragHandler {
                         target: roiPt1
                         xAxis.minimum: roiVF.paintedX - (roiPt1.width / 2)
-                        xAxis.maximum: roiPt2.x
+                        xAxis.maximum: roiPt2.x - 10
                         yAxis.minimum: roiVF.paintedY - (roiPt1.width / 2)
-                        yAxis.maximum: roiPt2.y
+                        yAxis.maximum: roiPt2.y - 10
                     }
                 }
 
@@ -81,9 +81,9 @@ Window {
 
                     DragHandler {
                         target: roiPt2
-                        xAxis.minimum: roiPt1.x
+                        xAxis.minimum: roiPt1.x + 10
                         xAxis.maximum: roiVF.paintedX + roiVF.paintedWidth - (roiPt2.width / 2)
-                        yAxis.minimum: roiPt1.y
+                        yAxis.minimum: roiPt1.y + 10
                         yAxis.maximum: roiVF.paintedY + roiVF.paintedHeight - (roiPt2.width / 2)
                     }
                 }

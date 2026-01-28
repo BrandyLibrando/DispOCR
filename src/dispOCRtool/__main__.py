@@ -60,18 +60,19 @@ if __name__ == "__main__":
     # Data bridges
     camera_list = ListBridge(camera_models + dai_names)
 
-    engine.rootContext().setContextProperty("cameraList", camera_list)
-    engine.rootContext().setContextProperty("cvCamCount", len(camera_models))
-    engine.rootContext().setContextProperty("daiCamCount", len(dai_names))
-
-
-    ## HELPERS
-    # Logger timer
-    logger = FileWriter(settings.getSaveDir())
-    engine.rootContext().setContextProperty("fileLogger", logger)
-
     # Camera initialization and image rendering
-    if camera_models:
+    if camera_list.size():
+        ## HELPERS
+        # Camera lists
+        engine.rootContext().setContextProperty("cameraList", camera_list)
+        engine.rootContext().setContextProperty("cvCamCount", len(camera_models))
+        engine.rootContext().setContextProperty("daiCamCount", len(dai_names))
+
+        # Logger class
+        logger = FileWriter(settings.getSaveDir())
+        engine.rootContext().setContextProperty("fileLogger", logger)
+
+        # Image providers
         cvCameraRenderer = OpencvImageProvider( cv2backend=preferred_backend, daiInit=(not len(camera_models) and len(dai_names)) )
         cvRoiRenderer = cvCameraRenderer.getRoiRenderer()
 
@@ -80,13 +81,13 @@ if __name__ == "__main__":
         engine.rootContext().setContextProperty("cvRoiRenderer", cvRoiRenderer)  # cv roi img provider
         engine.addImageProvider("CvRoiFeed", cvRoiRenderer)
 
+        ## LOADING OF QML FILE FOR APP
+        qml_file = Path(__file__).resolve().parent / "qml/main.qml"
+        engine.load(qml_file)
 
-    ## LOADING OF QML FILE FOR APP
-    qml_file = Path(__file__).resolve().parent / "qml/main.qml"
-    engine.load(qml_file)
-
-    if not engine.rootObjects():
-        sys.exit(-1)
+    else:
+        print("No cameras detected.\nPlease make sure a camera is properly connected.")
+        sys.exit(0)
 
 
     ## EXIT CLEANUP
@@ -102,6 +103,9 @@ if __name__ == "__main__":
         while logger.timer.isActive():
             app.processEvents()
 
-    app.aboutToQuit.connect(cleanup_on_exit)
 
+    if not engine.rootObjects():
+        sys.exit(-1)
+
+    app.aboutToQuit.connect(cleanup_on_exit)
     sys.exit(app.exec())

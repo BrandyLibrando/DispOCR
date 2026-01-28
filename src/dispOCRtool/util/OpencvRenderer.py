@@ -66,12 +66,12 @@ class OpencvImageProvider(QQuickImageProvider):
         print(index, camera_name, dai)
         if self.dai:
             # code for dai end
-            print("> Trying to end DAI pipeline.")
+            print("> Trying to end DAI pipeline.")  # TODO: DELETE LATER
             self.killThread()
 
         # End webcam
         else:
-            print("> Trying to end CV camera.")
+            print("> Trying to end CV camera.")  # TODO: DELETE LATER
             self.killThread()
 
 
@@ -108,7 +108,7 @@ class OpencvImageProvider(QQuickImageProvider):
 
     @Slot()
     def killThread(self):
-        print("> Finishing current CV camera thread...")
+        print("> Finishing current camera thread...")
         self.cam.stop()
 
     @Slot()

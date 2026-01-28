@@ -50,8 +50,8 @@ class ThreadOcrBase(QThread):
 
             ## PADDLEV2 OPTIONS (Tested on 2.9.1)
             lang="en",
-            det_model_dir="en_PP-OCRv3_mobile_det",
-            rec_model_dir="en_PP-OCRv3_mobile_rec",
+            det_model_name="en_PP-OCRv4_mobile_det",
+            rec_model_name="en_PP-OCRv4_mobile_rec",
             # rec_algorithm="SVTR_LCNet",
             drop_score=self.MIN_SCORE,
 
@@ -86,7 +86,7 @@ class ThreadOcrBase(QThread):
                 self.updatePrediction.emit(final_str, ave_score)
 
                 ## Profiling
-                if self.timer.elapsed != 0: self.elapsed_queue.append(1000/self.timer.restart() + 1)
+                if self.timer.elapsed() != 0: self.elapsed_queue.append(1000/self.timer.restart())
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 
