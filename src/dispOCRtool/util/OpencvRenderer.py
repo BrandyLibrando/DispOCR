@@ -10,7 +10,7 @@ import depthai as dai
 
 from PySide6.QtGui import QImage
 from PySide6.QtCore import Slot, Signal
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QThread, QTimer
 from PySide6.QtQuick import QQuickImageProvider
 
 from util.CroppedImageRenderer import CroppedImageProvider
@@ -48,6 +48,10 @@ class OpencvImageProvider(QQuickImageProvider):
         self.ocr.updatePrediction.connect(self.updatePredictedText)
         self.ocr.updateFps.connect(self.getOcrFps)
         self.ocr.start()
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.restartOcrThread)
+        self.timer.start(240000)
 
 
     def requestImage(self, id, size, requestedSize):
@@ -88,6 +92,7 @@ class OpencvImageProvider(QQuickImageProvider):
         # Start webcam
         else:
             print(f"\n> Trying to start CV camera {camera_name}.")
+            self.dai = False
             self.index = index
             self.start()
 
@@ -109,12 +114,21 @@ class OpencvImageProvider(QQuickImageProvider):
     @Slot()
     def killThread(self):
         print("> Finishing current camera thread...")
-        self.cam.stop()
+        if self.cam is not None: self.cam.stop()
 
     @Slot()
     def destroyOcrThread(self):
         self.ocr.stop()
         self.ocr = None
+
+    @Slot()
+    def restartOcrThread(self):
+        self.destroyOcrThread()
+        self.ocr = ThreadOcrBase()
+        self.ocr.updatePrediction.connect(self.updatePredictedText)
+        self.ocr.updateFps.connect(self.getOcrFps)
+        self.ocr.start()
+        print("> OCR thread restarted.")
 
 
     @Slot()

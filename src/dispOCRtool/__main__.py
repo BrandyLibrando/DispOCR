@@ -22,7 +22,7 @@ from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QSysInfo, QStandardPa
 from PySide6.QtQuick import QQuickImageProvider, QQuickView
 
 ## Own Utility/Class Imports
-from app.settings import AppSettings
+from app.settings import AppConfigs
 from util.IntervalLogger import FileWriter
 from util.Bridge import ListBridge
 from util.OpencvRenderer import OpencvImageProvider
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     engine = QQmlApplicationEngine()
 
     ## SETTINGS
-    settings = AppSettings()
+    settings = AppConfigs
     engine.rootContext().setContextProperty("appSettings", settings)
 
 

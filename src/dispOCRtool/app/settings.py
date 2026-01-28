@@ -5,19 +5,24 @@ Used for the save directory and the setup settings
 that are helpful when persistent (e.g., log frequency).
 """
 
-from PySide6.QtCore import QObject, Slot, QSettings, QUrl, QStandardPaths
+from PySide6.QtCore import QObject, QSettings, QUrl, QStandardPaths
+from PySide6.QtCore import Slot, Signal
 
 
 class AppSettings(QObject):
+    settingsUpdated = Signal(list)  # [bool, bool, bool] Each bool corr. to one setting categ.
+
     def __init__(self, org_name="BrandyLibrando", app_name="DispOCR"):
         super().__init__()
         self._settings = QSettings(org_name, app_name)
+
 
     ## App Settings
     # General Settings
     @Slot(float)
     def setLogFrequency(self, value):
         self._settings.setValue("ui/general/logFrequency", value)
+        self.settingsUpdated.emit([True, False, False])
     @Slot(result=float)
     def getLogFrequency(self):
         return self._settings.value("ui/general/logFrequency", 1, type=float)
@@ -25,6 +30,7 @@ class AppSettings(QObject):
     @Slot(bool)
     def setEnableTextCorrection(self, value=True):
         self._settings.setValue("ui/general/textCorrect", value)
+        self.settingsUpdated.emit([True, False, False])
     @Slot(result=bool)
     def getEnableTextCorrection(self):
         return self._settings.value("ui/general/textCorrect", False, type=bool)
@@ -34,6 +40,7 @@ class AppSettings(QObject):
     @Slot(bool)
     def setEnableController(self, value=True):
         self._settings.setValue("ui/control/enableController", value)
+        self.settingsUpdated.emit([False, True, False])
     @Slot(result=bool)
     def getEnableController(self):
         return self._settings.value("ui/control/enableController", False, type=bool)
@@ -41,6 +48,7 @@ class AppSettings(QObject):
     @Slot(str)
     def setControllerValue(self, value):
         self._settings.setValue("ui/control/controlValue", value)
+        self.settingsUpdated.emit([False, True, False])
     @Slot(result=str)
     def getControllerValue(self):
         return self._settings.value("ui/control/controlValue", "", type=str)
@@ -57,6 +65,7 @@ class AppSettings(QObject):
     @Slot(bool)
     def setEnableManualExposure(self, value=True):
         self._settings.setValue("ui/dai/manualExposure", value)
+        self.settingsUpdated.emit([False, True, False])
     @Slot(result=bool)
     def getEnableManualExposure(self):
         return self._settings.value("ui/dai/manualExposure", False, type=bool)
@@ -64,6 +73,7 @@ class AppSettings(QObject):
     @Slot(bool)
     def setEnableManualIso(self, value=True):
         self._settings.setValue("ui/dai/manualIso", value)
+        self.settingsUpdated.emit([False, True, False])
     @Slot(result=bool)
     def getEnableManualIso(self):
         return self._settings.value("ui/dai/manualIso", False, type=bool)
@@ -71,6 +81,7 @@ class AppSettings(QObject):
     @Slot(bool)
     def setEnableManualFocus(self, value=True):
         self._settings.setValue("ui/dai/manualFocus", value)
+        self.settingsUpdated.emit([False, True, False])
     @Slot(result=bool)
     def getEnableManualFocus(self):
         return self._settings.value("ui/dai/manualFocus", False, type=bool)
@@ -79,6 +90,7 @@ class AppSettings(QObject):
     @Slot(int)
     def setManualExposure(self, value):
         self._settings.setValue("ui/dai/values/manualExposure", value)
+        self.settingsUpdated.emit([False, True, False])
     @Slot(result=int)
     def getManualExposure(self):
         return self._settings.value("ui/dai/values/manualExposure", 16500, type=int)
@@ -86,6 +98,7 @@ class AppSettings(QObject):
     @Slot(int)
     def setManualIso(self, value):
         self._settings.setValue("ui/dai/values/manualIso", value)
+        self.settingsUpdated.emit([False, True, False])
     @Slot(result=int)
     def getManualIso(self):
         return self._settings.value("ui/dai/values/manualIso", 800, type=int)
@@ -93,6 +106,7 @@ class AppSettings(QObject):
     @Slot(int)
     def setManualFocus(self, value):
         self._settings.setValue("ui/dai/values/manualFocus", value)
+        self.settingsUpdated.emit([False, True, False])
     @Slot(result=int)
     def getManualFocus(self):
         return self._settings.value("ui/dai/values/manualFocus", 128, type=int)
@@ -106,3 +120,5 @@ class AppSettings(QObject):
     @Slot(result=QUrl)
     def getSaveDir(self):
         return self._settings.value("paths/saveDir", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
+
+AppConfigs = AppSettings()

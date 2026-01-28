@@ -27,7 +27,7 @@ ApplicationWindow {
         anchors.fill: parent
 
         // Camera image properties
-        property bool daiCameraSelected: true // inputCameraDevice.currentText.includes("[D")
+        property bool daiCameraSelected: inputCameraDevice.currentText.includes("[D")
         property real heightRatio: main.height/480
         property real widthRatio: main.width/640
         property var editedImage: null
@@ -373,9 +373,8 @@ ApplicationWindow {
 
                                     Connections {
                                         function onCurrentIndexChanged() {
-                                            if (inputCameraDevice.currentText) {
+                                            if (inputCameraDevice.currentText && inputCameraDevice.currentIndex !== -1) {
                                                 const daiIndex = Math.max(-1, inputCameraDevice.currentIndex - cvCamCount);
-                                                console.log("", daiIndex);
                                                 cvCameraRenderer.change_camera(
                                                             inputCameraDevice.currentIndex,
                                                             inputCameraDevice.model[inputCameraDevice.currentIndex],
@@ -431,7 +430,7 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputLogFrequencyLabel1
-                                    x: 0; y: 53
+                                    x: 0; y: 58
                                     width: 119; height: 16
                                     font.pixelSize: 11
                                     text: qsTr("Log every:")
@@ -617,7 +616,9 @@ ApplicationWindow {
                                     display: AbstractButton.TextBesideIcon
 
                                     text: qsTr("Manual exposure (Current: %1)").arg(daiExposure.value)
-                                    onCheckedChanged: appSettings.setEnableManualExposure(checked)
+                                    onCheckedChanged: {
+                                        appSettings.setEnableManualExposure(checked);
+                                    }
                                 }
 
                                 Slider {
@@ -638,7 +639,9 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: appSettings.setManualExposure(value);
+                                    onMoved: {
+                                        appSettings.setManualExposure(value);
+                                    }
                                 }
                             }
 
@@ -654,7 +657,9 @@ ApplicationWindow {
                                     display: AbstractButton.TextBesideIcon
 
                                     text: qsTr("Manual ISO (Current: %1)").arg(daiIso.value)
-                                    onCheckedChanged: appSettings.setEnableManualIso(checked);
+                                    onCheckedChanged: {
+                                        appSettings.setEnableManualIso(checked);
+                                    }
                                 }
 
                                 Slider {
@@ -675,7 +680,9 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: appSettings.setManualIso(value);
+                                    onMoved: {
+                                        appSettings.setManualIso(value);
+                                    }
                                 }
                             }
 
@@ -691,11 +698,14 @@ ApplicationWindow {
                                     display: AbstractButton.TextBesideIcon
 
                                     text: qsTr("Manual focus (Current: %1)").arg(daiFocus.value)
-                                    onCheckedChanged: appSettings.setEnableManualFocus(checked);
+                                    onCheckedChanged: {
+                                        appSettings.setEnableManualFocus(checked);
+                                    }
                                 }
 
                                 Slider {
                                     id: daiFocus
+
                                     width: parent.width
                                     from: 0; to: 255
                                     stepSize: 5
@@ -712,7 +722,9 @@ ApplicationWindow {
                                         }
                                     }
 
-                                    onMoved: appSettings.setManualFocus(value);
+                                    onMoved: {
+                                        appSettings.setManualFocus(value);
+                                    }
                                 }
                             }
                         }
@@ -738,6 +750,11 @@ ApplicationWindow {
                         Material.elevation: 1
 
                         text: qsTr("Start")
+                        hoverEnabled: true
+                        ToolTip.delay: 250
+                        ToolTip.timeout: 5000
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Start logging values into a .txt file.")
 
                         onClicked: {
                             // Check for invalid inputs
@@ -748,7 +765,6 @@ ApplicationWindow {
                             }
                             else {
                                 let invalid = root.focusInvalidInput(root.possibleInvalidInputs);
-                                console.log("", invalid);
                             }
                         }
                     }
@@ -766,6 +782,12 @@ ApplicationWindow {
 
                         enabled: false
                         text: qsTr("Stop + Save")
+                        hoverEnabled: true
+                        ToolTip.delay: 250
+                        ToolTip.timeout: 5000
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Stop log. Start correction if enabled.")
+
                         onClicked: {
                             // finalize write CSV file
                             // processes
@@ -831,7 +853,7 @@ ApplicationWindow {
             }
             onRejected: {
                 main.state = "";
-                console.log("Folder selection canceled");
+                console.log("> Folder selection canceled.");
             }
         }
 
@@ -935,8 +957,6 @@ ApplicationWindow {
     Component.onCompleted: {
         if (cameraList.data.length) {
             cvCameraRenderer.start();
-        } else {
-            console.log("No camera detected.");
         }
 
         // Preload app settings with previous settings

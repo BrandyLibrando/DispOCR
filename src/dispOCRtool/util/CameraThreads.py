@@ -13,6 +13,8 @@ from PySide6.QtGui import QImage
 from PySide6.QtCore import Slot, Signal
 from PySide6.QtCore import QThread, QElapsedTimer
 
+from app.settings import AppConfigs
+
 
 class ThreadCvCamera(QThread):
     updateFrame = Signal(QImage, QImage, object)
@@ -98,21 +100,24 @@ class ThreadDaiCamera(QThread):
     def __init__(self, mxid, parent=None):
         QThread.__init__(self, parent)
 
+        self.cfg = AppConfigs
+        self.cfg.settingsUpdated.connect(self.send_controls)
+
         self.width  = 640
         self.height = 480
 
         self.pipeline = dai.Pipeline()
 
         self.dai_cam = self.pipeline.create(dai.node.Camera).build()
-        # self.dai_cam.setFps(15)
         self.dai_prev = self.dai_cam.requestOutput(
                 (self.width, self.height), 
                 type=dai.ImgFrame.Type.BGR888p,
-                fps=30
+                fps=12
             )
 
         self.dai_out = self.dai_prev.createOutputQueue()
         self.dai_in  = self.dai_cam.inputControl.createInputQueue()
+        print(self.dai_cam.inputControl.getPossibleDatatypes())
 
         self.image = None
         self.roi_image = None
@@ -138,7 +143,7 @@ class ThreadDaiCamera(QThread):
                 if self.roi_changed:
                     self.x1, self.y1, self.x2, self.y2 = self.new_roi
                     self.roi_changed = False
-                    
+
                 try: inFrame = self.dai_out.get() 
                 except dai.MessageQueue.QueueException: print("> Cannot proceed getting frame from DAI, queue closed.")
                 
@@ -173,7 +178,6 @@ class ThreadDaiCamera(QThread):
     def stop(self):
         self._running = False
         self.pipeline.stop()
-        self.requestInterruption()
         self.wait()
         print("> DAI thread ended successfully.")
 
@@ -183,23 +187,29 @@ class ThreadDaiCamera(QThread):
         self.roi_changed = True
         print("> ROI coordinates set successfully.")
 
-    # @Slot()
-    # def send_controls():
-    #     ctrl = dai.CameraControl()
+    @Slot()
+    def send_controls(self):
+        use_manual_exposure = self.cfg.getEnableManualExposure()
+        use_manual_focus    = self.cfg.getEnableManualFocus()
 
-    #     if use_manual_exposure:
-    #         ctrl.setManualExposure(exposure_us, iso)  # (exposure time, ISO)
-    #     else:
-    #         ctrl.setAutoExposureEnable()
+        manual_exposure     = self.cfg.getManualExposure()
+        manual_iso          = self.cfg.getManualIso()
+        manual_focus        = self.cfg.getManualFocus()
 
-    #     if use_manual_focus:
-    #         ctrl.setManualFocus(focus)
-    #     else:
-    #         ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
+        ctrl = dai.CameraControl()
+        if use_manual_exposure:
+            ctrl.setManualExposure(manual_exposure, manual_iso)  # (exposure time, ISO)
+        else:
+            ctrl.setAutoExposureEnable()
 
-    #     if use_manual_wb:
-    #         ctrl.setManualWhiteBalance(wb_k)
-    #     else:
-    #         ctrl.setAutoWhiteBalanceMode(dai.CameraControl.AutoWhiteBalanceMode.AUTO)
+        if use_manual_focus:
+            ctrl.setManualFocus(manual_focus)
+        else:
+            ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
 
-    #     ctrlQ.send(ctrl)
+        #if use_manual_wb:
+        #    ctrl.setManualWhiteBalance(wb_k)
+        #else:
+        #    ctrl.setAutoWhiteBalanceMode(dai.CameraControl.AutoWhiteBalanceMode.AUTO)
+
+        self.dai_in.send(ctrl)

@@ -57,8 +57,8 @@ Window {
                     color: "#f00"
                     radius: width/2
 
-                    x:  roiVF.paintedX
-                    y:  roiVF.paintedY
+                    x:  roiVF.paintedX - (roiPt1.width / 2)
+                    y:  roiVF.paintedY - (roiPt1.width / 2)
 
                     DragHandler {
                         target: roiPt1
