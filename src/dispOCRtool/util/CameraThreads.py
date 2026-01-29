@@ -191,10 +191,12 @@ class ThreadDaiCamera(QThread):
     def send_controls(self):
         use_manual_exposure = self.cfg.getEnableManualExposure()
         use_manual_focus    = self.cfg.getEnableManualFocus()
+        use_manual_wb       = self.cfg.getEnableManualWhiteBalance()
 
         manual_exposure     = self.cfg.getManualExposure()
         manual_iso          = self.cfg.getManualIso()
         manual_focus        = self.cfg.getManualFocus()
+        manual_wb           = self.cfg.getManualWhiteBalance()
 
         ctrl = dai.CameraControl()
         if use_manual_exposure:
@@ -207,9 +209,9 @@ class ThreadDaiCamera(QThread):
         else:
             ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
 
-        #if use_manual_wb:
-        #    ctrl.setManualWhiteBalance(wb_k)
-        #else:
-        #    ctrl.setAutoWhiteBalanceMode(dai.CameraControl.AutoWhiteBalanceMode.AUTO)
+        if use_manual_wb:
+            ctrl.setManualWhiteBalance(manual_wb)
+        else:
+            ctrl.setAutoWhiteBalanceMode(dai.CameraControl.AutoWhiteBalanceMode.AUTO)
 
         self.dai_in.send(ctrl)

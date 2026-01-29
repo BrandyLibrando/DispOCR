@@ -591,35 +591,45 @@ ApplicationWindow {
                         Item {
                             id: depthaiSettingsList
 
-                            // CheckBox {
-                            //     id: toggleOakCamera
-                            //     x: -9; y: -10
-                            //     height: 35
-                            //     leftPadding: 8; rightPadding: 8
-                            //     padding: 8
-                            //     font.pointSize: 8
-                            //     display: AbstractButton.TextBesideIcon
-
-                            //     text: qsTr("OAK camera preprocessing")
-                            //     onCheckedChanged: appSettings.setEnableManualAll(checked);
-                            // }
-
                             Column {
                                 id: groupDaiExposure
-                                x: -9; y: -15  //toggleOakCamera.y + 25
+                                x: 0; y: 0
                                 width: settingsContainer.width - 5
-                                spacing: -20
+                                spacing: -10
+
+                                Text {
+                                    id: groupDaiExposureLabel
+                                    height: 16
+                                    font.pixelSize: 11
+
+                                    text: qsTr("Manual exposure & ISO (%1, %2)").arg(daiExposure.value).arg(daiIso.value)
+                                }
+
+                                Row {
+                                    x: -5
+                                    width: parent.width - 5
 
                                 CheckBox {
                                     id: toggleDaiExposure
+                                        y: (parent.height / 2) - (height / 2)
+                                        width: 25
                                     font.pointSize: 8
-                                    display: AbstractButton.TextBesideIcon
+                                        display: AbstractButton.IconOnly
 
-                                    text: qsTr("Manual exposure (Current: %1)").arg(daiExposure.value)
+                                        ToolTip.delay: 250
+                                        ToolTip.timeout: 5000
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Enable manual exposure and ISO")
+
                                     onCheckedChanged: {
                                         appSettings.setEnableManualExposure(checked);
                                     }
                                 }
+
+                                    Column {
+                                        id: groupDaiExposureSliders
+                                        width: parent.width - toggleDaiExposure.width
+                                        spacing: -20
 
                                 Slider {
                                     id: daiExposure
@@ -632,7 +642,7 @@ ApplicationWindow {
                                     ToolTip {
                                         parent: daiExposure.handle
                                         visible: daiExposure.pressed
-                                        text: daiExposure.value
+                                                text: qsTr("Exposure: %1").arg(daiExposure.value)
                                         background: Rectangle {
                                             radius: width / 2
                                             border.color: Material.accent; color: Material.accent
@@ -641,39 +651,87 @@ ApplicationWindow {
 
                                     onMoved: {
                                         appSettings.setManualExposure(value);
+                                            }
+                                        }
+
+                                        Slider {
+                                            id: daiIso
+                                            width: parent.width
+                                            from: 100; to: 1600
+                                            stepSize: 50
+                                            touchDragThreshold: 4
+                                            enabled: toggleDaiExposure.checked
+
+                                            ToolTip {
+                                                parent: daiIso.handle
+                                                visible: daiIso.pressed
+                                                text: qsTr("ISO: %1").arg(daiIso.value)
+                                                background: Rectangle {
+                                                    radius: width / 2
+                                                    border.color: Material.accent; color: Material.accent
+                                                }
+                                            }
+
+                                            onMoved: {
+                                                appSettings.setManualIso(value);
+                                            }
+                                        }
                                     }
                                 }
                             }
 
                             Column {
-                                id: groupDaiIso
-                                x: -9; y: groupDaiExposure.y + 70
+                                id: groupDaiWB
+                                x: 0; y: groupDaiExposure.y + groupDaiExposure.height + 3
                                 width: settingsContainer.width - 5
-                                spacing: -20
+                                spacing: -10
+
+                                Text {
+                                    id: groupDaiWBLabel
+                                    height: 16
+                                    font.pixelSize: 11
+
+                                    text: qsTr("Manual white balance (%1K)").arg(daiWB.value)
+                                }
+
+                                Row {
+                                    x: -5
+                                    width: parent.width - 5
 
                                 CheckBox {
-                                    id: toggleDaiIso
+                                        id: toggleDaiWB
+                                        y: (parent.height / 2) - (height / 2)
+                                        width: 25
                                     font.pointSize: 8
-                                    display: AbstractButton.TextBesideIcon
+                                        display: AbstractButton.IconOnly
 
-                                    text: qsTr("Manual ISO (Current: %1)").arg(daiIso.value)
+                                        ToolTip.delay: 250
+                                        ToolTip.timeout: 5000
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Enable manual white balance")
+
                                     onCheckedChanged: {
-                                        appSettings.setEnableManualIso(checked);
+                                            appSettings.setEnableManualWhiteBalance(checked);
                                     }
                                 }
 
+                                    Column {
+                                        id: groupDaiWBSliders
+                                        width: parent.width - toggleDaiWB.width
+                                        spacing: -20
+
                                 Slider {
-                                    id: daiIso
+                                            id: daiWB
                                     width: parent.width
-                                    from: 100; to: 1600
-                                    stepSize: 50
+                                            from: 1000; to: 12000
+                                            stepSize: 500
                                     touchDragThreshold: 4
-                                    enabled: toggleDaiIso.checked
+                                            enabled: toggleDaiWB.checked
 
                                     ToolTip {
-                                        parent: daiIso.handle
-                                        visible: daiIso.pressed
-                                        text: daiIso.value
+                                                parent: daiWB.handle
+                                                visible: daiWB.pressed
+                                                text: qsTr("White balance: %1K").arg(daiWB.value)
                                         background: Rectangle {
                                             radius: width / 2
                                             border.color: Material.accent; color: Material.accent
@@ -681,27 +739,52 @@ ApplicationWindow {
                                     }
 
                                     onMoved: {
-                                        appSettings.setManualIso(value);
+                                                appSettings.setManualWhiteBalance(value);
+                                            }
+                                        }
                                     }
                                 }
                             }
 
                             Column {
                                 id: groupDaiFocus
-                                x: -9; y: groupDaiIso.y + 70
+                                x: 0; y: groupDaiWB.y + groupDaiWB.height + 3
                                 width: settingsContainer.width - 5
-                                spacing: -20
+                                spacing: -10
+
+                                Text {
+                                    id: groupDaiFocusLabel
+                                    height: 16
+                                    font.pixelSize: 11
+
+                                    text: qsTr("Manual focus (%1)").arg(daiFocus.value)
+                                }
+
+                                Row {
+                                    x: -5
+                                    width: parent.width - 5
 
                                 CheckBox {
                                     id: toggleDaiFocus
+                                        y: (parent.height / 2) - (height / 2)
+                                        width: 25
                                     font.pointSize: 8
-                                    display: AbstractButton.TextBesideIcon
+                                        display: AbstractButton.IconOnly
 
-                                    text: qsTr("Manual focus (Current: %1)").arg(daiFocus.value)
+                                        ToolTip.delay: 250
+                                        ToolTip.timeout: 5000
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Enable manual focus")
+
                                     onCheckedChanged: {
                                         appSettings.setEnableManualFocus(checked);
                                     }
                                 }
+
+                                    Column {
+                                        id: groupDaiFocusSliders
+                                        width: parent.width - toggleDaiFocus.width
+                                        spacing: -20
 
                                 Slider {
                                     id: daiFocus
@@ -715,7 +798,7 @@ ApplicationWindow {
                                     ToolTip {
                                         parent: daiFocus.handle
                                         visible: daiFocus.pressed
-                                        text: daiFocus.value
+                                                text: qsTr("Focus: %1").arg(daiFocus.value)
                                         background: Rectangle {
                                             radius: width / 2
                                             border.color: Material.accent; color: Material.accent
@@ -724,6 +807,8 @@ ApplicationWindow {
 
                                     onMoved: {
                                         appSettings.setManualFocus(value);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -968,12 +1053,12 @@ ApplicationWindow {
         toggleControlSystem.checked = cfg.getEnableController();
         inputCtrlVal.text           = cfg.getControllerValue();
 
-        // toggleOakCamera.checked     = cfg.getEnableManualAll();
         toggleDaiExposure.checked   = cfg.getEnableManualExposure();
-        toggleDaiIso.checked        = cfg.getEnableManualIso();
         toggleDaiFocus.checked      = cfg.getEnableManualFocus();
+        toggleDaiWB.checked         = cfg.getEnableManualWhiteBalance();
         daiExposure.value           = cfg.getManualExposure();
         daiIso.value                = cfg.getManualIso();
         daiFocus.value              = cfg.getManualFocus();
+        daiWB.value                 = cfg.getManualWhiteBalance();
     }
 }

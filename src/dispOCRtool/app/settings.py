@@ -71,20 +71,20 @@ class AppSettings(QObject):
         return self._settings.value("ui/dai/manualExposure", False, type=bool)
 
     @Slot(bool)
-    def setEnableManualIso(self, value=True):
-        self._settings.setValue("ui/dai/manualIso", value)
-        self.settingsUpdated.emit([False, True, False])
-    @Slot(result=bool)
-    def getEnableManualIso(self):
-        return self._settings.value("ui/dai/manualIso", False, type=bool)
-
-    @Slot(bool)
     def setEnableManualFocus(self, value=True):
         self._settings.setValue("ui/dai/manualFocus", value)
         self.settingsUpdated.emit([False, True, False])
     @Slot(result=bool)
     def getEnableManualFocus(self):
         return self._settings.value("ui/dai/manualFocus", False, type=bool)
+
+    @Slot(bool)
+    def setEnableManualWhiteBalance(self, value=True):
+        self._settings.setValue("ui/dai/manualWhiteBalance", value)
+        self.settingsUpdated.emit([False, True, False])
+    @Slot(result=bool)
+    def getEnableManualWhiteBalance(self):
+        return self._settings.value("ui/dai/manualWhiteBalance", False, type=bool)
 
 
     @Slot(int)
@@ -110,6 +110,14 @@ class AppSettings(QObject):
     @Slot(result=int)
     def getManualFocus(self):
         return self._settings.value("ui/dai/values/manualFocus", 128, type=int)
+
+    @Slot(int)
+    def setManualWhiteBalance(self, value):
+        self._settings.setValue("ui/dai/values/manualWhiteBalance", value)
+        self.settingsUpdated.emit([False, True, False])
+    @Slot(result=int)
+    def getManualWhiteBalance(self):
+        return self._settings.value("ui/dai/values/manualWhiteBalance", 7000, type=int)
 
 
     ## Log File Save Directory
