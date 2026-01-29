@@ -17,6 +17,7 @@ files = [
     "src/dispOCRtool/util/Bridge.py",
     "src/dispOCRtool/util/CameraThreads.py",
     "src/dispOCRtool/util/CroppedImageRenderer.py",
+    "src/dispOCRtool/util/IntervalLogger.py",
     "src/dispOCRtool/util/OpencvRenderer.py",
 ]
 
@@ -56,8 +57,8 @@ requires = [
     "opencv-python-headless<=4.10",
     "cv2_enumerate_cameras",
     "depthai==3.0.0",
-    "paddleocr==3.3.2",         # For v2, use 2.9.1
-    "paddlepaddle==3.2.0",  
+    "paddleocr==3.3.2",         # For PaddleOCR v2, use 2.9.1
+    "paddlepaddle==3.2.0",      # For PaddlePaddle v2, use 2.6
     "language-tool-python",
 ]
 test_requires = [
@@ -76,6 +77,12 @@ requires = [
 ]
 
 [tool.briefcase.app.dispOCRtool.linux.system.debian]
+requires = [
+    # Additional modules for Raspberry Pi 5 controller functionality
+    "gpiozero",
+    "lgpio",
+    "pigpio",
+]
 system_requires = [
 ]
 system_runtime_requires = [

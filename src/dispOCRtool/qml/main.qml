@@ -39,6 +39,7 @@ ApplicationWindow {
         property real lastScore: 0.0
 
         property string saveDir: ""
+        property string scriptPath: appSettings.getScriptPath()
 
         Row {
             id: mainContainer
@@ -522,6 +523,7 @@ ApplicationWindow {
 
                             Item {
                                 id: groupInputCtrlValue
+                                width: settingsContainer.width
 
                                 Rectangle {
                                     id: inputCtrlValContainer
@@ -586,6 +588,29 @@ ApplicationWindow {
                                     }
                                 }
                             }
+
+                            Button {
+                                id: configScript
+                                x: (settingsContainer.width - configScript.width) / 3; y: 100
+                                height: configDir.height - 10
+                                font.bold: true
+                                font.pointSize: 8
+                                Material.foreground: Material.accent
+                                Material.background: "#eeeeee"
+                                Material.elevation: 1
+
+                                text: qsTr("Select script file")
+                                hoverEnabled: true
+                                ToolTip.delay: 250
+                                ToolTip.timeout: 5000
+                                ToolTip.visible: hovered
+                                ToolTip.text: qsTr("Current: %1").arg(main.scriptPath)
+
+                                onClicked: {
+                                    main.state = "editroidir"
+                                    scriptFileDialog.open()
+                                }
+                            }
                         }
 
                         Item {
@@ -609,11 +634,11 @@ ApplicationWindow {
                                     x: -5
                                     width: parent.width - 5
 
-                                CheckBox {
-                                    id: toggleDaiExposure
+                                    CheckBox {
+                                        id: toggleDaiExposure
                                         y: (parent.height / 2) - (height / 2)
                                         width: 25
-                                    font.pointSize: 8
+                                        font.pointSize: 8
                                         display: AbstractButton.IconOnly
 
                                         ToolTip.delay: 250
@@ -621,36 +646,36 @@ ApplicationWindow {
                                         ToolTip.visible: hovered
                                         ToolTip.text: qsTr("Enable manual exposure and ISO")
 
-                                    onCheckedChanged: {
-                                        appSettings.setEnableManualExposure(checked);
+                                        onCheckedChanged: {
+                                            appSettings.setEnableManualExposure(checked);
+                                        }
                                     }
-                                }
 
                                     Column {
                                         id: groupDaiExposureSliders
                                         width: parent.width - toggleDaiExposure.width
                                         spacing: -20
 
-                                Slider {
-                                    id: daiExposure
-                                    width: parent.width
-                                    from: 1; to: 33000
-                                    stepSize: 250
-                                    touchDragThreshold: 4
-                                    enabled: toggleDaiExposure.checked
+                                        Slider {
+                                            id: daiExposure
+                                            width: parent.width
+                                            from: 1; to: 33000
+                                            stepSize: 250
+                                            touchDragThreshold: 4
+                                            enabled: toggleDaiExposure.checked
 
-                                    ToolTip {
-                                        parent: daiExposure.handle
-                                        visible: daiExposure.pressed
+                                            ToolTip {
+                                                parent: daiExposure.handle
+                                                visible: daiExposure.pressed
                                                 text: qsTr("Exposure: %1").arg(daiExposure.value)
-                                        background: Rectangle {
-                                            radius: width / 2
-                                            border.color: Material.accent; color: Material.accent
-                                        }
-                                    }
+                                                background: Rectangle {
+                                                    radius: width / 2
+                                                    border.color: Material.accent; color: Material.accent
+                                                }
+                                            }
 
-                                    onMoved: {
-                                        appSettings.setManualExposure(value);
+                                            onMoved: {
+                                                appSettings.setManualExposure(value);
                                             }
                                         }
 
@@ -698,11 +723,11 @@ ApplicationWindow {
                                     x: -5
                                     width: parent.width - 5
 
-                                CheckBox {
+                                    CheckBox {
                                         id: toggleDaiWB
                                         y: (parent.height / 2) - (height / 2)
                                         width: 25
-                                    font.pointSize: 8
+                                        font.pointSize: 8
                                         display: AbstractButton.IconOnly
 
                                         ToolTip.delay: 250
@@ -710,35 +735,35 @@ ApplicationWindow {
                                         ToolTip.visible: hovered
                                         ToolTip.text: qsTr("Enable manual white balance")
 
-                                    onCheckedChanged: {
+                                        onCheckedChanged: {
                                             appSettings.setEnableManualWhiteBalance(checked);
+                                        }
                                     }
-                                }
 
                                     Column {
                                         id: groupDaiWBSliders
                                         width: parent.width - toggleDaiWB.width
                                         spacing: -20
 
-                                Slider {
+                                        Slider {
                                             id: daiWB
-                                    width: parent.width
+                                            width: parent.width
                                             from: 1000; to: 12000
                                             stepSize: 500
-                                    touchDragThreshold: 4
+                                            touchDragThreshold: 4
                                             enabled: toggleDaiWB.checked
 
-                                    ToolTip {
+                                            ToolTip {
                                                 parent: daiWB.handle
                                                 visible: daiWB.pressed
                                                 text: qsTr("White balance: %1K").arg(daiWB.value)
-                                        background: Rectangle {
-                                            radius: width / 2
-                                            border.color: Material.accent; color: Material.accent
-                                        }
-                                    }
+                                                background: Rectangle {
+                                                    radius: width / 2
+                                                    border.color: Material.accent; color: Material.accent
+                                                }
+                                            }
 
-                                    onMoved: {
+                                            onMoved: {
                                                 appSettings.setManualWhiteBalance(value);
                                             }
                                         }
@@ -764,11 +789,11 @@ ApplicationWindow {
                                     x: -5
                                     width: parent.width - 5
 
-                                CheckBox {
-                                    id: toggleDaiFocus
+                                    CheckBox {
+                                        id: toggleDaiFocus
                                         y: (parent.height / 2) - (height / 2)
                                         width: 25
-                                    font.pointSize: 8
+                                        font.pointSize: 8
                                         display: AbstractButton.IconOnly
 
                                         ToolTip.delay: 250
@@ -776,37 +801,37 @@ ApplicationWindow {
                                         ToolTip.visible: hovered
                                         ToolTip.text: qsTr("Enable manual focus")
 
-                                    onCheckedChanged: {
-                                        appSettings.setEnableManualFocus(checked);
+                                        onCheckedChanged: {
+                                            appSettings.setEnableManualFocus(checked);
+                                        }
                                     }
-                                }
 
                                     Column {
                                         id: groupDaiFocusSliders
                                         width: parent.width - toggleDaiFocus.width
                                         spacing: -20
 
-                                Slider {
-                                    id: daiFocus
+                                        Slider {
+                                            id: daiFocus
 
-                                    width: parent.width
-                                    from: 0; to: 255
-                                    stepSize: 5
-                                    touchDragThreshold: 4
-                                    enabled: toggleDaiFocus.checked
+                                            width: parent.width
+                                            from: 0; to: 255
+                                            stepSize: 5
+                                            touchDragThreshold: 4
+                                            enabled: toggleDaiFocus.checked
 
-                                    ToolTip {
-                                        parent: daiFocus.handle
-                                        visible: daiFocus.pressed
+                                            ToolTip {
+                                                parent: daiFocus.handle
+                                                visible: daiFocus.pressed
                                                 text: qsTr("Focus: %1").arg(daiFocus.value)
-                                        background: Rectangle {
-                                            radius: width / 2
-                                            border.color: Material.accent; color: Material.accent
-                                        }
-                                    }
+                                                background: Rectangle {
+                                                    radius: width / 2
+                                                    border.color: Material.accent; color: Material.accent
+                                                }
+                                            }
 
-                                    onMoved: {
-                                        appSettings.setManualFocus(value);
+                                            onMoved: {
+                                                appSettings.setManualFocus(value);
                                             }
                                         }
                                     }
@@ -942,6 +967,26 @@ ApplicationWindow {
             }
         }
 
+        // CONTROL SCRIPT DIRECTORY HANDLER
+        FileDialog {
+            id: scriptFileDialog
+            title: "Select Target Script File"
+            acceptLabel: qsTr("Select File")
+            fileMode: FileDialog.OpenFile
+            nameFilters: ["Python script files (*.py)"]
+
+            selectedFile: main.scriptPath
+            onAccepted: {
+                main.state = "";
+                appSettings.setScriptPath(scriptFileDialog.selectedFile);
+                main.scriptPath = appSettings.getScriptPath();
+            }
+            onRejected: {
+                main.state = "";
+                console.log("> Script file selection canceled.");
+            }
+        }
+
         // ROI SELECTION HANDLER
         RoiDialog {
             id: roiwindow
@@ -993,6 +1038,7 @@ ApplicationWindow {
                 PropertyChanges {
                     configRoi { enabled: false }
                     configDir { enabled: false }
+                    configScript { enabled: false }
                     operationStart { enabled: false }
                     operationStop { enabled: true }
                     settingsContainer { enabled: false; opacity: 0.3 }
@@ -1004,6 +1050,7 @@ ApplicationWindow {
                 PropertyChanges {
                     configRoi { enabled: false }
                     configDir { enabled: false }
+                    configScript { enabled: false }
                     operationStart { enabled: false }
                     operationStop { enabled: false }
                     settingsContainer { enabled: false; opacity: 0.3 }
@@ -1047,6 +1094,7 @@ ApplicationWindow {
         // Preload app settings with previous settings
         const cfg = appSettings;
         main.saveDir                = cfg.getSaveDir();
+        main.scriptPath             = cfg.getScriptPath();
         inputFreqVal.text           = cfg.getLogFrequency();
         toggleCorrection.checked    = cfg.getEnableTextCorrection();
 

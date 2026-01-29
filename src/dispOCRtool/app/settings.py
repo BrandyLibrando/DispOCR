@@ -120,13 +120,19 @@ class AppSettings(QObject):
         return self._settings.value("ui/dai/values/manualWhiteBalance", 7000, type=int)
 
 
-    ## Log File Save Directory
+    ## Directory Handlers
     @Slot(QUrl)
     def setSaveDir(self, url):
         self._settings.setValue("paths/saveDir", url)
-
     @Slot(result=QUrl)
     def getSaveDir(self):
         return self._settings.value("paths/saveDir", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
+    
+    @Slot(QUrl)
+    def setScriptPath(self, url):
+        self._settings.setValue("paths/scriptPath", url)
+    @Slot(result=QUrl)
+    def getScriptPath(self):
+        return self._settings.value("paths/scriptPath", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
 
 AppConfigs = AppSettings()
