@@ -42,10 +42,12 @@ ApplicationWindow {
         // Paths
         property string saveDir: ""
         property string scriptPath: appSettings.getScriptPath()
+        property string scriptPathAlt: appSettings.getScriptPathAlt()
 
         // Control System Flags
         property bool hasExecuted: false
         property bool hasMatched: false
+        property int resultStack: 0
 
         Row {
             id: mainContainer
@@ -509,7 +511,7 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputCtrlCondLabel1
-                                    x: 0; y: 28
+                                    x: 0; y: 25
                                     width: 119; height: 16
                                     font.pixelSize: 11
 
@@ -567,7 +569,7 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputCtrlValLabel1
-                                    x: 0; y: 66
+                                    x: 0; y: 60
                                     width: 119; height: 16
                                     font.pixelSize: 11
 
@@ -598,7 +600,7 @@ ApplicationWindow {
 
                             Button {
                                 id: configScript
-                                x: (settingsContainer.width - configScript.width) / 3; y: 100
+                                x: (settingsContainer.width - configScript.width) / 3; y: 90
                                 height: configDir.height - 10
                                 font.bold: true
                                 font.pointSize: 8
@@ -606,7 +608,8 @@ ApplicationWindow {
                                 Material.background: "#eeeeee"
                                 Material.elevation: 1
 
-                                text: qsTr("Select script file")
+                                enabled: toggleControlSystem.checked
+                                text: qsTr("Select pass script file")
                                 hoverEnabled: true
                                 ToolTip.delay: 250
                                 ToolTip.timeout: 5000
@@ -616,6 +619,50 @@ ApplicationWindow {
                                 onClicked: {
                                     main.state = "editroidir"
                                     scriptFileDialog.open()
+                                }
+                            }
+
+                            CheckBox {
+                                id: toggleFailScript
+                                x: -9; y: 125
+                                leftPadding: 8; rightPadding: 8
+                                padding: 8
+                                height: 35
+                                font.pointSize: 8
+                                display: AbstractButton.TextBesideIcon
+
+                                enabled: toggleControlSystem.checked
+                                text: qsTr("Execute script on fail")
+                                onCheckedChanged: appSettings.setEnableScriptAlt(checked);
+
+                                hoverEnabled: true
+                                ToolTip.delay: 250
+                                ToolTip.timeout: 5000
+                                ToolTip.visible: hovered
+                                ToolTip.text: qsTr("Execute a Python script file once when the condition fails")
+                            }
+
+                            Button {
+                                id: configScriptAlt
+                                x: (settingsContainer.width - configScript.width) / 3; y: 150
+                                height: configDir.height - 10
+                                font.bold: true
+                                font.pointSize: 8
+                                Material.foreground: Material.accent
+                                Material.background: "#eeeeee"
+                                Material.elevation: 1
+
+                                enabled: toggleControlSystem.checked
+                                text: qsTr("Select fail script file")
+                                hoverEnabled: true
+                                ToolTip.delay: 250
+                                ToolTip.timeout: 5000
+                                ToolTip.visible: hovered
+                                ToolTip.text: qsTr("Current: %1").arg(main.scriptPathAlt)
+
+                                onClicked: {
+                                    main.state = "editroidir"
+                                    scriptFileDialogAlt.open()
                                 }
                             }
                         }
@@ -974,10 +1021,10 @@ ApplicationWindow {
             }
         }
 
-        // CONTROL SCRIPT DIRECTORY HANDLER
+        // CONTROL SCRIPT DIRECTORY HANDLERS
         FileDialog {
             id: scriptFileDialog
-            title: "Select Target Script File"
+            title: "Select Target Script File (Pass Condition)"
             acceptLabel: qsTr("Select File")
             fileMode: FileDialog.OpenFile
             nameFilters: ["Python script files (*.py)"]
@@ -987,6 +1034,24 @@ ApplicationWindow {
                 main.state = "";
                 appSettings.setScriptPath(scriptFileDialog.selectedFile);
                 main.scriptPath = appSettings.getScriptPath();
+            }
+            onRejected: {
+                main.state = "";
+                console.log("> Script file selection canceled.");
+            }
+        }
+        FileDialog {
+            id: scriptFileDialogAlt
+            title: "Select Target Script File (Fail Condition)"
+            acceptLabel: qsTr("Select File")
+            fileMode: FileDialog.OpenFile
+            nameFilters: ["Python script files (*.py)"]
+
+            selectedFile: main.scriptPathAlt
+            onAccepted: {
+                main.state = "";
+                appSettings.setScriptPathAlt(scriptFileDialogAlt.selectedFile);
+                main.scriptPathAlt = appSettings.getScriptPathAlt();
             }
             onRejected: {
                 main.state = "";
@@ -1026,10 +1091,41 @@ ApplicationWindow {
             }
 
             function onPredictionChanged(predictText, predictScore) {
+                if (main.lastText === predictText) {
+                    main.resultStack += 1;  // Sets redundancy threshold before firing activation to reduce sensitivity
+                } else {
+                    predictTextArea.text = predictText;
+                    main.resultStack = 0;  // Reset count when text is changed
+                }
+
+                // Update data things
                 fileLogger.update_data(predictText);
-                predictTextArea.text = predictText;
                 main.lastText = predictText;
                 main.lastScore = (predictScore * 100).toFixed(2);
+
+                // Script execution
+                if (predictTextArea.text.trim() !== "" && appSettings.getEnableController()) {  // Check non-empty prediction and if script exec enabled
+                    // Check if condition has changed (scripts only run once => edge-triggered)
+                    const conditionCheck = evaluateControl(predictTextArea.text);
+
+                    // XOR for edge-trigger (changing state resets hasExecuted)
+                    if (main.hasMatched !== conditionCheck) {
+                        main.hasMatched = conditionCheck;
+                        main.hasExecuted = false;  // Reset execution on state change
+                    }
+
+                    // Execute script when in operation, threshold exceeded, and edge-triggered
+                    if (main.state === "inop" && main.resultStack >= 3 && !main.hasExecuted) {
+                        if (main.hasMatched) {
+                            scriptHandler.start_pass();
+                        } else if (toggleFailScript.checked) {
+                            scriptHandler.start_fail();
+                        }
+                        main.hasExecuted = true;
+                    }
+                } else {  // Script execution occurs with OCR output; reset execution state when output is empty (e.g., screen of target turned off)
+                    main.hasExecuted = false;
+                }
             }
 
             function onFpsCamChanged(fps) { labelFpsCam.text = qsTr("Camera: %1 FPS").arg(fps.toFixed(2)); }
@@ -1092,6 +1188,34 @@ ApplicationWindow {
     // Get MXID portion of DAI camera name
     function getLastWord(str) { return str.trim().split(" ").pop(); }
 
+    // Evaluate condition of control system
+    function evaluateControl(predictedText) {
+        let passed = false;
+        const predicted = predictedText.trim();
+        const base = inputCtrlVal.text.trim();
+        switch (inputCtrlCond.currentText) {
+            case "contains":
+                passed = predicted.includes(base);
+                break;
+            case ">=":
+                passed = parseFloat(predicted) >= base;
+                break;
+            case ">":
+                passed = parseFloat(predicted) > base;
+                break;
+            case "<=":
+                passed = parseFloat(predicted) <= base;
+                break;
+            case "<":
+                passed = parseFloat(predicted) < base;
+                break;
+            case "==":
+                passed = parseFloat(predicted) === base;
+                break;
+        }
+        return passed;
+    }
+
 
     Component.onCompleted: {
         if (cameraList.data.length) {
@@ -1102,11 +1226,13 @@ ApplicationWindow {
         const cfg = appSettings;
         main.saveDir                = cfg.getSaveDir();
         main.scriptPath             = cfg.getScriptPath();
+        main.scriptPathAlt          = cfg.getScriptPathAlt();
         inputFreqVal.text           = cfg.getLogFrequency();
         toggleCorrection.checked    = cfg.getEnableTextCorrection();
 
         toggleControlSystem.checked = cfg.getEnableController();
         inputCtrlVal.text           = cfg.getControllerValue();
+        toggleFailScript.checked    = cfg.getEnableScriptAlt();
 
         toggleDaiExposure.checked   = cfg.getEnableManualExposure();
         toggleDaiFocus.checked      = cfg.getEnableManualFocus();

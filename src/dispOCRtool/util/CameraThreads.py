@@ -101,7 +101,7 @@ class ThreadDaiCamera(QThread):
         QThread.__init__(self, parent)
 
         self.cfg = AppConfigs
-        self.cfg.settingsUpdated.connect(self.send_controls)
+        self.cfg.daiSettingsUpdated.connect(self.send_controls)
 
         self.width  = 640
         self.height = 480

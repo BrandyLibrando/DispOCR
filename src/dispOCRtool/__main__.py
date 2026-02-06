@@ -24,6 +24,7 @@ from PySide6.QtQuick import QQuickImageProvider, QQuickView
 ## Own Utility/Class Imports
 from app.settings import AppConfigs
 from util.IntervalLogger import FileWriter
+from util.ScriptHandler import ScriptHandler
 from util.Bridge import ListBridge
 from util.OpencvRenderer import OpencvImageProvider
 
@@ -34,9 +35,12 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
-    ## SETTINGS
+    ## SETTINGS AND SCRIPT HANDLER
     settings = AppConfigs
     engine.rootContext().setContextProperty("appSettings", settings)
+
+    scriptHandler = ScriptHandler(settings.getScriptPath(), settings.getScriptPathAlt())
+    engine.rootContext().setContextProperty("scriptHandler", scriptHandler)
 
 
     ## PY-QML DATA BRIDGES
