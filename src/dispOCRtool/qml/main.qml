@@ -35,11 +35,17 @@ ApplicationWindow {
         property int cameraWidth: 0
         property int cameraHeight: 0
 
+        // OCR Properties
         property string lastText: ""
         property real lastScore: 0.0
 
+        // Paths
         property string saveDir: ""
         property string scriptPath: appSettings.getScriptPath()
+
+        // Control System Flags
+        property bool hasExecuted: false
+        property bool hasMatched: false
 
         Row {
             id: mainContainer
@@ -82,21 +88,21 @@ ApplicationWindow {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.verticalCenterOffset: -1
 
-                                Image {
+                                ImageViewfinder {
                                     id: subCameraVF
-                                    property string providerId: "image://CvRoiFeed/img"
+                                    property string providerId: "image://CvCameraFeed/img"
 
-                                    anchors.fill: parent
-                                    fillMode: Image.PreserveAspectFit
+                                    overlayColor: Material.accent
+                                    imageProvider: cvCameraRenderer
+                                    imageWidth: main.cameraWidth
+                                    imageHeight: main.cameraHeight
 
-                                    // asynchronous: true
-                                    cache: false
-                                    source: providerId
+                                    imageSource: providerId
                                     property bool counter: false
 
                                     function reloadImage() {
                                         counter = !counter
-                                        source = providerId + "?id=" + counter
+                                        imageSource = providerId + "?id=" + counter
                                     }
                                 }
                             }
@@ -188,21 +194,22 @@ ApplicationWindow {
                                 rightInset: 0
                                 padding: 0
 
-                                ImageViewfinder {
+
+                                Image {
                                     id: cameraVF
-                                    property string providerId: "image://CvCameraFeed/img"
+                                    property string providerId: "image://CvRoiFeed/img"
 
-                                    overlayColor: Material.accent
-                                    imageProvider: cvCameraRenderer
-                                    imageWidth: main.cameraWidth
-                                    imageHeight: main.cameraHeight
+                                    anchors.fill: parent
+                                    fillMode: Image.PreserveAspectFit
 
-                                    imageSource: providerId
+                                    // asynchronous: true
+                                    cache: false
+                                    source: providerId
                                     property bool counter: false
 
                                     function reloadImage() {
                                         counter = !counter
-                                        imageSource = providerId + "?id=" + counter
+                                        source = providerId + "?id=" + counter
                                     }
                                 }
                             }
@@ -990,11 +997,11 @@ ApplicationWindow {
         // ROI SELECTION HANDLER
         RoiDialog {
             id: roiwindow
-            viewfinder: cameraVF
+            viewfinder: subCameraVF
             onHidden: main.state = ""
             onRoiChanged: (x1, y1, x2, y2) => {
                 cvCameraRenderer.setRoi(x1, y1, x2, y2);
-                cameraVF.setRoi(x1, y1, x2, y2);
+                subCameraVF.setRoi(x1, y1, x2, y2);
             }
         }
 
@@ -1015,7 +1022,7 @@ ApplicationWindow {
                 main.cameraWidth = cameraWidth;
                 main.cameraHeight = cameraHeight;
                 roiwindow.resetPoints();
-                cameraVF.resetPoints();
+                subCameraVF.resetPoints();
             }
 
             function onPredictionChanged(predictText, predictScore) {
