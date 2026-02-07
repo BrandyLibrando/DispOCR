@@ -19,6 +19,7 @@ files = [
     "src/dispOCRtool/util/IntervalLogger.py",
     "src/dispOCRtool/util/OpencvRenderer.py",
     "src/dispOCRtool/util/ScriptHandler.py",
+    "src/dispOCRtool/util/ScriptThread.py",
     "src/dispOCRtool/util/__init__.py",
 ]
 
@@ -59,7 +60,6 @@ requires = [
     "cv2_enumerate_cameras",
     "depthai==3.0.0",
     "language-tool-python",
-
     # For PaddleOCR v2, use 2.9.1 (<=3.0)
     "paddleocr==3.3.2",
     # For PaddlePaddle v2, use 2.6 (<=2.7)

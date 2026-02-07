@@ -4,38 +4,42 @@ Helper class for running Python scripts as subprocesses.
 For executing control system scripts.
 """
 
-from pathlib import Path
-import subprocess as sp
-
 from PySide6.QtCore import Slot
 from PySide6.QtCore import QObject, QUrl
+
+from util.ScriptThread import ScriptThread
 
 
 class ScriptHandler(QObject):
     def __init__(self, pass_script_url:QUrl=None, fail_script_url:QUrl=None, parent=None):
         super().__init__(parent)
 
-        if pass_script_url: self.pass_script = QUrl.toLocalFile(pass_script_url)
-        else:               self.script = None
+        self.pass_script = QUrl.toLocalFile(pass_script_url) if pass_script_url else None
+        self.fail_script = QUrl.toLocalFile(fail_script_url) if fail_script_url else None
 
-        if fail_script_url: self.fail_script = QUrl.toLocalFile(fail_script_url)
-        else:               self.fail_script = None
+        self.__threads = []
+
+
+    def execute(self, file, is_pass):
+        thread = ScriptThread(file, is_pass)
+        self.__threads.append(thread)
+        thread.finished.connect(lambda: self.__threads.remove(thread))
+        thread.start()
 
 
     @Slot()
     def start_pass(self):
-        try:
-            print("> Executing pass script...")
-        except:
-            print("> Cannot execute pass script.")
-
+        self.execute(self.pass_script, True)
 
     @Slot()
     def start_fail(self):
-        try:
-            print("> Executing fail script...")
-        except:
-            print("> Cannot execute fail script.")
+        self.execute(self.fail_script, False)
+
+    @Slot()
+    def end_all_threads(self, file):
+        for th in self.__threads:
+            th.stop()
+            th.wait()
 
 
     @Slot(QUrl)
