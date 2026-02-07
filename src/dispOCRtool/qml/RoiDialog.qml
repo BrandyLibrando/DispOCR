@@ -18,10 +18,10 @@ Window {
     signal roiChanged(x1: int, y1: int, x2: int, y2: int)
 
     property Image viewfinder
-    property int x1: Math.trunc( (roiPt1.x - roiVF.paintedX + roiPt1.width/2) / roiVF.paintedWidth * roiVF.imageWidth)
-    property int x2: Math.trunc( (roiPt2.x - roiVF.paintedX + roiPt2.width/2) / roiVF.paintedWidth * roiVF.imageWidth)
-    property int y1: Math.trunc( (roiPt1.y - roiVF.paintedY + roiPt1.height/2) / roiVF.paintedHeight * roiVF.imageHeight)
-    property int y2: Math.trunc( (roiPt2.y - roiVF.paintedY + roiPt2.height/2) / roiVF.paintedHeight * roiVF.imageHeight)
+    property int x1: Math.trunc( (roiPt1.x - roiVF.paintedX + roiPt1.width/2) / roiVF.paintedWidth * roiVF.imageWidth )
+    property int x2: Math.trunc( (roiPt2.x - roiVF.paintedX + roiPt2.width/2) / roiVF.paintedWidth * roiVF.imageWidth )
+    property int y1: Math.trunc( (roiPt1.y - roiVF.paintedY + roiPt1.height/2) / roiVF.paintedHeight * roiVF.imageHeight )
+    property int y2: Math.trunc( (roiPt2.y - roiVF.paintedY + roiPt2.height/2) / roiVF.paintedHeight * roiVF.imageHeight )
 
     Column {
         anchors.fill: parent

@@ -16,10 +16,10 @@ Image {
 
     property int imageWidth: imageProvider.getWidth()
     property int imageHeight: imageProvider.getHeight()
-    property var imageSource  // QQuickImageProvider url
-    property var imageProvider  // Image provider instance, instantiated in PY file
+    property var imageSource        // QQuickImageProvider url
+    property var imageProvider      // Image provider instance, instantiated in PY file
 
-    property var overlayColor: "#ffff00"
+    property string overlayColor: "#ffff00"
 
 
     anchors.fill: parent

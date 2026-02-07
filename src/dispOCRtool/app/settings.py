@@ -63,13 +63,6 @@ class AppSettings(QObject):
 
 
     ## DepthAi Camera Settings
-    # @Slot(bool)
-    # def setEnableManualAll(self, value=True):
-    #     self._settings.setValue("ui/dai/manualSettings", value)
-    # @Slot(result=bool)
-    # def getEnableManualAll(self):
-    #     return self._settings.value("ui/dai/manualSettings", False, type=bool)
-
     @Slot(bool)
     def setEnableManualExposure(self, value=True):
         self._settings.setValue("ui/dai/manualExposure", value)
@@ -161,4 +154,4 @@ class AppSettings(QObject):
         return self._settings.value("paths/scriptPathAlt", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
 
 
-AppConfigs = AppSettings()
+AppConfigs = AppSettings()  # For singleton pattern

@@ -5,12 +5,10 @@ handling Dai/Cv camera threads and OCR thread.
 """
 
 import cv2
-import numpy as np
-import depthai as dai
 
 from PySide6.QtGui import QImage
 from PySide6.QtCore import Slot, Signal
-from PySide6.QtCore import QThread, QTimer
+from PySide6.QtCore import QTimer
 from PySide6.QtQuick import QQuickImageProvider
 
 from util.CroppedImageRenderer import CroppedImageProvider
@@ -65,32 +63,28 @@ class OpencvImageProvider(QQuickImageProvider):
 
     @Slot(int, str, int)
     def change_camera(self, index, camera_name=None, dai=-1):
-        # Terminate current camera process
-        # End OAK cam
+        ## Terminate current camera process
         print(index, camera_name, dai)
-        if self.dai:
+        if self.dai:  # End OAK cam
             # code for dai end
             print("> Trying to end DAI pipeline.")  # TODO: DELETE LATER
             self.killThread()
 
-        # End webcam
-        else:
+        else:  # End webcam
             print("> Trying to end CV camera.")  # TODO: DELETE LATER
             self.killThread()
 
 
+        ## Start target camera
         # if dai == -1, the index passed to this function is not a DAI camera
-        # Start OAK cam
-        if dai >= 0:
+        if dai >= 0:  # Start OAK cam
             # code for dai start
             print(f"\n> Trying to start DAI camera {camera_name}.")
-
             mxid = self.getMxid(camera_name)
             self.dai = True
             self.start(mxid)
 
-        # Start webcam
-        else:
+        else:  # Start webcam
             print(f"\n> Trying to start CV camera {camera_name}.")
             self.dai = False
             self.index = index
@@ -110,9 +104,9 @@ class OpencvImageProvider(QQuickImageProvider):
         self.cam.openedCamera.connect(self.setDimensions)
         self.cam.start()
 
-
+    ## Public thread functions
     @Slot()
-    def killThread(self):
+    def killThread(self):  # For camera thread, not OCR
         print("> Finishing current camera thread...")
         if self.cam is not None: self.cam.stop()
 
@@ -131,6 +125,7 @@ class OpencvImageProvider(QQuickImageProvider):
         print("> OCR thread restarted.")
 
 
+    ## Image utility functions
     @Slot()
     def updateImage(self, img, roi_img=None, roi_frame=None):
         self.image = img
@@ -160,6 +155,7 @@ class OpencvImageProvider(QQuickImageProvider):
         return self.height
 
 
+    ## OCR utility functions
     @Slot()
     def updatePredictedText(self, output="", average_confidence=0):
         self.ocr_data = output
@@ -175,12 +171,14 @@ class OpencvImageProvider(QQuickImageProvider):
         return self.ocr_score
 
 
+    ## Others
     def getRoiRenderer(self):
         return self.roi_renderer
 
     def getMxid(self, text):
         return text.strip().rsplit(" ", 1)
 
+    ## Profiling
     @Slot()
     def getCamFps(self, average_fps):
         self.cam_fps = average_fps

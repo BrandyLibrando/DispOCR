@@ -6,7 +6,8 @@ language-tool-python library.
 
 from pathlib import Path
 
-from PySide6.QtCore import QThread, QElapsedTimer
+# from PySide6.QtCore import QElapsedTimer          # Reimport elapsed timer module if profiling needed
+from PySide6.QtCore import QThread
 import language_tool_python
 from language_tool_python.utils import correct
 

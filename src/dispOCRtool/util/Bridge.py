@@ -1,9 +1,7 @@
 """
-ListBridge.py
+Bridge.py
 Contains class for bidirectional models.
-Intended for lists but a list can be used as a wrapper.
-Currently does not support generic classes due to C++-Py
-binding intricacies.
+Intended for lists but a list can be used as a wrapper for a single object (bad practice though).
 """
 
 from PySide6.QtCore import Slot, Signal, Property, QObject

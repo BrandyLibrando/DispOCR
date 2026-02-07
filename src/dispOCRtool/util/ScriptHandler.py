@@ -1,6 +1,6 @@
 """
 ScriptHandler.py
-Helper class for running Python scripts as subprocesses.
+Helper class for running Python scripts as subprocesses (in separate threads).
 For executing control system scripts.
 """
 
@@ -36,10 +36,9 @@ class ScriptHandler(QObject):
         self.execute(self.fail_script, False)
 
     @Slot()
-    def end_all_threads(self, file):
+    def end_all_threads(self):
         for th in self.__threads:
             th.stop()
-            th.wait()
 
 
     @Slot(QUrl)

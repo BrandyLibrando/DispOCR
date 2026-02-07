@@ -3,8 +3,6 @@ import QtQuick.Controls
 import QtQuick.Window
 import QtQuick.Dialogs
 import QtQuick.Layouts
-// import QtMultimedia
-// import QtQuick.VirtualKeyboard
 import QtQuick.Controls.Material
 
 
@@ -1104,7 +1102,7 @@ ApplicationWindow {
                 main.lastScore = (predictScore * 100).toFixed(2);
 
                 // Script execution
-                if (predictTextArea.text.trim() !== "" && appSettings.getEnableController()) {  // Check non-empty prediction and if script exec enabled
+                if (predictTextArea.text.trim() !== "" && appSettings.getEnableController()) {  // Check non-empty and if script exec enabled
                     // Check if condition has changed (scripts only run once => edge-triggered)
                     const conditionCheck = evaluateControl(predictTextArea.text);
 
@@ -1123,7 +1121,8 @@ ApplicationWindow {
                         }
                         main.hasExecuted = true;
                     }
-                } else {  // Script execution occurs with OCR output; reset execution state when output is empty (e.g., screen of target turned off)
+                } else {
+                    // Script execution occurs with OCR output; reset execution state when output is empty (e.g., screen of target turned off)
                     main.hasExecuted = false;
                 }
             }
@@ -1198,19 +1197,19 @@ ApplicationWindow {
                 passed = predicted.includes(base);
                 break;
             case ">=":
-                passed = parseFloat(predicted) >= base;
+                passed = parseFloat(predicted) >= parseFloat(base);
                 break;
             case ">":
-                passed = parseFloat(predicted) > base;
+                passed = parseFloat(predicted) > parseFloat(base);
                 break;
             case "<=":
-                passed = parseFloat(predicted) <= base;
+                passed = parseFloat(predicted) <= parseFloat(base);
                 break;
             case "<":
-                passed = parseFloat(predicted) < base;
+                passed = parseFloat(predicted) < parseFloat(base);
                 break;
             case "==":
-                passed = parseFloat(predicted) === base;
+                passed = parseFloat(predicted) === parseFloat(base);
                 break;
         }
         return passed;

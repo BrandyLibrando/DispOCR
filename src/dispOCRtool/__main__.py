@@ -1,27 +1,21 @@
 """
 THS_DispOCR
 Authored by: Julius Librando
-In fulfillment of thesis requirement along with
+In fulfillment of BS Computer Engineering thesis requirement along with
 Seungkwan Bang, Harish Chawla, and Aidan Albert Narvaez.
 """
 
-import sys, os
+import sys
 from pathlib import Path
-import random, time
-import numpy as np
+
 import cv2
 import depthai as dai
 from cv2_enumerate_cameras import enumerate_cameras
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtCore import QCoreApplication, QSysInfo
 
-from PySide6.QtGui import QImage
-from PySide6.QtCore import QCoreApplication, Slot, Signal, Property
-from PySide6.QtCore import QObject, QTimer, QUrl, QThread, QSysInfo, QStandardPaths
-from PySide6.QtQuick import QQuickImageProvider, QQuickView
-
-## Own Utility/Class Imports
 from app.settings import AppConfigs
 from util.IntervalLogger import FileWriter
 from util.ScriptHandler import ScriptHandler
@@ -102,7 +96,10 @@ if __name__ == "__main__":
         cvCameraRenderer.killThread()
         cvCameraRenderer.destroyOcrThread()
 
-        # Safely close file (no text correction applied)
+        # Terminate all user script threads
+        scriptHandler.end_all_threads()
+
+        # Safely close log files when interrupted (no text correction applied)
         logger.abort()
         while logger.timer.isActive():
             app.processEvents()
