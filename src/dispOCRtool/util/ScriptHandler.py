@@ -23,7 +23,6 @@ class ScriptHandler(QObject):
     def execute(self, file, is_pass):
         thread = ScriptThread(file, is_pass)
         self.__threads.append(thread)
-        thread.finished.connect(lambda: self.__threads.remove(thread))
         thread.start()
 
 
