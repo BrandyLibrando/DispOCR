@@ -22,7 +22,7 @@ class ScriptThread(QThread):
 
     def run(self):
         if not os.path.isfile(self.file):
-            print(f"> File for {self.prompt} script not found.")
+            print(f"> File for {self.prompt} script not found. \n  Have you selected an exsting Python script file?")
             self.finished_signal.emit()
             return
 

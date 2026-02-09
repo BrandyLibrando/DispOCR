@@ -5,6 +5,7 @@ Used for the save directory and the setup settings
 that are helpful when persistent (e.g., log frequency).
 """
 
+import os
 from PySide6.QtCore import QObject, QSettings, QUrl, QStandardPaths
 from PySide6.QtCore import Slot, Signal
 
@@ -133,6 +134,12 @@ class AppSettings(QObject):
     def setSaveDir(self, url):
         self._settings.setValue("paths/saveDir", url)
         self.settingsUpdated.emit()
+    @Slot()
+    def verifySaveDir(self):
+        saveDir = self.getSaveDir()
+        if not os.path.exists(saveDir) or not os.path.isdir(saveDir):
+            self._settings.setValue("paths/saveDir", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)))
+            self.settingsUpdated.emit()
     @Slot(result=QUrl)
     def getSaveDir(self):
         return self._settings.value("paths/saveDir", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
@@ -141,6 +148,12 @@ class AppSettings(QObject):
     def setScriptPath(self, url):
         self._settings.setValue("paths/scriptPath", url)
         self.settingsUpdated.emit()
+    @Slot()
+    def verifyScriptPath(self):
+        scriptPath = self.getScriptPath()
+        if not os.path.exists(scriptPath) or not os.path.isfile(scriptPath):
+            self._settings.setValue("paths/scriptPath", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)))
+            self.settingsUpdated.emit()
     @Slot(result=QUrl)
     def getScriptPath(self):
         return self._settings.value("paths/scriptPath", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
@@ -149,9 +162,21 @@ class AppSettings(QObject):
     def setScriptPathAlt(self, url):
         self._settings.setValue("paths/scriptPathAlt", url)
         self.settingsUpdated.emit()
+    @Slot()
+    def verifyScriptPathAlt(self):
+        scriptPath = self.getScriptPathAlt()
+        if not os.path.exists(scriptPath) or not os.path.isfile(scriptPath):
+            self._settings.setValue("paths/scriptPathAlt", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)))
+            self.settingsUpdated.emit()
     @Slot(result=QUrl)
     def getScriptPathAlt(self):
         return self._settings.value("paths/scriptPathAlt", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
+
+    @Slot()
+    def verifyPaths(self):
+        self.verifySaveDir()
+        self.verifyScriptPath()
+        self.verifyScriptPathAlt()
 
 
 AppConfigs = AppSettings()  # For singleton pattern

@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
     ## SETTINGS AND SCRIPT HANDLER
     settings = AppConfigs
+    settings.verifyPaths()
     engine.rootContext().setContextProperty("appSettings", settings)
 
     scriptHandler = ScriptHandler(settings.getScriptPath(), settings.getScriptPathAlt())
