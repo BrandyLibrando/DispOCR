@@ -47,9 +47,9 @@ class OpencvImageProvider(QQuickImageProvider):
         self.ocr.updateFps.connect(self.getOcrFps)
         self.ocr.start()
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.restartOcrThread)
-        self.timer.start(240000)
+        # self.timer = QTimer(self)
+        # self.timer.timeout.connect(self.restartOcrThread)
+        # self.timer.start(240000)
 
 
     def requestImage(self, id, size, requestedSize):

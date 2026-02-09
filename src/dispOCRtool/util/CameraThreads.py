@@ -156,7 +156,7 @@ class ThreadDaiCamera(QThread):
                     else:
                         roi_frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
                         frame = cv2.cvtColor(np.zeros((300, 300), dtype=np.uint8), cv2.COLOR_GRAY2BGR)
-                except Exception as e:
+                except:
                     self._running = False
                     break
 
