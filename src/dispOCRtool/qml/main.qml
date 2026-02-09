@@ -472,7 +472,7 @@ ApplicationWindow {
                                 font.pointSize: 8
                                 display: AbstractButton.TextBesideIcon
 
-                                text: qsTr("Apply LLM text correct upon save")
+                                text: qsTr("Apply text correct upon save")
                                 onCheckedChanged: appSettings.setEnableTextCorrection(checked);
                             }
                         }

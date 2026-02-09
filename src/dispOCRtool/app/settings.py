@@ -136,12 +136,12 @@ class AppSettings(QObject):
         self.settingsUpdated.emit()
     @Slot()
     def verifySaveDir(self):
-        saveDir = self.getSaveDir()
+        saveDir = QUrl.toLocalFile(self.getSaveDir())
         if not os.path.exists(saveDir) or not os.path.isdir(saveDir):
             self._settings.setValue("paths/saveDir", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)))
             self.settingsUpdated.emit()
     @Slot(result=QUrl)
-    def getSaveDir(self):
+    def getSaveDir(self) -> QUrl:
         return self._settings.value("paths/saveDir", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
     
     @Slot(QUrl)
@@ -150,12 +150,12 @@ class AppSettings(QObject):
         self.settingsUpdated.emit()
     @Slot()
     def verifyScriptPath(self):
-        scriptPath = self.getScriptPath()
+        scriptPath = QUrl.toLocalFile(self.getScriptPath())
         if not os.path.exists(scriptPath) or not os.path.isfile(scriptPath):
             self._settings.setValue("paths/scriptPath", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)))
             self.settingsUpdated.emit()
     @Slot(result=QUrl)
-    def getScriptPath(self):
+    def getScriptPath(self) -> QUrl:
         return self._settings.value("paths/scriptPath", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
 
     @Slot(QUrl)
@@ -164,12 +164,12 @@ class AppSettings(QObject):
         self.settingsUpdated.emit()
     @Slot()
     def verifyScriptPathAlt(self):
-        scriptPath = self.getScriptPathAlt()
+        scriptPath = QUrl.toLocalFile(self.getScriptPathAlt())
         if not os.path.exists(scriptPath) or not os.path.isfile(scriptPath):
             self._settings.setValue("paths/scriptPathAlt", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)))
             self.settingsUpdated.emit()
     @Slot(result=QUrl)
-    def getScriptPathAlt(self):
+    def getScriptPathAlt(self) -> QUrl:
         return self._settings.value("paths/scriptPathAlt", QUrl.fromLocalFile(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)), type=QUrl)
 
     @Slot()
