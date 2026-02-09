@@ -24,7 +24,7 @@ jobs:
    strategy:
      fail-fast: false
      matrix:
-       target: [ "Windows", "Ubuntu-24.04", "Debian-12" ]
+       target: [ "Windows", "Ubuntu-24.04", "Ubuntu-24.04-Arm" ]
        include:
          - target: "Windows"
            output-format: "app"
