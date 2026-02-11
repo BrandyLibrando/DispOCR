@@ -64,21 +64,11 @@ class OpencvImageProvider(QQuickImageProvider):
     @Slot(int, str, int)
     def change_camera(self, index, camera_name=None, dai=-1):
         ## Terminate current camera process
-        print(index, camera_name, dai)
-        if self.dai:  # End OAK cam
-            # code for dai end
-            print("> Trying to end DAI pipeline.")  # TODO: DELETE LATER
-            self.killThread()
-
-        else:  # End webcam
-            print("> Trying to end CV camera.")  # TODO: DELETE LATER
-            self.killThread()
-
+        self.killThread()
 
         ## Start target camera
         # if dai == -1, the index passed to this function is not a DAI camera
         if dai >= 0:  # Start OAK cam
-            # code for dai start
             print(f"\n> Trying to start DAI camera {camera_name}.")
             mxid = self.getMxid(camera_name)
             self.dai = True

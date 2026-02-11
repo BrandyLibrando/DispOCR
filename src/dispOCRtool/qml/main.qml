@@ -8,9 +8,9 @@ import QtQuick.Controls.Material
 
 ApplicationWindow {
     id: root
-    width: 640; height: 480
-    minimumWidth: 640; minimumHeight: 480
-    maximumWidth: 640; maximumHeight: 480
+    width: 700; height: 500
+    minimumWidth: 700; minimumHeight: 500
+    maximumWidth: 700; maximumHeight: 500
 
     visible: true
     title: qsTr("DispOCR")
@@ -78,7 +78,7 @@ ApplicationWindow {
                                 id: subCameraField
                                 x: 2
                                 width: subCameraBorder.width * 5 / 8
-                                height: subCameraField.width / 16 * 9
+                                height: Math.min(subCameraField.width / 16 * 9, subCameraContainer.height - 20)
                                 padding: 2
 
                                 background: Rectangle {
@@ -86,7 +86,7 @@ ApplicationWindow {
                                 }
 
                                 anchors.verticalCenter: parent.verticalCenter
-                                anchors.verticalCenterOffset: -1
+                                anchors.verticalCenterOffset: 2
 
                                 ImageViewfinder {
                                     id: subCameraVF
@@ -119,7 +119,7 @@ ApplicationWindow {
                                 Button {
                                     id: configRoi
                                     width: configContainer.width
-                                    height: operationStop.height
+                                    height: configDir.height
                                     font.bold: true
                                     font.pointSize: 9
                                     Material.foreground: Material.accent
@@ -137,7 +137,7 @@ ApplicationWindow {
                                 Button {
                                     id: configDir
                                     width: configContainer.width
-                                    height: operationStop.height
+                                    height: 50
                                     font.bold: true
                                     font.pointSize: 9
                                     Material.foreground: Material.accent
@@ -188,7 +188,7 @@ ApplicationWindow {
                             Pane {
                                 id: cameraField
                                 width: cameraBorder.width * 9 / 10
-                                height: cameraField.width / 4.5 * 3
+                                height: Math.min(cameraField.width / 4.5 * 3, cameraContainer.height - 20)
                                 anchors.centerIn: parent
                                 anchors.horizontalCenterOffset: -4
                                 rightInset: 0
