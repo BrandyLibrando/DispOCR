@@ -498,8 +498,8 @@ ApplicationWindow {
 
                                 ComboBox {
                                     id: inputCtrlCond
-                                    x: 84; y: 30
-                                    width: 120; height: 28
+                                    x: 84; y: 25
+                                    width: 145; height: 28
                                     font.pointSize: 8
 
                                     enabled: toggleControlSystem.checked
@@ -535,7 +535,7 @@ ApplicationWindow {
                                 Rectangle {
                                     id: inputCtrlValContainer
                                     x: inputCtrlCond.x + 10
-                                    y: inputCtrlValLabel1.y + 2
+                                    y: inputCtrlValLabel1.y
                                     width: inputCtrlCond.width - 10
                                     height: inputCtrlCond.height
                                     border.width: 2
@@ -567,7 +567,7 @@ ApplicationWindow {
 
                                 Text {
                                     id: inputCtrlValLabel1
-                                    x: 0; y: 60
+                                    x: 0; y: 62
                                     width: 119; height: 16
                                     font.pixelSize: 11
 
