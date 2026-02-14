@@ -70,7 +70,7 @@ class FileWriter(QObject):
             now = QDateTime.currentDateTime()
             nowContents = now.toString("[yyyy-MM-dd HH:mm:ss.zzz]")
 
-            self.file.write(f"{nowContents} - {self.data}\n")
+            self.file.write(f"{nowContents} - {self.data.strip()}\n")
             self.file.flush()
 
         if self.aborted:
