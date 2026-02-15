@@ -8,16 +8,20 @@ from pathlib import Path
 
 # from PySide6.QtCore import QElapsedTimer          # Reimport elapsed timer module if profiling needed
 from PySide6.QtCore import QThread
+
+import re
+from symspellpy import SymSpell
 import language_tool_python
 from language_tool_python.utils import correct
 
 
 class TextCorrector(QThread):
-    def __init__(self, dir, filename, lt_instance=None, parent=None):
+    def __init__(self, dir, filename, sp_instance, lt_instance=None, parent=None):
         QThread.__init__(self, parent)
 
         self.out_dir = dir
         self.filename = filename
+        self.sp = sp_instance
         self.lt = lt_instance if lt_instance is not None else language_tool_python.LanguageTool("en-US")
 
         # self.timer = QElapsedTimer()  # For performance measure
@@ -39,15 +43,30 @@ class TextCorrector(QThread):
 
             with open(dst_path, "w", encoding="utf-8") as dst_file:
                 for line in lines:
+                    new_line = ""
                     if self.aborted:
                         dst_file.write("===== Correction of original file aborted. =====")
                         return
 
                     if line.strip():
-                        matches = self.lt.check(line)
-                        line = correct(line, matches)
+                        ## SymSpell segmentation and correction layer
+                        # TODO: put back this logic when reverting test output format
+                        # new_line = self.sp.word_segmentation(line[:28], max_edit_distance=1).corrected_string.lower()
+                        new_line = self.sp.word_segmentation(line, max_edit_distance=1).corrected_string.lower()
+                        suggestions = self.sp.lookup_compound(
+                        # TODO:    # newline[27:], max_edit_distance=1)
+                            new_line, max_edit_distance=1)
+                        new_line = suggestions[0].term.lower() + "\n"
 
-                    dst_file.write(line)
+                        ## Regex-based capitalization layer
+                        new_line = re.sub(r"(\A\w)|(?<!\.\w)([\.?!])\w|\w(?:\.\w)|(?<=\w\.)\w",   
+                            lambda x: x.group().upper(), 
+                            new_line)
+                        
+                        ## Language-tool-python correction layer
+                        new_line = self.lt.correct(new_line)
+
+                    dst_file.write(new_line)
                     # print(self.timer.restart())
 
         print("> Text correct thread finished successfully.")

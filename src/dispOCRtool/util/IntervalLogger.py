@@ -5,12 +5,14 @@ Uses QTimer.
 Also serves as controller for text correct threads.
 """
 
+import os, importlib
 from pathlib import Path
 
 from PySide6.QtCore import Slot
 from PySide6.QtCore import QObject, QTimer, QUrl, QDateTime
-import language_tool_python
 
+import language_tool_python
+from symspellpy import SymSpell
 from ocr.TextCorrection import TextCorrector
 
 
@@ -28,6 +30,14 @@ class FileWriter(QObject):
 
         self.lt = language_tool_python.LanguageTool("en-US")
         self.lt_threads = []
+
+        self.sp = SymSpell(max_dictionary_edit_distance=3, prefix_length=7)
+        self.dictionary_path = importlib.resources.files("symspellpy") / "frequency_dictionary_en_82_765.txt"
+        self.bigram_path = importlib.resources.files("symspellpy") / "frequency_bigramdictionary_en_243_342.txt"
+
+        self.sp.load_dictionary(self.dictionary_path, term_index=0, count_index=1)
+        self.sp.load_bigram_dictionary(self.bigram_path, term_index=0, count_index=2)
+        
 
 
     @Slot(int)
@@ -50,6 +60,7 @@ class FileWriter(QObject):
             lt_thread = TextCorrector(
                 dir=self.directory,
                 filename=self.filename.rsplit('.', 1)[0],
+                sp_instance=self.sp,
                 lt_instance=self.lt
             )
             self.lt_threads.append(lt_thread)
@@ -70,7 +81,8 @@ class FileWriter(QObject):
             now = QDateTime.currentDateTime()
             nowContents = now.toString("[yyyy-MM-dd HH:mm:ss.zzz]")
 
-            self.file.write(f"{nowContents} - {self.data.strip()}\n")
+            # self.file.write(f"{nowContents} - {self.data.strip()}\n")
+            self.file.write(f"{self.data.strip()}\n")
             self.file.flush()
 
         if self.aborted:
