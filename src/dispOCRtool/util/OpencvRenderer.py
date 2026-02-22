@@ -117,13 +117,16 @@ class OpencvImageProvider(QQuickImageProvider):
 
     ## Image utility functions
     @Slot()
-    def updateImage(self, img, roi_img=None, roi_frame=None):
-        self.image = img
-        self.cropped_image = roi_img
+    def updateImage(self, img, roi_img):
+        frame = img.copy()
+        self.image = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
+        
+        roi_frame = roi_img.copy()
+        self.cropped_image = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], roi_frame.strides[0], QImage.Format_BGR888)  # try using deep copy later if fail
 
         if self.ocr is not None: self.ocr.change_image(roi_frame)
-        self.roi_renderer.setCroppedImage(roi_img)
-        self.imageChanged.emit(img)
+        self.roi_renderer.setCroppedImage(self.cropped_image)
+        self.imageChanged.emit(self.image)
 
     @Slot(int, int)
     def setDimensions(self, width, height):

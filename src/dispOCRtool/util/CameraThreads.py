@@ -17,7 +17,7 @@ from app.settings import AppConfigs
 
 
 class ThreadCvCamera(QThread):
-    updateFrame = Signal(QImage, QImage, object)
+    updateFrame = Signal(object, object)
     updateFps = Signal(float)
     openedCamera = Signal(int, int)
 
@@ -66,11 +66,9 @@ class ThreadCvCamera(QThread):
                     self._running = False
                     break
 
-                img = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
-                roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], roi_frame.strides[0], QImage.Format_BGR888)  # try using deep copy later if fail
                 self.image = frame
                 self.roi_image = roi_frame
-                self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
+                self.updateFrame.emit(frame, roi_frame)  # signal reload to Image class within QML
 
                 ## Profiling
                 if self.timer.elapsed() != 0: self.elapsed_queue.append(1000/self.timer.restart())
@@ -93,7 +91,7 @@ class ThreadCvCamera(QThread):
 
 
 class ThreadDaiCamera(QThread):
-    updateFrame = Signal(QImage, QImage, object)
+    updateFrame = Signal(object, object)
     updateFps = Signal(float)
     openedCamera = Signal(int, int)
 
@@ -160,11 +158,9 @@ class ThreadDaiCamera(QThread):
                     self._running = False
                     break
 
-                img = QImage(frame.data, frame.shape[1], frame.shape[0], QImage.Format_BGR888)
-                roi_img = QImage(roi_frame.data, roi_frame.shape[1], roi_frame.shape[0], roi_frame.strides[0], QImage.Format_BGR888)  # try using deep copy later if fail
                 self.image = frame
                 self.roi_image = roi_frame
-                self.updateFrame.emit(img, roi_img, roi_frame)  # signal reload to Image class within QML
+                self.updateFrame.emit(frame, roi_frame)  # signal reload to Image class within QML
 
                 ## Profiling
                 if self.timer.elapsed() != 0: self.elapsed_queue.append(1000/self.timer.restart())
