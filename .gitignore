@@ -92,5 +92,6 @@ dist/
 tests/
 scripts/
 venv10/
+src/dispOCRtool.dist-info/
 editdistpy-0.1.6/
 editdistpy-0.1.6.tar.gz

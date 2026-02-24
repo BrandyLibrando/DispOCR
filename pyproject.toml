@@ -1,28 +1,6 @@
 [project]
 name = "DispOCR"
 
-[tool.pyside6-project]
-files = [
-    "src/dispOCRtool/__init__.py",
-    "src/dispOCRtool/__main__.py",
-    "src/dispOCRtool/app/__init__.py",
-    "src/dispOCRtool/app/settings.py",
-    "src/dispOCRtool/ocr/ModelPaddleBase.py",
-    "src/dispOCRtool/ocr/TextCorrection.py",
-    "src/dispOCRtool/ocr/__init__.py",
-    "src/dispOCRtool/qml/ImageViewfinder.qml",
-    "src/dispOCRtool/qml/RoiDialog.qml",
-    "src/dispOCRtool/qml/main.qml",
-    "src/dispOCRtool/util/Bridge.py",
-    "src/dispOCRtool/util/CameraThreads.py",
-    "src/dispOCRtool/util/CroppedImageRenderer.py",
-    "src/dispOCRtool/util/IntervalLogger.py",
-    "src/dispOCRtool/util/OpencvRenderer.py",
-    "src/dispOCRtool/util/ScriptHandler.py",
-    "src/dispOCRtool/util/ScriptThread.py",
-    "src/dispOCRtool/util/__init__.py",
-]
-
 [tool.briefcase]
 project_name = "DispOCR"
 bundle = "com.brandylibrando.apps"
@@ -67,6 +45,30 @@ requires = [
     "symspellpy",
 ]
 test_requires = [
+]
+
+
+
+[tool.pyside6-project]
+files = [
+    "src/dispOCRtool/__init__.py",
+    "src/dispOCRtool/__main__.py",
+    "src/dispOCRtool/app/__init__.py",
+    "src/dispOCRtool/app/settings.py",
+    "src/dispOCRtool/ocr/ModelPaddleBase.py",
+    "src/dispOCRtool/ocr/TextCorrection.py",
+    "src/dispOCRtool/ocr/__init__.py",
+    "src/dispOCRtool/qml/ImageViewfinder.qml",
+    "src/dispOCRtool/qml/RoiDialog.qml",
+    "src/dispOCRtool/qml/main.qml",
+    "src/dispOCRtool/util/Bridge.py",
+    "src/dispOCRtool/util/CameraThreads.py",
+    "src/dispOCRtool/util/CroppedImageRenderer.py",
+    "src/dispOCRtool/util/IntervalLogger.py",
+    "src/dispOCRtool/util/OpencvRenderer.py",
+    "src/dispOCRtool/util/ScriptHandler.py",
+    "src/dispOCRtool/util/ScriptThread.py",
+    "src/dispOCRtool/util/__init__.py",
 ]
 
 [tool.briefcase.app.dispOCRtool.macOS]
