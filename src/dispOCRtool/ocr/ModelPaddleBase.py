@@ -70,11 +70,14 @@ class ThreadOcrBase(QThread):
 
                 # Resize for speed
                 h, w = rgb.shape[:2]
-                rgb_small = cv2.resize(
-                    rgb,
-                    (max(1, int(w * self.SCALE)), max(1, int(h * self.SCALE))),
-                    interpolation=cv2.INTER_AREA,
-                )
+                if h < 150 or w < 150:
+                    rgb_small = rgb
+                else:
+                    rgb_small = cv2.resize(
+                        rgb,
+                        (max(1, int(w * self.SCALE)), max(1, int(h * self.SCALE))),
+                        interpolation=cv2.INTER_AREA,
+                    )
 
                 ## Prediction
                 if hasattr(ocr, "predict"):
