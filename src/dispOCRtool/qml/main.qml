@@ -202,7 +202,6 @@ ApplicationWindow {
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectFit
 
-                                    // asynchronous: true
                                     cache: false
                                     source: providerId
                                     property bool counter: false

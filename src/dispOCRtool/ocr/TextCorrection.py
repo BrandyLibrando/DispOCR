@@ -51,22 +51,23 @@ class TextCorrector(QThread):
                     if line.strip():
                         ## SymSpell segmentation and correction layer
                         # TODO: put back this logic when reverting test output format
-                        # new_line = self.sp.word_segmentation(line[:28], max_edit_distance=1).corrected_string.lower()
-                        new_line = self.sp.word_segmentation(line, max_edit_distance=1).corrected_string.lower()
+                        new_line = line[:28]
+                        substring = self.sp.word_segmentation(line[27:].strip(), max_edit_distance=1).corrected_string.lower()
+                        # new_line = self.sp.word_segmentation(line.strip(), max_edit_distance=1).corrected_string.lower()
                         suggestions = self.sp.lookup_compound(
-                        # TODO:    # newline[27:], max_edit_distance=1)
-                            new_line, max_edit_distance=1)
-                        new_line = suggestions[0].term.lower() + "\n"
+                            substring, max_edit_distance=1)
+                            # new_line, max_edit_distance=1)
+                        suggested = suggestions[0].term.lower().strip()
 
                         ## Regex-based capitalization layer
-                        new_line = re.sub(r"(\A\w)|(?<!\.\w)([\.?!])\w|\w(?:\.\w)|(?<=\w\.)\w",   
+                        suggested = re.sub(r"(\A\w)|(?<!\.\w)([\.?!])\w|\w(?:\.\w)|(?<=\w\.)\w",   
                             lambda x: x.group().upper(), 
-                            new_line)
+                            suggested)
                         
                         ## Language-tool-python correction layer
-                        new_line = self.lt.correct(new_line)
+                        new_line = new_line + self.lt.correct(suggested)
 
-                    dst_file.write(new_line)
+                    dst_file.write(new_line + "\n")
                     # print(self.timer.restart())
 
         print("> Text correct thread finished successfully.")
