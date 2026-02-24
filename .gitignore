@@ -61,6 +61,7 @@ CMakeLists.txt.user*
 *.opensdf
 *.vcxproj
 *vcxproj.*
+.vscode/
 
 # MinGW generated files
 *.Debug
@@ -89,4 +90,7 @@ logs/
 build/
 dist/
 tests/
+scripts/
 venv10/
+editdistpy-0.1.6/
+editdistpy-0.1.6.tar.gz
