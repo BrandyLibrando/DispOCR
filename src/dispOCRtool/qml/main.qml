@@ -923,6 +923,8 @@ ApplicationWindow {
                             if (allInputsValid) {
                                 main.state = "inop";
                                 fileLogger.start( parseFloat(inputFreqVal.text) * 1000 );
+                                main.hasMatched = false
+                                main.hasExecuted = false
                             }
                             else {
                                 let invalid = root.focusInvalidInput(root.possibleInvalidInputs);
@@ -1088,15 +1090,15 @@ ApplicationWindow {
             }
 
             function onPredictionChanged(predictText, predictScore) {
-                if (main.lastText === predictText) {
+                if ((main.lastText === predictText || inputCtrlCond.currentText !== "contains") && (predictText.trim() !== "")) {
                     main.resultStack += 1;  // Sets redundancy threshold before firing activation to reduce sensitivity
                 } else {
-                    predictTextArea.text = predictText;
                     main.resultStack = 0;  // Reset count when text is changed
                 }
 
                 // Update data things
                 fileLogger.update_data(predictText);
+                predictTextArea.text = predictText;// + "\n\nRedundancy count: " + main.resultStack;
                 main.lastText = predictText;
                 main.lastScore = (predictScore * 100).toFixed(2);
 
@@ -1109,6 +1111,7 @@ ApplicationWindow {
                     if (main.hasMatched !== conditionCheck) {
                         main.hasMatched = conditionCheck;
                         main.hasExecuted = false;  // Reset execution on state change
+                        main.resultStack = 0;
                     }
 
                     // Execute script when in operation, threshold exceeded, and edge-triggered
