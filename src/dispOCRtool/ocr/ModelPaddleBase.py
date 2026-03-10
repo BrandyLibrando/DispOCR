@@ -89,7 +89,18 @@ class ThreadOcrBase(QThread):
                 self.updatePrediction.emit(final_str, ave_score)
 
                 ## Profiling
-                if self.timer.elapsed() != 0: self.elapsed_queue.append(1000/self.timer.restart())
+                if self.timer.elapsed() != 0: 
+                    if "arm" in platform.machine().lower() or "aarch" in platform.machine().lower():
+                        # Throttle to max 10 fps if ARM arch
+                        time_el = self.timer.restart()
+                        if time_el < 100:
+                            time.sleep((100-time_el)/1000)
+                            time_el = 100
+                        self.elapsed_queue.append(1000/time_el)
+                        self.timer.restart()
+                    else:
+                        self.elapsed_queue.append(1000/self.timer.restart())
+                    
                 ave = 0 if len(self.elapsed_queue) == 0 else sum(self.elapsed_queue)/len(self.elapsed_queue)
                 self.updateFps.emit(ave)
 
