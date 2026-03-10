@@ -4,6 +4,7 @@ Contains class for OCR prediction thread.
 Inherits from QThread.
 """
 
+import time, platform
 from collections import deque
 import cv2
 import numpy as np
