@@ -68,7 +68,6 @@ class TextCorrector(QThread):
                         new_line = new_line + self.lt.correct(suggested)
 
                     dst_file.write(new_line + "\n")
-                    # print(self.timer.restart())
 
         print("> Text correct thread finished successfully.")
 

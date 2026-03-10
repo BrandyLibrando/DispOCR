@@ -115,7 +115,6 @@ class ThreadDaiCamera(QThread):
 
         self.dai_out = self.dai_prev.createOutputQueue()
         self.dai_in  = self.dai_cam.inputControl.createInputQueue()
-        print(self.dai_cam.inputControl.getPossibleDatatypes())
 
         self.image = None
         self.roi_image = None
