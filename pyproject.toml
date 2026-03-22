@@ -4,7 +4,7 @@ name = "DispOCR"
 [tool.briefcase]
 project_name = "DispOCR"
 bundle = "com.brandylibrando.apps"
-version = "0.0.1"
+version = "1.0.0"
 url = "https://github.com/BrandyLibrando/THS_DispOCR"
 license.file = "LICENSE"
 author = "Julius Alvin Librando"
@@ -37,10 +37,8 @@ requires = [
     "opencv-python-headless<=4.10",
     "cv2_enumerate_cameras",
     "depthai==3.0.0",
-    # For PaddleOCR v2, use 2.9.1 (<=3.0)
     "paddleocr<3",
-    # For PaddlePaddle v2, use 2.6 (<=2.7)
-    "paddlepaddle<=3",
+    "paddlepaddle==3.2",        # 3.2 fixes library core bug
     "language-tool-python",
     "symspellpy",
 ]
