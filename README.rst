@@ -10,6 +10,6 @@ Can work with different webcams, but has specialized support for Luxonis OAK cam
 
 -------------------------------------
 
-Created in fulfillment of thesis requirements. Intended system is Raspberry Pi 5, tested on Raspberry Pi 5, Windows 11, and Linux x64 (Debian & Arch) environments. GUI program and components written in Python 3.10 and QML (Qt 6.9). Built and distributed using PySide6 and Briefcase.
+Created in fulfillment of thesis requirements. GUI program and components written in Python 3.10 (tested compatibility up to 3.13) and QML (Qt 6.9). Built and distributed using PySide6 and Briefcase.
 
 *Source code for the whole project authored by Julius Alvin Librando.*
