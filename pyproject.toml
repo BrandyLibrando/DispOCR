@@ -37,13 +37,16 @@ requires = [
     "opencv-python-headless<=4.10",
     "cv2_enumerate_cameras",
     "depthai==3.0.0",
-    "paddleocr<3",
-    "paddlepaddle==3.2",        # 3.2 fixes library core bug
+    "paddleocr<3",              # set to < 3 for ARM, latest for x64
+    "paddlepaddle==3.2",        # set to == 3.2 for ARM (fixes library core bug), latest for x64
     "language-tool-python",
     "symspellpy",
 ]
 test_requires = [
 ]
+
+icon = "res/andy"
+installer_icon = "res/andy"
 
 
 
