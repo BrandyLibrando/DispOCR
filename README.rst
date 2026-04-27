@@ -8,6 +8,15 @@ The project also allows executing custom Python scripts based on whether a given
 
 Can work with different webcams, but has specialized support for Luxonis OAK cameras to adjust camera configurations such as focus and exposure.
 
+.. image:: ./res/Docs/snapshot01.png
+    :alt: Screenshot of DispOCR GUI app detecting 4 numbers with 5 digits and a decimal point each
+    :height: 300px
+
+.. image:: ./res/Docs/snapshot02.png
+    :alt: Screenshot of DispOCR GUI app detecting the sentence "A WARM BLANKET WRAPPED THE TRAVELER AGAINST THE CHILL."
+    :height: 300px
+
+
 -------------------------------------
 
 Created in fulfillment of thesis requirements. GUI program and components written in Python 3.10 (tested compatibility up to 3.13) and QML (Qt 6.9). Built and distributed using PySide6 and Briefcase.
