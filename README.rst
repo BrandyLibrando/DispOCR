@@ -10,11 +10,15 @@ Can work with different webcams, but has specialized support for Luxonis OAK cam
 
 .. image:: ./res/Docs/snapshot01.png
     :alt: Screenshot of DispOCR GUI app detecting 4 numbers with 5 digits and a decimal point each
-    :height: 300px
+    :width: 500px
+    :align: center 
+
+|
 
 .. image:: ./res/Docs/snapshot02.png
     :alt: Screenshot of DispOCR GUI app detecting the sentence "A WARM BLANKET WRAPPED THE TRAVELER AGAINST THE CHILL."
-    :height: 300px
+    :width: 500px
+    :align: center
 
 
 -------------------------------------
